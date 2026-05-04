@@ -1,8 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Unigodas" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Color principal: Rojo Bilbao -->
+        <item name="colorPrimary">@color/bilbao_red</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/bilbao_red_dark</item>
+
+        <!-- Color secundario: Gris oscuro Bilbao -->
+        <item name="colorSecondary">@color/bilbao_grey_dark</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Fondos y superficies -->
+        <item name="android:colorBackground">@color/bg_light</item>
+        <item name="colorSurface">@color/white</item>
     </style>
 
     <style name="Theme.Unigodas" parent="Base.Theme.Unigodas" />

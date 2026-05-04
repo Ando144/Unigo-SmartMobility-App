@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Paleta Ayuntamiento de Bilbao -->
+    <color name="bilbao_red">#FFCC0000</color> <!-- FF = 100% opaco -->
+    <color name="bilbao_red_dark">#FF990000</color>
+    <color name="bilbao_grey_dark">#FF333333</color>
+    <color name="bilbao_grey_light">#E0E0E0</color>
+
+    <!-- Neutros -->
+    <color name="bg_light">#F4F4F4</color>
+    <color name="text_dark">#1A1A1A</color>
+    <color name="text_medium">#666666</color>
+    <color name="white">#FFFFFF</color>
 </resources>

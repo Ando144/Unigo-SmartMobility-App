@@ -1,10 +1,15 @@
-package com.example.unigo_das;
+package com.example.unigo_das.activities;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+
+import com.example.unigo_das.fragments.MapFragment;
+import com.example.unigo_das.R;
+import com.example.unigo_das.fragments.SchoolFragment;
+import com.example.unigo_das.fragments.SettingsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 

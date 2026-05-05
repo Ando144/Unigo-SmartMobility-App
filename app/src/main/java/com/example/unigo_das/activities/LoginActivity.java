@@ -1,4 +1,4 @@
-package com.example.unigo_das;
+package com.example.unigo_das.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,8 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.button.MaterialButton;
+
+import com.example.unigo_das.R;
 
 public class LoginActivity extends AppCompatActivity {
 

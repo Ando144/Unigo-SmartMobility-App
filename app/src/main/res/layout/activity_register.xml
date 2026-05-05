@@ -7,18 +7,19 @@
     android:background="@color/bg_light">
 
     <!-- Icono superior -->
+
+    <!-- Título en Rojo Bilbao -->
     <ImageView
         android:id="@+id/ivLogoRegister"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_marginTop="40dp"
-        android:src="@android:drawable/ic_dialog_map"
+        android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_person_add"
         app:tint="@color/bilbao_grey_dark" />
 
-    <!-- Título en Rojo Bilbao -->
     <TextView
         android:id="@+id/tvTitleRegister"
         android:layout_width="wrap_content"

@@ -4,6 +4,13 @@
         android:id="@+id/nav_school"
         android:icon="@drawable/ic_menu_school"
         android:title="Centros" />
+
+    <!-- NUEVA PESTAÑA DE CLIMA -->
+    <item
+        android:id="@+id/nav_weather"
+        android:icon="@drawable/ic_menu_weather"
+        android:title="Clima" />
+
     <item
         android:id="@+id/nav_map"
         android:icon="@drawable/ic_menu_map"

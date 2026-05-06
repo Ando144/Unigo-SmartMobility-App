@@ -10,6 +10,7 @@ import com.example.unigo_das.fragments.MapFragment;
 import com.example.unigo_das.R;
 import com.example.unigo_das.fragments.SchoolFragment;
 import com.example.unigo_das.fragments.SettingsFragment;
+import com.example.unigo_das.fragments.WeatherFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 
@@ -31,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 if (itemId == R.id.nav_school) {
                     selectedFragment = new SchoolFragment();
+                } else if (itemId == R.id.nav_weather) { // AÑADIMOS ESTO
+                    selectedFragment = new WeatherFragment();
                 } else if (itemId == R.id.nav_map) {
                     selectedFragment = new MapFragment();
                 } else if (itemId == R.id.nav_settings) {

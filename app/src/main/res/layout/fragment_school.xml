@@ -1,14 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:background="@color/bg_light"
     android:fitsSystemWindows="true"
+
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sección: Centros Educativos"
-        android:textSize="24sp" />
+        android:layout_margin="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchViewCentros"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:iconifiedByDefault="false"
+            app:queryHint="Buscar centro (ej. Deusto, Leioa...)"
+            app:queryBackground="@android:color/transparent"/>
+    </com.google.android.material.card.MaterialCardView>
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:fillViewport="true"
+        android:paddingHorizontal="8dp"
+        android:paddingBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnFiltroTodas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Todas"
+                android:textSize="12sp"
+                android:minWidth="0dp"
+                android:minHeight="40dp"
+                android:layout_marginEnd="6dp"
+                app:cornerRadius="16dp" />
+
+            <Button
+                android:id="@+id/btnFiltroEHU"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EHU"
+                android:textSize="12sp"
+                android:minWidth="0dp"
+                android:minHeight="40dp"
+                android:layout_marginEnd="6dp"
+                app:cornerRadius="16dp" />
+
+            <Button
+                android:id="@+id/btnFiltroDeusto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Deusto"
+                android:textSize="12sp"
+                android:minWidth="0dp"
+                android:minHeight="40dp"
+                android:layout_marginEnd="6dp"
+                app:cornerRadius="16dp" />
+
+            <Button
+                android:id="@+id/btnFiltroMondragon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mondragon"
+                android:textSize="12sp"
+                android:minWidth="0dp"
+                android:minHeight="40dp"
+                app:cornerRadius="16dp" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvCentros"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp" /> <!-- Margen para que el BottomNav no tape el último -->
+
 </LinearLayout>

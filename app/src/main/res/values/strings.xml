@@ -1,5 +1,99 @@
 <resources>
     <string name="app_name">unigo-das</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Settings Strings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="pref_header_profile">Perfil</string>
+    <string name="pref_account_section">Cuenta</string>
+    <string name="pref_my_account">Mi cuenta</string>
+    <string name="pref_logout">Cerrar sesión</string>
+    <string name="pref_register">Registrarse</string>
+    <string name="pref_login">Iniciar sesión</string>
+    <string name="pref_general_config">Configuración General</string>
+    <string name="pref_language">Cambiar Idioma</string>
+    <string name="pref_dark_mode">Modo Oscuro</string>
+    <string name="pref_dark_mode_summary">Activar/Desactivar el tema oscuro</string>
+
+    <!-- Language Dialog -->
+    <string name="select_language">Seleccionar Idioma</string>
+    <string name="lang_es">Castellano</string>
+    <string name="lang_eu">Euskara</string>
+    <string name="lang_en">English</string>
+
+    <!-- Profile Dialog -->
+    <string name="profile_image_options">Opciones de imagen</string>
+    <string name="remove_photo">Eliminar foto</string>
+    <string name="change_photo">Cambiar foto</string>
+
+    <!-- Account Detail Strings -->
+    <string name="account_detail_title">Mi Cuenta</string>
+    <string name="email_label">Email</string>
+    <string name="name_label">Nombre completo</string>
+    <string name="change_password">Cambiar contraseña</string>
+
+    <!-- Clima Strings -->
+    <string name="seccion_clima_de_euskadi">Sección: Clima de Euskadi</string>
+    <string name="weather_title">Clima</string>
+
+    <!-- Centros Strings -->
+    <string name="centres_title">Centros</string>
+    <string name="search_centre">Buscar centro (e.g. Deusto, Leioa...)</string>
+    <string name="all">Todas</string>
+    <string name="bus">Autobús</string>
+    <string name="line">Línea</string>
+    <string name="metro">Metro</string>
+    <string name="station">Estación</string>
+    <string name="tram">Tranvía</string>
+    <string name="stop">Parada</string>
+    <string name="bicycle">Bicicleta</string>
+    <string name="bilbaobizi_50m">Estación Bilbaobizi a 50m</string>
+    <string name="cycle_path">Carril bici</string>
+    <string name="cycle_path_joined">Carril bici conectado</string>
+
+    <!-- Centros Universitarios EHU -->
+    <string name="centro_ehu_ingenieria_bilbao">Escuela de Ingeniería de Bilbao</string>
+    <string name="centro_ehu_bellas_artes">Facultad de Bellas Artes</string>
+    <string name="centro_ehu_ciencia_tecnologia">Facultad de Ciencia y Tecnología</string>
+    <string name="centro_ehu_ciencias_sociales_comunicacion">Facultad de Ciencias Sociales y Comunicación</string>
+    <string name="centro_ehu_derecho">Facultad de Derecho. Sección bizkaia</string>
+    <string name="centro_ehu_economia_empresa">Facultad de Economía y Empresa</string>
+    <string name="centro_ehu_economia_empresa_elcano">Facultad de Economía y Empresa. Sección Elkano</string>
+    <string name="centro_ehu_educacion_bilbao">Facultad de Educación de Bilbao</string>
+    <string name="centro_ehu_medicina_enfermeria">Facultad de Medicina y Enfermería</string>
+    <string name="centro_ehu_unidad_docente_medicina">Unidad Docente Fac. Med. y Enfermería</string>
+    <string name="centro_ehu_aulas_experiencia">Aulas de la Experiencia</string>
+
+    <!-- Centros Universitarios Mondragon Unibertsitatea -->
+    <string name="centro_mu_bbf_empresariales">Bilbao Berrikuntza Faktoria (BBF): Empresariales</string>
+    <string name="centro_mu_bbf_leinn">Bilbao Berrikuntza Faktoria (BBF): LEINN</string>
+    <string name="centro_mu_as_politecnica">As Fabrik: Escuela Politécnica Superior</string>
+    <string name="centro_mu_as_humanidades">As Fabrik: Fac. Humanidades y Ciencias Edu.</string>
+
+    <!-- Centros Universitarios Deusto -->
+    <string name="centro_deusto_business">Deustu Business School</string>
+    <string name="centro_deusto_derecho">Facultad de Derecho</string>
+    <string name="centro_deusto_sociales_humanas">Facultad de Ciencias Sociales y Humanas</string>
+    <string name="centro_deusto_ingenieria">Facultad de Ingeniería</string>
+    <string name="centro_deusto_educacion_deporte">Facultad de Educación y Deporte</string>
+    <string name="centro_deusto_salud">Facultad de Ciencias de la Salud</string>
+    <string name="centro_deusto_sociales_comunicacion">Facultad de Ciencias Sociales y Comunicación</string>
+
+    <!-- Mapa Strings -->
+    <string name="map_title">Mapa</string>
+
+    <!-- Login & Register Strings -->
+    <string name="login_title">UNIGO</string>
+    <string name="login_subtitle">Tu campus, tu ruta.</string>
+    <string name="login_email_hint">Correo electrónico</string>
+    <string name="login_password_hint">Contraseña</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="register_button">Crear una cuenta</string>
+    <string name="guest_button">Continuar como invitado</string>
+    <string name="register_title">Crear Cuenta</string>
+    <string name="register_subtitle">Únete a la movilidad de UNIGO</string>
+    <string name="register_name_hint">Nombre completo</string>
+    <string name="register_do_button">Registrarme</string>
+    <string name="register_back_to_login">¿Ya tienes cuenta? Inicia sesión</string>
+
 </resources>

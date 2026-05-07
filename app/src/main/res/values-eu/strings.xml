@@ -1,0 +1,88 @@
+<resources>
+    <string name="settings_title">Ezarpenak</string>
+    <string name="pref_header_profile">Profila</string>
+    <string name="pref_account_section">Kontua</string>
+    <string name="pref_my_account">Nire kontua</string>
+    <string name="pref_logout">Saioa itxi</string>
+    <string name="pref_register">Erregistratu</string>
+    <string name="pref_login">Saioa hasi</string>
+    <string name="pref_general_config">Konfigurazio Orokorra</string>
+    <string name="pref_language">Hizkuntza Aldatu</string>
+    <string name="pref_dark_mode">Modu Iluna</string>
+    <string name="pref_dark_mode_summary">Gaitu/Desgaitu modu iluna</string>
+
+    <string name="select_language">Hizkuntza Aukeratu</string>
+    <string name="lang_es">Gaztelania</string>
+    <string name="lang_eu">Euskara</string>
+    <string name="lang_en">Ingelesa</string>
+
+    <string name="profile_image_options">Argazki aukerak</string>
+    <string name="remove_photo">Argazkia kendu</string>
+    <string name="change_photo">Argazkia aldatu</string>
+
+    <string name="account_detail_title">Nire Kontua</string>
+    <string name="email_label">Email-a</string>
+    <string name="name_label">Izen-abizenak</string>
+    <string name="change_password">Pasahitza aldatu</string>
+    <string name="seccion_clima_de_euskadi">Sección: Clima de Euskadi</string>
+    <string name="weather_title">Eguraldia</string>
+    <string name="map_title">Mapa</string>
+
+    <!-- Zentroen Kateak -->
+    <string name="centres_title">Zentroak</string>
+    <string name="search_centre">Bilatu zentroa (adib. Deusto, Leioa...)</string>
+    <string name="all">Guztiak</string>
+    <string name="bus">Autobusa</string>
+    <string name="line">Linea</string>
+    <string name="metro">Metroa</string>
+    <string name="station">Geltokia</string>
+    <string name="tram">Tranbia</string>
+    <string name="stop">Geralekua</string>
+    <string name="bicycle">Bizikleta</string>
+    <string name="bilbaobizi_50m">Bilbaobizi geltokia 50m-ra</string>
+    <string name="cycle_path">Bidegorria</string>
+    <string name="cycle_path_joined">Bidegorri konektatua</string>
+
+    <!-- Unibertsitate Zentroak EHU -->
+    <string name="centro_ehu_ingenieria_bilbao">Bilboko Ingeniaritza Eskola</string>
+    <string name="centro_ehu_bellas_artes">Arte Ederren Fakultatea</string>
+    <string name="centro_ehu_ciencia_tecnologia">Zientzia eta Teknologia Fakultatea</string>
+    <string name="centro_ehu_ciencias_sociales_comunicacion">Gizarte eta Komunikazio Zientzien Fakultatea</string>
+    <string name="centro_ehu_derecho">Zuzenbide Fakultatea. Bizkaiko Atala</string>
+    <string name="centro_ehu_economia_empresa">Ekonomia eta Enpresa Fakultatea</string>
+    <string name="centro_ehu_economia_empresa_elcano">Ekonomia eta Enpresa Fakultatea. Elkano Atala</string>
+    <string name="centro_ehu_educacion_bilbao">Bilboko Hezkuntza Fakultatea</string>
+    <string name="centro_ehu_medicina_enfermeria">Medikuntza eta Erizaintza Fakultatea</string>
+    <string name="centro_ehu_unidad_docente_medicina">Medikuntza eta Erizaintza Fak. Irakas-Unitatea</string>
+    <string name="centro_ehu_aulas_experiencia">Esperientzia Geletako</string>
+
+    <!-- Unibertsitate Zentroak Mondragon Unibertsitatea -->
+    <string name="centro_mu_bbf_empresariales">Bilbao Berrikuntza Faktoria (BBF): Enpresagintza</string>
+    <string name="centro_mu_bbf_leinn">Bilbao Berrikuntza Faktoria (BBF): LEINN</string>
+    <string name="centro_mu_as_politecnica">As Fabrik: Goi Eskola Politeknikoa</string>
+    <string name="centro_mu_as_humanidades">As Fabrik: Giza eta Hezkuntza Zientzien Fak.</string>
+
+    <!-- Unibertsitate Zentroak Deustu -->
+    <string name="centro_deusto_business">Deusto Business School</string>
+    <string name="centro_deusto_derecho">Zuzenbide Fakultatea</string>
+    <string name="centro_deusto_sociales_humanas">Gizarte eta Giza Zientzien Fakultatea</string>
+    <string name="centro_deusto_ingenieria">Ingeniaritza Fakultatea</string>
+    <string name="centro_deusto_educacion_deporte">Hezkuntza eta Kirol Fakultatea</string>
+    <string name="centro_deusto_salud">Osasun Zientzien Fakultatea</string>
+    <string name="centro_deusto_sociales_comunicacion">Gizarte eta Komunikazio Zientzien Fakultatea</string>
+
+    <!-- Login & Register Strings -->
+    <string name="login_title">UNIGO</string>
+    <string name="login_subtitle">Zure campusa, zure ibilbidea.</string>
+    <string name="login_email_hint">Posta elektronikoa</string>
+    <string name="login_password_hint">Pasahitza</string>
+    <string name="login_button">Saioa Hasi</string>
+    <string name="register_button">Kontu bat sortu</string>
+    <string name="guest_button">Gonbidatu gisa jarraitu</string>
+    <string name="register_title">Kontua Sortu</string>
+    <string name="register_subtitle">UNIGOren mugikortasunera batu</string>
+    <string name="register_name_hint">Izen-abizenak</string>
+    <string name="register_do_button">Erregistratu</string>
+    <string name="register_back_to_login">Dagoeneko kontua duzu? Hasi saioa</string>
+
+</resources>

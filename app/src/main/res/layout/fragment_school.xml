@@ -21,7 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:iconifiedByDefault="false"
-            app:queryHint="Buscar centro (ej. Deusto, Leioa...)"
+            app:queryHint="@string/search_centre"
             app:queryBackground="@android:color/transparent"/>
     </com.google.android.material.card.MaterialCardView>
 
@@ -43,7 +43,7 @@
                 android:id="@+id/btnFiltroTodas"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Todas"
+                android:text="@string/all"
                 android:textSize="12sp"
                 android:minWidth="0dp"
                 android:minHeight="40dp"

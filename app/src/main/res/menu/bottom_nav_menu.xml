@@ -3,20 +3,20 @@
     <item
         android:id="@+id/nav_school"
         android:icon="@drawable/ic_menu_school"
-        android:title="Centros" />
+        android:title="@string/centres_title" />
 
     <!-- NUEVA PESTAÑA DE CLIMA -->
     <item
         android:id="@+id/nav_weather"
         android:icon="@drawable/ic_menu_weather"
-        android:title="Clima" />
+        android:title="@string/weather_title" />
 
     <item
         android:id="@+id/nav_map"
         android:icon="@drawable/ic_menu_map"
-        android:title="Mapa" />
+        android:title="@string/map_title" />
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_menu_settings"
-        android:title="Ajustes" />
+        android:title="@string/settings_title" />
 </menu>

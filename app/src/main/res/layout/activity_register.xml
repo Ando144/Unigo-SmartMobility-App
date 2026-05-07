@@ -8,8 +8,6 @@
     android:background="@color/bg_light">
 
     <!-- Icono superior -->
-
-    <!-- Título en Rojo Bilbao -->
     <ImageView
         android:id="@+id/ivLogoRegister"
         android:layout_width="56dp"
@@ -21,12 +19,13 @@
         app:srcCompat="@drawable/ic_person_add"
         app:tint="@color/bilbao_grey_dark" />
 
+    <!-- Título en Rojo Bilbao -->
     <TextView
         android:id="@+id/tvTitleRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Crear Cuenta"
+        android:text="@string/register_title"
         android:textColor="@color/bilbao_red"
         android:textSize="32sp"
         android:textStyle="bold"
@@ -40,7 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Únete a la movilidad de UNIGO"
+        android:text="@string/register_subtitle"
         android:textColor="@color/text_medium"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -83,7 +82,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Nombre completo"
+                    android:hint="@string/register_name_hint"
                     app:boxCornerRadiusBottomEnd="4dp"
                     app:boxCornerRadiusBottomStart="4dp"
                     app:boxCornerRadiusTopEnd="4dp"
@@ -103,7 +102,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="Correo electrónico"
+                    android:hint="@string/login_email_hint"
                     app:boxCornerRadiusBottomEnd="4dp"
                     app:boxCornerRadiusBottomStart="4dp"
                     app:boxCornerRadiusTopEnd="4dp"
@@ -123,7 +122,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="Contraseña"
+                    android:hint="@string/login_password_hint"
                     app:endIconMode="password_toggle"
                     app:boxCornerRadiusBottomEnd="4dp"
                     app:boxCornerRadiusBottomStart="4dp"
@@ -144,7 +143,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="24dp"
-                    android:text="Registrarme"
+                    android:text="@string/register_do_button"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:cornerRadius="6dp"
@@ -161,7 +160,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        android:text="¿Ya tienes cuenta? Inicia sesión"
+        android:text="@string/register_back_to_login"
         android:textColor="@color/bilbao_grey_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

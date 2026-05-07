@@ -124,39 +124,38 @@ public class SchoolFragment extends Fragment {
         // Se añaden los datos integrando la información de Bilbobus, Bizkaibus y red de transporte de Euskadi
 
         // --- CENTROS EHU ---
-        listaOriginalCompletita.add(new Centro("EHU_345", "Escuela de Ingeniería de Bilbao", "EHU", "Edif II", "Autobús: Bilbobus 28, 38, 62.\nTranvía: Parada San Mamés."));
-        listaOriginalCompletita.add(new Centro("EHU_350", "Escuela de Ingeniería de Bilbao", "EHU", "Náutica", "Autobús: Bizkaibus A3411.\nBicicleta: Bidegorri cercano."));
-        listaOriginalCompletita.add(new Centro("EHU_363", "Escuela de Ingeniería de Bilbao", "EHU", "Edif II", "Autobús: Bilbobus 28, 38.\nTranvía: Parada San Mamés."));
-        listaOriginalCompletita.add(new Centro("EHU_364", "Escuela de Ingeniería de Bilbao", "EHU", "Edif II", "Autobús: Bilbobus 28, 38.\nTranvía: Parada San Mamés."));
-        listaOriginalCompletita.add(new Centro("EHU_320", "Facultad de Bellas Artes", "EHU", "Leioa", "Autobús: Bizkaibus A2161, A2321.\nBicicleta: Parking Leioa."));
-        listaOriginalCompletita.add(new Centro("EHU_310", "Facultad de Ciencia y Tecnología", "EHU", "Leioa", "Autobús: Bizkaibus A2161, A2321.\nBicicleta: Parking Leioa."));
-        listaOriginalCompletita.add(new Centro("EHU_323", "Facultad de Ciencias Sociales y Comunicación", "EHU", "Leioa", "Autobús: Bizkaibus A2161, A2321.\nBicicleta: Parking Leioa."));
-        listaOriginalCompletita.add(new Centro("EHU_324", "Facultad de Derecho. Sección bizkaia", "EHU", "Leioa", "Autobús: Bizkaibus A2161, A2321.\nBicicleta: Parking Leioa."));
-        listaOriginalCompletita.add(new Centro("EHU_321", "Facultad de Economía y Empresa", "EHU", "Sarriko", "Metro: Sarriko.\nAutobús: Bilbobus 13, 18, 71."));
-        listaOriginalCompletita.add(new Centro("EHU_351", "Facultad de Economía y Empresa. Sección Elkano", "EHU", "Bilbao", "Metro: Moyua.\nAutobús: Bilbobus varias líneas."));
-        listaOriginalCompletita.add(new Centro("EHU_354", "Facultad de Educación de Bilbao", "EHU", "Leioa", "Autobús: Bizkaibus A2161, A2321.\nBicicleta: Parking Leioa."));
-        listaOriginalCompletita.add(new Centro("EHU_327", "Facultad de Medicina y Enfermería", "EHU", "Leioa", "Autobús: Bizkaibus A2161, A2321.\nBicicleta: Parking Leioa."));
-        listaOriginalCompletita.add(new Centro("EHU_352", "Facultad de Medicina y Enfermería", "EHU", "Leioa", "Autobús: Bizkaibus A2161, A2321.\nBicicleta: Parking Leioa."));
-        listaOriginalCompletita.add(new Centro("EHU_332", "Unidad Docente Fac. Med. y Enfermería", "EHU", "Galdakao", "Autobús: Bizkaibus Línea Galdakao Ospitalea."));
-        listaOriginalCompletita.add(new Centro("EHU_328", "Unidad Docente Fac. Med. y Enfermería", "EHU", "Basurto - Bilbao", "Tranvía: Ospitalea/Hospital.\nAutobús: Bilbobus 28, 58."));
-        listaOriginalCompletita.add(new Centro("EHU_329", "Unidad Docente Fac. Med. y Enfermería", "EHU", "Cruces", "Metro: Gurutzeta/Cruces.\nAutobús: Bizkaibus."));
-        listaOriginalCompletita.add(new Centro("EHU_EXP", "Aulas de la Experiencia", "EHU", "Bilbao", "Autobús: Casco Viejo.\nMetro: Zazpikaleak."));
+        listaOriginalCompletita.add(new Centro("EHU_345", getString(R.string.centro_ehu_ingenieria_bilbao), "EHU", "Edif II", getString(R.string.bus) + ": Bilbobus 28, 38, 62.\n" + getString(R.string.tram) + ": " + getString(R.string.stop) + " San Mamés."));
+        listaOriginalCompletita.add(new Centro("EHU_350", getString(R.string.centro_ehu_ingenieria_bilbao), "EHU", "Náutica", getString(R.string.bus) + ": Bizkaibus A3411.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path_joined) + "."));
+        listaOriginalCompletita.add(new Centro("EHU_363", getString(R.string.centro_ehu_ingenieria_bilbao), "EHU", "Edif II", getString(R.string.bus) + ": Bilbobus 28, 38.\n" + getString(R.string.tram) + ": " + getString(R.string.stop) + " San Mamés."));
+        listaOriginalCompletita.add(new Centro("EHU_364", getString(R.string.centro_ehu_ingenieria_bilbao), "EHU", "Edif II", getString(R.string.bus) + ": Bilbobus 28, 38.\n" + getString(R.string.tram) + ": " + getString(R.string.stop) + " San Mamés."));
+        listaOriginalCompletita.add(new Centro("EHU_320", getString(R.string.centro_ehu_bellas_artes), "EHU", "Leioa", getString(R.string.bus) + ": Bizkaibus A2161, A2321.\n" + getString(R.string.bicycle) + ": Parking Leioa."));
+        listaOriginalCompletita.add(new Centro("EHU_310", getString(R.string.centro_ehu_ciencia_tecnologia), "EHU", "Leioa", getString(R.string.bus) + ": Bizkaibus A2161, A2321.\n" + getString(R.string.bicycle) + ": Parking Leioa."));
+        listaOriginalCompletita.add(new Centro("EHU_323", getString(R.string.centro_ehu_ciencias_sociales_comunicacion), "EHU", "Leioa", getString(R.string.bus) + ": Bizkaibus A2161, A2321.\n" + getString(R.string.bicycle) + ": Parking Leioa."));
+        listaOriginalCompletita.add(new Centro("EHU_324", getString(R.string.centro_ehu_derecho), "EHU", "Leioa", getString(R.string.bus) + ": Bizkaibus A2161, A2321.\n" + getString(R.string.bicycle) + ": Parking Leioa."));
+        listaOriginalCompletita.add(new Centro("EHU_321", getString(R.string.centro_ehu_economia_empresa), "EHU", "Sarriko", getString(R.string.metro) + ": Sarriko.\n" + getString(R.string.bus) + ": Bilbobus 13, 18, 71."));
+        listaOriginalCompletita.add(new Centro("EHU_351", getString(R.string.centro_ehu_economia_empresa_elcano), "EHU", "Bilbao", getString(R.string.metro) + ": Moyua.\n" + getString(R.string.bus) + ": Bilbobus (Varias " + getString(R.string.line) + "s)."));
+        listaOriginalCompletita.add(new Centro("EHU_354", getString(R.string.centro_ehu_educacion_bilbao), "EHU", "Leioa", getString(R.string.bus) + ": Bizkaibus A2161, A2321.\n" + getString(R.string.bicycle) + ": Parking Leioa."));
+        listaOriginalCompletita.add(new Centro("EHU_327", getString(R.string.centro_ehu_medicina_enfermeria), "EHU", "Leioa", getString(R.string.bus) + ": Bizkaibus A2161, A2321.\n" + getString(R.string.bicycle) + ": Parking Leioa."));
+        listaOriginalCompletita.add(new Centro("EHU_352", getString(R.string.centro_ehu_medicina_enfermeria), "EHU", "Leioa", getString(R.string.bus) + ": Bizkaibus A2161, A2321.\n" + getString(R.string.bicycle) + ": Parking Leioa."));
+        listaOriginalCompletita.add(new Centro("EHU_332", getString(R.string.centro_ehu_unidad_docente_medicina), "EHU", "Galdakao", getString(R.string.bus) + ": Bizkaibus " + getString(R.string.line) + " Galdakao Ospitalea."));
+        listaOriginalCompletita.add(new Centro("EHU_328", getString(R.string.centro_ehu_unidad_docente_medicina), "EHU", "Basurto - Bilbao", getString(R.string.tram) + ": Ospitalea/Hospital.\n" + getString(R.string.bus) + ": Bilbobus 28, 58."));
+        listaOriginalCompletita.add(new Centro("EHU_329", getString(R.string.centro_ehu_unidad_docente_medicina), "EHU", "Cruces", getString(R.string.metro) + ": Gurutzeta/Cruces.\n" + getString(R.string.bus) + ": Bizkaibus."));
+        listaOriginalCompletita.add(new Centro("EHU_EXP", getString(R.string.centro_ehu_aulas_experiencia), "EHU", "Bilbao", getString(R.string.bus) + ": Casco Viejo.\n" + getString(R.string.metro) + ": Zazpikaleak."));
 
-        // --- CENTROS MONDRAGON UNIBERTSITATEA ---
-        listaOriginalCompletita.add(new Centro("MU_BBF_EMP", "Bilbao Berrikuntza Faktoria (BBF): Empresariales", "Mondragon", "Uribitarte, 6", "Autobús: Bilbobus Línea 11.\nBicicleta: Estación Bilbaobizi a 50m."));
-        listaOriginalCompletita.add(new Centro("MU_BBF_LEINN", "Bilbao Berrikuntza Faktoria (BBF): LEINN", "Mondragon", "Uribitarte, 6", "Autobús: Bilbobus Línea 11.\nBicicleta: Estación Bilbaobizi a 50m."));
-        listaOriginalCompletita.add(new Centro("MU_AS_POL", "As Fabrik: Escuela Politécnica Superior", "Mondragon", "Zorrotzaurre", "Autobús: Bilbobus Línea A4.\nBicicleta: Bidegorri Zorrotzaurre."));
-        listaOriginalCompletita.add(new Centro("MU_AS_HUM", "As Fabrik: Fac. Humanidades y Ciencias Edu.", "Mondragon", "Zorrotzaurre", "Autobús: Bilbobus Línea A4.\nBicicleta: Bidegorri Zorrotzaurre."));
+// --- CENTROS MONDRAGON UNIBERTSITATEA ---
+        listaOriginalCompletita.add(new Centro("MU_BBF_EMP", getString(R.string.centro_mu_bbf_empresariales), "Mondragon", "Uribitarte, 6", getString(R.string.bus) + ": Bilbobus " + getString(R.string.line) + " 11.\n" + getString(R.string.bicycle) + ": " + getString(R.string.bilbaobizi_50m) + "."));
+        listaOriginalCompletita.add(new Centro("MU_BBF_LEINN", getString(R.string.centro_mu_bbf_leinn), "Mondragon", "Uribitarte, 6", getString(R.string.bus) + ": Bilbobus " + getString(R.string.line) + " 11.\n" + getString(R.string.bicycle) + ": " + getString(R.string.bilbaobizi_50m) + "."));
+        listaOriginalCompletita.add(new Centro("MU_AS_POL", getString(R.string.centro_mu_as_politecnica), "Mondragon", "Zorrotzaurre", getString(R.string.bus) + ": Bilbobus " + getString(R.string.line) + " A4.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path) + " Zorrotzaurre."));
+        listaOriginalCompletita.add(new Centro("MU_AS_HUM", getString(R.string.centro_mu_as_humanidades), "Mondragon", "Zorrotzaurre", getString(R.string.bus) + ": Bilbobus " + getString(R.string.line) + " A4.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path) + " Zorrotzaurre."));
 
-        // --- CENTROS DEUSTO ---
-        listaOriginalCompletita.add(new Centro("DEU_DBS", "Deustu Business School", "Deusto", "Deusto", "Autobús: Bizkaibus A3411, Bilbobus 18, 71.\nBicicleta: Carril bici conectado."));
-        listaOriginalCompletita.add(new Centro("DEU_DER", "Facultad de Derecho", "Deusto", "Deusto", "Autobús: Bizkaibus A3411, Bilbobus 18, 71.\nBicicleta: Carril bici conectado."));
-        listaOriginalCompletita.add(new Centro("DEU_CSH", "Facultad de Ciencias Sociales y Humanas", "Deusto", "Deusto", "Autobús: Bizkaibus A3411, Bilbobus 18, 71.\nBicicleta: Carril bici conectado."));
-        listaOriginalCompletita.add(new Centro("DEU_ING", "Facultad de Ingeniería", "Deusto", "Deusto", "Autobús: Bizkaibus A3411, Bilbobus 18, 71.\nBicicleta: Carril bici conectado."));
-        listaOriginalCompletita.add(new Centro("DEU_EDU", "Facultad de Educación y Deporte", "Deusto", "Deusto", "Autobús: Bizkaibus A3411, Bilbobus 18, 71.\nBicicleta: Carril bici conectado."));
-        listaOriginalCompletita.add(new Centro("DEU_SAL", "Facultad de Ciencias de la Salud", "Deusto", "Deusto", "Autobús: Bizkaibus A3411, Bilbobus 18, 71.\nBicicleta: Carril bici conectado."));
-        listaOriginalCompletita.add(new Centro("DEU_CSC", "Facultad de Ciencias Sociales y Comunicación", "Deusto", "Deusto", "Autobús: Bizkaibus A3411, Bilbobus 18, 71.\nBicicleta: Carril bici conectado."));
-
+// --- CENTROS DEUSTO ---
+        listaOriginalCompletita.add(new Centro("DEU_DBS", getString(R.string.centro_deusto_business), "Deusto", "Deusto", getString(R.string.bus) + ": Bizkaibus A3411, Bilbobus 18, 71.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path_joined) + "."));
+        listaOriginalCompletita.add(new Centro("DEU_DER", getString(R.string.centro_deusto_derecho), "Deusto", "Deusto", getString(R.string.bus) + ": Bizkaibus A3411, Bilbobus 18, 71.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path_joined) + "."));
+        listaOriginalCompletita.add(new Centro("DEU_CSH", getString(R.string.centro_deusto_sociales_humanas), "Deusto", "Deusto", getString(R.string.bus) + ": Bizkaibus A3411, Bilbobus 18, 71.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path_joined) + "."));
+        listaOriginalCompletita.add(new Centro("DEU_ING", getString(R.string.centro_deusto_ingenieria), "Deusto", "Deusto", getString(R.string.bus) + ": Bizkaibus A3411, Bilbobus 18, 71.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path_joined) + "."));
+        listaOriginalCompletita.add(new Centro("DEU_EDU", getString(R.string.centro_deusto_educacion_deporte), "Deusto", "Deusto", getString(R.string.bus) + ": Bizkaibus A3411, Bilbobus 18, 71.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path_joined) + "."));
+        listaOriginalCompletita.add(new Centro("DEU_SAL", getString(R.string.centro_deusto_salud), "Deusto", "Deusto", getString(R.string.bus) + ": Bizkaibus A3411, Bilbobus 18, 71.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path_joined) + "."));
+        listaOriginalCompletita.add(new Centro("DEU_CSC", getString(R.string.centro_deusto_sociales_comunicacion), "Deusto", "Deusto", getString(R.string.bus) + ": Bizkaibus A3411, Bilbobus 18, 71.\n" + getString(R.string.bicycle) + ": " + getString(R.string.cycle_path_joined) + "."));
         // Comprobamos en la lista original si hay favoritos guardados
         Set<String> favs = prefs.getStringSet("centros_favoritos", new HashSet<>());
         for (Centro c : listaOriginalCompletita) {

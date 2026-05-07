@@ -13,7 +13,13 @@
         <!-- Fondos y superficies -->
         <item name="android:colorBackground">@color/bg_light</item>
         <item name="colorSurface">@color/white</item>
+
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <style name="Theme.Unigodas" parent="Base.Theme.Unigodas" />
+
+    <style name="CircleImageView" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

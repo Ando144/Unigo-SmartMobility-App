@@ -1,0 +1,87 @@
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="pref_header_profile">Profile</string>
+    <string name="pref_account_section">Account</string>
+    <string name="pref_my_account">My account</string>
+    <string name="pref_logout">Log out</string>
+    <string name="pref_register">Register</string>
+    <string name="pref_login">Log in</string>
+    <string name="pref_general_config">General Configuration</string>
+    <string name="pref_language">Change Language</string>
+    <string name="pref_dark_mode">Dark Mode</string>
+    <string name="pref_dark_mode_summary">Enable/Disable dark theme</string>
+
+    <string name="select_language">Select Language</string>
+    <string name="lang_es">Castellano</string>
+    <string name="lang_eu">Euskera</string>
+    <string name="lang_en">Inglés</string>
+
+    <string name="profile_image_options">Image options</string>
+    <string name="remove_photo">Remove photo</string>
+    <string name="change_photo">Change photo</string>
+
+    <string name="account_detail_title">My Account</string>
+    <string name="email_label">Email</string>
+    <string name="name_label">Full name</string>
+    <string name="change_password">Change password</string>
+    <string name="seccion_clima_de_euskadi">Sección: Clima de Euskadi</string>
+    <string name="weather_title">Weather</string>
+    <string name="map_title">Map</string>
+
+    <!-- Centres Strings -->
+    <string name="centres_title">Centres</string>
+    <string name="search_centre">Search centre (e.g. Deusto, Leioa...)</string>
+    <string name="all">All</string>
+    <string name="bus">Bus</string>
+    <string name="line">Line</string>
+    <string name="metro">Metro</string>
+    <string name="station">Station</string>
+    <string name="tram">Tram</string>
+    <string name="stop">Stop</string>
+    <string name="bicycle">Bicycle</string>
+    <string name="bilbaobizi_50m">Bilbaobizi station 50m away</string>
+    <string name="cycle_path">Cycle path</string>
+    <string name="cycle_path_joined">Connected cycle path</string>
+
+    <!-- University Centres EHU -->
+    <string name="centro_ehu_ingenieria_bilbao">School of Engineering of Bilbao</string>
+    <string name="centro_ehu_bellas_artes">Faculty of Fine Arts</string>
+    <string name="centro_ehu_ciencia_tecnologia">Faculty of Science and Technology</string>
+    <string name="centro_ehu_ciencias_sociales_comunicacion">Faculty of Social Sciences and Communication</string>
+    <string name="centro_ehu_derecho">Faculty of Law. Bizkaia Section</string>
+    <string name="centro_ehu_economia_empresa">Faculty of Economics and Business</string>
+    <string name="centro_ehu_economia_empresa_elcano">Faculty of Economics and Business. Elcano Section</string>
+    <string name="centro_ehu_educacion_bilbao">Faculty of Education of Bilbao</string>
+    <string name="centro_ehu_medicina_enfermeria">Faculty of Medicine and Nursing</string>
+    <string name="centro_ehu_unidad_docente_medicina">Teaching Unit Fac. Medicine and Nursing</string>
+    <string name="centro_ehu_aulas_experiencia">Experience Classrooms</string>
+
+    <!-- University Centres Mondragon Unibertsitatea -->
+    <string name="centro_mu_bbf_empresariales">Bilbao Berrikuntza Faktoria (BBF): Business</string>
+    <string name="centro_mu_bbf_leinn">Bilbao Berrikuntza Faktoria (BBF): LEINN</string>
+    <string name="centro_mu_as_politecnica">As Fabrik: Higher Polytechnic School</string>
+    <string name="centro_mu_as_humanidades">As Fabrik: Fac. Humanities and Education Sciences</string>
+
+    <!-- University Centres Deusto -->
+    <string name="centro_deusto_business">Deusto Business School</string>
+    <string name="centro_deusto_derecho">Faculty of Law</string>
+    <string name="centro_deusto_sociales_humanas">Faculty of Social and Human Sciences</string>
+    <string name="centro_deusto_ingenieria">Faculty of Engineering</string>
+    <string name="centro_deusto_educacion_deporte">Faculty of Education and Sport</string>
+    <string name="centro_deusto_salud">Faculty of Health Sciences</string>
+    <string name="centro_deusto_sociales_comunicacion">Faculty of Social Sciences and Communication</string>
+
+    <!-- Login & Register Strings -->
+    <string name="login_title">UNIGO</string>
+    <string name="login_subtitle">Your campus, your route.</string>
+    <string name="login_email_hint">Email</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_button">Log In</string>
+    <string name="register_button">Create an account</string>
+    <string name="guest_button">Continue as guest</string>
+    <string name="register_title">Create Account</string>
+    <string name="register_subtitle">Join UNIGO mobility</string>
+    <string name="register_name_hint">Full name</string>
+    <string name="register_do_button">Register</string>
+    <string name="register_back_to_login">Already have an account? Log in</string>
+</resources>

@@ -2,15 +2,68 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_light"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#F5F7FA">
 
-    <TextView
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:background="@android:color/white"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/ivIconoClimaPrincipal"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@android:drawable/ic_menu_help" /> <TextView
+        android:id="@+id/tvTemperaturaPrincipal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sección: Clima de Euskadi"
-        android:textColor="@color/bilbao_red"
-        android:textSize="24sp"
-        android:textStyle="bold"/>
+        android:text="-- ºC"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:textColor="#333333" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bilbao"
+            android:textSize="18sp"
+            android:textColor="#666666" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Clima en tus Campus Favoritos"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="16dp" />
+
+    <LinearLayout
+        android:id="@+id/llFavoritosContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Radar de Precipitaciones en Vivo"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="16dp"
+        android:layout_marginTop="8dp"/>
+
+    <WebView
+        android:id="@+id/wvRadarLluvia"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        android:background="@android:color/darker_gray"/>
+
 </LinearLayout>

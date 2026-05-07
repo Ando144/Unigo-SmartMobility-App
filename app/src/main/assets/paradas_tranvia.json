@@ -1,0 +1,116 @@
+{
+  "listaParadas": [
+    {
+      "id": "TR01",
+      "nombre": "Bolueta",
+      "tipo": "Tranvía",
+      "latitud": 43.2458,
+      "longitud": -2.9069
+    },
+    {
+      "id": "TR02",
+      "nombre": "Abusu",
+      "tipo": "Tranvía",
+      "latitud": 43.2435,
+      "longitud": -2.9194
+    },
+    {
+      "id": "TR03",
+      "nombre": "Atxuri",
+      "tipo": "Tranvía",
+      "latitud": 43.2536,
+      "longitud": -2.9213
+    },
+    {
+      "id": "TR04",
+      "nombre": "Ribera",
+      "tipo": "Tranvía",
+      "latitud": 43.2568,
+      "longitud": -2.9242
+    },
+    {
+      "id": "TR05",
+      "nombre": "Arriaga",
+      "tipo": "Tranvía",
+      "latitud": 43.2595,
+      "longitud": -2.9248
+    },
+    {
+      "id": "TR06",
+      "nombre": "Abando",
+      "tipo": "Tranvía",
+      "latitud": 43.2612,
+      "longitud": -2.9272
+    },
+    {
+      "id": "TR07",
+      "nombre": "Pío Baroja",
+      "tipo": "Tranvía",
+      "latitud": 43.2629,
+      "longitud": -2.9304
+    },
+    {
+      "id": "TR08",
+      "nombre": "Uribitarte",
+      "tipo": "Tranvía",
+      "latitud": 43.2657,
+      "longitud": -2.9318
+    },
+    {
+      "id": "TR09",
+      "nombre": "Guggenheim",
+      "tipo": "Tranvía",
+      "latitud": 43.2682,
+      "longitud": -2.9351
+    },
+    {
+      "id": "TR10",
+      "nombre": "Abandoibarra",
+      "tipo": "Tranvía",
+      "latitud": 43.2683,
+      "longitud": -2.9392
+    },
+    {
+      "id": "TR11",
+      "nombre": "Euskalduna",
+      "tipo": "Tranvía",
+      "latitud": 43.2667,
+      "longitud": -2.9436
+    },
+    {
+      "id": "TR12",
+      "nombre": "Sabino Arana",
+      "tipo": "Tranvía",
+      "latitud": 43.2641,
+      "longitud": -2.9463
+    },
+    {
+      "id": "TR13",
+      "nombre": "San Mamés",
+      "tipo": "Tranvía",
+      "latitud": 43.2619,
+      "longitud": -2.9472
+    },
+    {
+      "id": "TR14",
+      "nombre": "Ospitalea/Hospital",
+      "tipo": "Tranvía",
+      "latitud": 43.2596,
+      "longitud": -2.9499
+    },
+    {
+      "id": "TR15",
+      "nombre": "Basurto",
+      "tipo": "Tranvía",
+      "latitud": 43.2581,
+      "longitud": -2.9515
+    },
+    {
+      "id": "TR16",
+      "nombre": "La Casilla",
+      "tipo": "Tranvía",
+      "latitud": 43.2564,
+      "longitud": -2.9452
+    }
+  ]
+}

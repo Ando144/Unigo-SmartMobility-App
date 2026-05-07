@@ -1,0 +1,1341 @@
+{
+  "listaParadas": [
+    {
+      "id": "41",
+      "nombre": "Santurtzi",
+      "tipo": "Metro",
+      "latitud": 43.32895,
+      "longitud": -3.03421
+    },
+    {
+      "id": "6",
+      "nombre": "Zazpikaleak/Casco Viejo",
+      "tipo": "Metro",
+      "latitud": 43.25968,
+      "longitud": -2.92071
+    },
+    {
+      "id": "16",
+      "nombre": "Astrabudua",
+      "tipo": "Metro",
+      "latitud": 43.31463,
+      "longitud": -2.98681
+    },
+    {
+      "id": "25",
+      "nombre": "Ibarbengoa",
+      "tipo": "Metro",
+      "latitud": 43.3632,
+      "longitud": -3.00699
+    },
+    {
+      "id": "32",
+      "nombre": "Gurutzeta/Cruces",
+      "tipo": "Metro",
+      "latitud": 43.28301,
+      "longitud": -2.98245
+    },
+    {
+      "id": "34",
+      "nombre": "Barakaldo",
+      "tipo": "Metro",
+      "latitud": 43.29563,
+      "longitud": -2.98936
+    },
+    {
+      "id": "1",
+      "nombre": "Ariz",
+      "tipo": "Metro",
+      "latitud": 43.23801,
+      "longitud": -2.88203
+    },
+    {
+      "id": "8",
+      "nombre": "Moyua",
+      "tipo": "Metro",
+      "latitud": 43.26259,
+      "longitud": -2.93308
+    },
+    {
+      "id": "15",
+      "nombre": "Erandio",
+      "tipo": "Metro",
+      "latitud": 43.30338,
+      "longitud": -2.97437
+    },
+    {
+      "id": "17",
+      "nombre": "Leioa",
+      "tipo": "Metro",
+      "latitud": 43.31788,
+      "longitud": -2.99168
+    },
+    {
+      "id": "29",
+      "nombre": "Urduliz",
+      "tipo": "Metro",
+      "latitud": 43.379,
+      "longitud": -2.95811
+    },
+    {
+      "id": "35",
+      "nombre": "Bagatza",
+      "tipo": "Metro",
+      "latitud": 43.29885,
+      "longitud": -2.99268
+    },
+    {
+      "id": "42",
+      "nombre": "Kabiezes",
+      "tipo": "Metro",
+      "latitud": 43.32238,
+      "longitud": -3.03777
+    },
+    {
+      "id": "40",
+      "nombre": "Peñota",
+      "tipo": "Metro",
+      "latitud": 43.32198,
+      "longitud": -3.0254
+    },
+    {
+      "id": "38",
+      "nombre": "Abatxolo",
+      "tipo": "Metro",
+      "latitud": 43.31436,
+      "longitud": -3.01357
+    },
+    {
+      "id": "10",
+      "nombre": "Santimami/San Mamés",
+      "tipo": "Metro",
+      "latitud": 43.26252,
+      "longitud": -2.94751
+    },
+    {
+      "id": "11",
+      "nombre": "Deustu",
+      "tipo": "Metro",
+      "latitud": 43.27145,
+      "longitud": -2.94954
+    },
+    {
+      "id": "19",
+      "nombre": "Areeta",
+      "tipo": "Metro",
+      "latitud": 43.32595,
+      "longitud": -3.00961
+    },
+    {
+      "id": "24",
+      "nombre": "Bidezabal",
+      "tipo": "Metro",
+      "latitud": 43.35644,
+      "longitud": -3.01127
+    },
+    {
+      "id": "33",
+      "nombre": "Ansio",
+      "tipo": "Metro",
+      "latitud": 43.28919,
+      "longitud": -2.98716
+    },
+    {
+      "id": "37",
+      "nombre": "Sestao",
+      "tipo": "Metro",
+      "latitud": 43.30912,
+      "longitud": -3.00567
+    },
+    {
+      "id": "39",
+      "nombre": "Portugalete",
+      "tipo": "Metro",
+      "latitud": 43.31777,
+      "longitud": -3.02076
+    },
+    {
+      "id": "21",
+      "nombre": "Neguri",
+      "tipo": "Metro",
+      "latitud": 43.34024,
+      "longitud": -3.00562
+    },
+    {
+      "id": "51",
+      "nombre": "Basauri",
+      "tipo": "Metro",
+      "latitud": 43.23624,
+      "longitud": -2.8934
+    },
+    {
+      "id": "3",
+      "nombre": "Bolueta",
+      "tipo": "Metro",
+      "latitud": 43.247,
+      "longitud": -2.90573
+    },
+    {
+      "id": "5",
+      "nombre": "Santutxu",
+      "tipo": "Metro",
+      "latitud": 43.2543,
+      "longitud": -2.91335
+    },
+    {
+      "id": "9",
+      "nombre": "Indautxu",
+      "tipo": "Metro",
+      "latitud": 43.26127,
+      "longitud": -2.94179
+    },
+    {
+      "id": "13",
+      "nombre": "San Ignazio",
+      "tipo": "Metro",
+      "latitud": 43.28068,
+      "longitud": -2.96239
+    },
+    {
+      "id": "14",
+      "nombre": "Lutxana",
+      "tipo": "Metro",
+      "latitud": 43.29098,
+      "longitud": -2.96992
+    },
+    {
+      "id": "20",
+      "nombre": "Gobela",
+      "tipo": "Metro",
+      "latitud": 43.33308,
+      "longitud": -3.00735
+    },
+    {
+      "id": "22",
+      "nombre": "Aiboa",
+      "tipo": "Metro",
+      "latitud": 43.34414,
+      "longitud": -3.00267
+    },
+    {
+      "id": "27",
+      "nombre": "Larrabasterra",
+      "tipo": "Metro",
+      "latitud": 43.37573,
+      "longitud": -2.99147
+    },
+    {
+      "id": "28",
+      "nombre": "Sopela",
+      "tipo": "Metro",
+      "latitud": 43.38021,
+      "longitud": -2.97899
+    },
+    {
+      "id": "7",
+      "nombre": "Abando",
+      "tipo": "Metro",
+      "latitud": 43.2614,
+      "longitud": -2.92761
+    },
+    {
+      "id": "12",
+      "nombre": "Sarriko",
+      "tipo": "Metro",
+      "latitud": 43.27495,
+      "longitud": -2.95874
+    },
+    {
+      "id": "18",
+      "nombre": "Lamiako",
+      "tipo": "Metro",
+      "latitud": 43.32133,
+      "longitud": -3.00102
+    },
+    {
+      "id": "30",
+      "nombre": "Plentzia",
+      "tipo": "Metro",
+      "latitud": 43.40134,
+      "longitud": -2.94636
+    },
+    {
+      "id": "2",
+      "nombre": "Etxebarri",
+      "tipo": "Metro",
+      "latitud": 43.24386,
+      "longitud": -2.89771
+    },
+    {
+      "id": "4",
+      "nombre": "Basarrate",
+      "tipo": "Metro",
+      "latitud": 43.25116,
+      "longitud": -2.91082
+    },
+    {
+      "id": "23",
+      "nombre": "Algorta",
+      "tipo": "Metro",
+      "latitud": 43.35045,
+      "longitud": -3.00935
+    },
+    {
+      "id": "26",
+      "nombre": "Berango",
+      "tipo": "Metro",
+      "latitud": 43.36704,
+      "longitud": -2.99949
+    },
+    {
+      "id": "36",
+      "nombre": "Urbinaga",
+      "tipo": "Metro",
+      "latitud": 43.3057,
+      "longitud": -2.9926
+    },
+    {
+      "id": "1.1",
+      "nombre": "40 (Ariz)",
+      "tipo": "Metro",
+      "latitud": 43.23767,
+      "longitud": -2.88255
+    },
+    {
+      "id": "1.2",
+      "nombre": "41 (Ariz)",
+      "tipo": "Metro",
+      "latitud": 43.23784,
+      "longitud": -2.88355
+    },
+    {
+      "id": "1.3",
+      "nombre": "42 (Ariz)",
+      "tipo": "Metro",
+      "latitud": 43.23798,
+      "longitud": -2.88125
+    },
+    {
+      "id": "2.1",
+      "nombre": "115 (Etxebarri)",
+      "tipo": "Metro",
+      "latitud": 43.24387,
+      "longitud": -2.89668
+    },
+    {
+      "id": "2.2",
+      "nombre": "116 (Etxebarri)",
+      "tipo": "Metro",
+      "latitud": 43.24467,
+      "longitud": -2.89696
+    },
+    {
+      "id": "3.1",
+      "nombre": "84 (Bolueta)",
+      "tipo": "Metro",
+      "latitud": 43.247,
+      "longitud": -2.9055
+    },
+    {
+      "id": "3.2",
+      "nombre": "85 (Bolueta)",
+      "tipo": "Metro",
+      "latitud": 43.24709,
+      "longitud": -2.9059
+    },
+    {
+      "id": "4.1",
+      "nombre": "68 (Basarrate)",
+      "tipo": "Metro",
+      "latitud": 43.25077,
+      "longitud": -2.91057
+    },
+    {
+      "id": "4.2",
+      "nombre": "69 (Basarrate)",
+      "tipo": "Metro",
+      "latitud": 43.25062,
+      "longitud": -2.91147
+    },
+    {
+      "id": "5.1",
+      "nombre": "215 (Santutxu)",
+      "tipo": "Metro",
+      "latitud": 43.25383,
+      "longitud": -2.91343
+    },
+    {
+      "id": "5.2",
+      "nombre": "216 (Santutxu)",
+      "tipo": "Metro",
+      "latitud": 43.25407,
+      "longitud": -2.91472
+    },
+    {
+      "id": "5.3",
+      "nombre": "217 (Santutxu)",
+      "tipo": "Metro",
+      "latitud": 43.25547,
+      "longitud": -2.91312
+    },
+    {
+      "id": "6.1",
+      "nombre": "96 (Zazpikaleak/Casco Viejo)",
+      "tipo": "Metro",
+      "latitud": 43.26024,
+      "longitud": -2.91987
+    },
+    {
+      "id": "6.2",
+      "nombre": "97 (Zazpikaleak/Casco Viejo)",
+      "tipo": "Metro",
+      "latitud": 43.25997,
+      "longitud": -2.92214
+    },
+    {
+      "id": "6.3",
+      "nombre": "98 (Zazpikaleak/Casco Viejo)",
+      "tipo": "Metro",
+      "latitud": 43.25863,
+      "longitud": -2.92163
+    },
+    {
+      "id": "7.1",
+      "nombre": "1 (Abando)",
+      "tipo": "Metro",
+      "latitud": 43.26144,
+      "longitud": -2.9282
+    },
+    {
+      "id": "7.2",
+      "nombre": "2 (Abando)",
+      "tipo": "Metro",
+      "latitud": 43.26203,
+      "longitud": -2.92804
+    },
+    {
+      "id": "7.3",
+      "nombre": "3 (Abando)",
+      "tipo": "Metro",
+      "latitud": 43.26134,
+      "longitud": -2.92783
+    },
+    {
+      "id": "7.4",
+      "nombre": "4 (Abando)",
+      "tipo": "Metro",
+      "latitud": 43.26078,
+      "longitud": -2.92746
+    },
+    {
+      "id": "8.1",
+      "nombre": "175 (Moyua)",
+      "tipo": "Metro",
+      "latitud": 43.26267,
+      "longitud": -2.93377
+    },
+    {
+      "id": "8.2",
+      "nombre": "176 (Moyua)",
+      "tipo": "Metro",
+      "latitud": 43.26194,
+      "longitud": -2.93254
+    },
+    {
+      "id": "8.3",
+      "nombre": "177 (Moyua)",
+      "tipo": "Metro",
+      "latitud": 43.26262,
+      "longitud": -2.93454
+    },
+    {
+      "id": "8.4",
+      "nombre": "178 (Moyua)",
+      "tipo": "Metro",
+      "latitud": 43.26316,
+      "longitud": -2.93432
+    },
+    {
+      "id": "9.1",
+      "nombre": "136 (Indautxu)",
+      "tipo": "Metro",
+      "latitud": 43.26125,
+      "longitud": -2.94234
+    },
+    {
+      "id": "9.2",
+      "nombre": "137 (Indautxu)",
+      "tipo": "Metro",
+      "latitud": 43.26066,
+      "longitud": -2.94273
+    },
+    {
+      "id": "9.3",
+      "nombre": "138 (Indautxu)",
+      "tipo": "Metro",
+      "latitud": 43.2608,
+      "longitud": -2.94001
+    },
+    {
+      "id": "10.1",
+      "nombre": "207 (Santimami/San Mamés)",
+      "tipo": "Metro",
+      "latitud": 43.26254,
+      "longitud": -2.94819
+    },
+    {
+      "id": "10.2",
+      "nombre": "208 (Santimami/San Mamés)",
+      "tipo": "Metro",
+      "latitud": 43.26136,
+      "longitud": -2.94885
+    },
+    {
+      "id": "10.3",
+      "nombre": "209 (Santimami/San Mamés)",
+      "tipo": "Metro",
+      "latitud": 43.26274,
+      "longitud": -2.9461
+    },
+    {
+      "id": "11.1",
+      "nombre": "104 (Deustu)",
+      "tipo": "Metro",
+      "latitud": 43.27182,
+      "longitud": -2.94947
+    },
+    {
+      "id": "11.2",
+      "nombre": "105 (Deustu)",
+      "tipo": "Metro",
+      "latitud": 43.27049,
+      "longitud": -2.94939
+    },
+    {
+      "id": "11.3",
+      "nombre": "106 (Deustu)",
+      "tipo": "Metro",
+      "latitud": 43.27186,
+      "longitud": -2.94859
+    },
+    {
+      "id": "12.1",
+      "nombre": "222 (Sarriko)",
+      "tipo": "Metro",
+      "latitud": 43.27441,
+      "longitud": -2.95807
+    },
+    {
+      "id": "13.1",
+      "nombre": "237 (San Ignazio)",
+      "tipo": "Metro",
+      "latitud": 43.28137,
+      "longitud": -2.96265
+    },
+    {
+      "id": "13.2",
+      "nombre": "238 (San Ignazio)",
+      "tipo": "Metro",
+      "latitud": 43.28147,
+      "longitud": -2.963
+    },
+    {
+      "id": "13.3",
+      "nombre": "239 (San Ignazio)",
+      "tipo": "Metro",
+      "latitud": 43.27993,
+      "longitud": -2.96214
+    },
+    {
+      "id": "13.4",
+      "nombre": "240 (San Ignazio)",
+      "tipo": "Metro",
+      "latitud": 43.28002,
+      "longitud": -2.96187
+    },
+    {
+      "id": "13.5",
+      "nombre": "241 (San Ignazio)",
+      "tipo": "Metro",
+      "latitud": 43.28144,
+      "longitud": -2.96246
+    },
+    {
+      "id": "14.1",
+      "nombre": "168 (Lutxana)",
+      "tipo": "Metro",
+      "latitud": 43.29113,
+      "longitud": -2.97005
+    },
+    {
+      "id": "14.2",
+      "nombre": "169 (Lutxana)",
+      "tipo": "Metro",
+      "latitud": 43.29136,
+      "longitud": -2.96983
+    },
+    {
+      "id": "15.1",
+      "nombre": "111 (Erandio)",
+      "tipo": "Metro",
+      "latitud": 43.30379,
+      "longitud": -2.97447
+    },
+    {
+      "id": "16.1",
+      "nombre": "47 (Astrabudua)",
+      "tipo": "Metro",
+      "latitud": 43.31448,
+      "longitud": -2.98677
+    },
+    {
+      "id": "16.2",
+      "nombre": "48 (Astrabudua)",
+      "tipo": "Metro",
+      "latitud": 43.31482,
+      "longitud": -2.98681
+    },
+    {
+      "id": "17.1",
+      "nombre": "163 (Leioa)",
+      "tipo": "Metro",
+      "latitud": 43.31799,
+      "longitud": -2.99203
+    },
+    {
+      "id": "17.2",
+      "nombre": "164 (Leioa)",
+      "tipo": "Metro",
+      "latitud": 43.31797,
+      "longitud": -2.99244
+    },
+    {
+      "id": "18.1",
+      "nombre": "152 (Lamiako)",
+      "tipo": "Metro",
+      "latitud": 43.32142,
+      "longitud": -3.00159
+    },
+    {
+      "id": "18.2",
+      "nombre": "153 (Lamiako)",
+      "tipo": "Metro",
+      "latitud": 43.32162,
+      "longitud": -3.00145
+    },
+    {
+      "id": "18.3",
+      "nombre": "275 (Lamiako)",
+      "tipo": "Metro",
+      "latitud": 43.32119,
+      "longitud": -3.00033
+    },
+    {
+      "id": "19.1",
+      "nombre": "33 (Areeta)",
+      "tipo": "Metro",
+      "latitud": 43.32637,
+      "longitud": -3.01017
+    },
+    {
+      "id": "19.2",
+      "nombre": "34 (Areeta)",
+      "tipo": "Metro",
+      "latitud": 43.32651,
+      "longitud": -3.0104
+    },
+    {
+      "id": "19.3",
+      "nombre": "35 (Areeta)",
+      "tipo": "Metro",
+      "latitud": 43.32548,
+      "longitud": -3.00885
+    },
+    {
+      "id": "20.1",
+      "nombre": "120 (Gobela)",
+      "tipo": "Metro",
+      "latitud": 43.3336,
+      "longitud": -3.00704
+    },
+    {
+      "id": "21.1",
+      "nombre": "183 (Neguri)",
+      "tipo": "Metro",
+      "latitud": 43.34035,
+      "longitud": -3.00631
+    },
+    {
+      "id": "21.2",
+      "nombre": "184 (Neguri)",
+      "tipo": "Metro",
+      "latitud": 43.34014,
+      "longitud": -3.00563
+    },
+    {
+      "id": "22.1",
+      "nombre": "16 (Aiboa)",
+      "tipo": "Metro",
+      "latitud": 43.34359,
+      "longitud": -3.00288
+    },
+    {
+      "id": "22.2",
+      "nombre": "17 (Aiboa)",
+      "tipo": "Metro",
+      "latitud": 43.34359,
+      "longitud": -3.00288
+    },
+    {
+      "id": "23.1",
+      "nombre": "21 (Algorta)",
+      "tipo": "Metro",
+      "latitud": 43.35078,
+      "longitud": -3.00946
+    },
+    {
+      "id": "23.2",
+      "nombre": "22 (Algorta)",
+      "tipo": "Metro",
+      "latitud": 43.34988,
+      "longitud": -3.0091
+    },
+    {
+      "id": "23.3",
+      "nombre": "23 (Algorta)",
+      "tipo": "Metro",
+      "latitud": 43.35102,
+      "longitud": -3.00957
+    },
+    {
+      "id": "24.1",
+      "nombre": "78 (Bidezabal)",
+      "tipo": "Metro",
+      "latitud": 43.35694,
+      "longitud": -3.01166
+    },
+    {
+      "id": "24.2",
+      "nombre": "79 (Bidezabal)",
+      "tipo": "Metro",
+      "latitud": 43.35698,
+      "longitud": -3.01177
+    },
+    {
+      "id": "24.3",
+      "nombre": "80 (Bidezabal)",
+      "tipo": "Metro",
+      "latitud": 43.35682,
+      "longitud": -3.01148
+    },
+    {
+      "id": "25.1",
+      "nombre": "132 (Ibarbengoa)",
+      "tipo": "Metro",
+      "latitud": 43.36317,
+      "longitud": -3.00667
+    },
+    {
+      "id": "25.2",
+      "nombre": "276 (Ibarbengoa)",
+      "tipo": "Metro",
+      "latitud": 43.36263,
+      "longitud": -3.00784
+    },
+    {
+      "id": "26.1",
+      "nombre": "74 (Berango)",
+      "tipo": "Metro",
+      "latitud": 43.36676,
+      "longitud": -2.99942
+    },
+    {
+      "id": "27.1",
+      "nombre": "158 (Larrabasterra)",
+      "tipo": "Metro",
+      "latitud": 43.37555,
+      "longitud": -2.99134
+    },
+    {
+      "id": "27.2",
+      "nombre": "159 (Larrabasterra)",
+      "tipo": "Metro",
+      "latitud": 43.37565,
+      "longitud": -2.99188
+    },
+    {
+      "id": "28.1",
+      "nombre": "247 (Sopela)",
+      "tipo": "Metro",
+      "latitud": 43.38017,
+      "longitud": -2.97879
+    },
+    {
+      "id": "28.2",
+      "nombre": "248 (Sopela)",
+      "tipo": "Metro",
+      "latitud": 43.38024,
+      "longitud": -2.97926
+    },
+    {
+      "id": "29.1",
+      "nombre": "265 (Urduliz)",
+      "tipo": "Metro",
+      "latitud": 43.37865,
+      "longitud": -2.95905
+    },
+    {
+      "id": "29.2",
+      "nombre": "272 (Urduliz)",
+      "tipo": "Metro",
+      "latitud": 43.37874,
+      "longitud": -2.95883
+    },
+    {
+      "id": "30.1",
+      "nombre": "196 (Plentzia)",
+      "tipo": "Metro",
+      "latitud": 43.40162,
+      "longitud": -2.94658
+    },
+    {
+      "id": "32.1",
+      "nombre": "124 (Gurutzeta/Cruces)",
+      "tipo": "Metro",
+      "latitud": 43.2832,
+      "longitud": -2.98296
+    },
+    {
+      "id": "32.2",
+      "nombre": "125 (Gurutzeta/Cruces)",
+      "tipo": "Metro",
+      "latitud": 43.28231,
+      "longitud": -2.98269
+    },
+    {
+      "id": "32.3",
+      "nombre": "126 (Gurutzeta/Cruces)",
+      "tipo": "Metro",
+      "latitud": 43.28358,
+      "longitud": -2.98132
+    },
+    {
+      "id": "33.1",
+      "nombre": "28 (Ansio)",
+      "tipo": "Metro",
+      "latitud": 43.28975,
+      "longitud": -2.98699
+    },
+    {
+      "id": "34.1",
+      "nombre": "60 (Barakaldo)",
+      "tipo": "Metro",
+      "latitud": 43.29531,
+      "longitud": -2.9889
+    },
+    {
+      "id": "34.2",
+      "nombre": "61 (Barakaldo)",
+      "tipo": "Metro",
+      "latitud": 43.29623,
+      "longitud": -2.98903
+    },
+    {
+      "id": "34.3",
+      "nombre": "62 (Barakaldo)",
+      "tipo": "Metro",
+      "latitud": 43.2953,
+      "longitud": -2.98824
+    },
+    {
+      "id": "34.4",
+      "nombre": "63 (Barakaldo)",
+      "tipo": "Metro",
+      "latitud": 43.29465,
+      "longitud": -2.989
+    },
+    {
+      "id": "35.1",
+      "nombre": "53 (Bagatza)",
+      "tipo": "Metro",
+      "latitud": 43.29849,
+      "longitud": -2.99262
+    },
+    {
+      "id": "35.2",
+      "nombre": "54 (Bagatza)",
+      "tipo": "Metro",
+      "latitud": 43.29834,
+      "longitud": -2.99352
+    },
+    {
+      "id": "35.3",
+      "nombre": "55 (Bagatza)",
+      "tipo": "Metro",
+      "latitud": 43.29973,
+      "longitud": -2.99318
+    },
+    {
+      "id": "36.1",
+      "nombre": "261 (Urbinaga)",
+      "tipo": "Metro",
+      "latitud": 43.30593,
+      "longitud": -2.99238
+    },
+    {
+      "id": "37.1",
+      "nombre": "229 (Sestao)",
+      "tipo": "Metro",
+      "latitud": 43.30934,
+      "longitud": -3.00663
+    },
+    {
+      "id": "37.2",
+      "nombre": "230 (Sestao)",
+      "tipo": "Metro",
+      "latitud": 43.31029,
+      "longitud": -3.00575
+    },
+    {
+      "id": "37.3",
+      "nombre": "231 (Sestao)",
+      "tipo": "Metro",
+      "latitud": 43.30952,
+      "longitud": -3.00728
+    },
+    {
+      "id": "37.4",
+      "nombre": "232 (Sestao)",
+      "tipo": "Metro",
+      "latitud": 43.30867,
+      "longitud": -3.00426
+    },
+    {
+      "id": "38.1",
+      "nombre": "10 (Abatxolo)",
+      "tipo": "Metro",
+      "latitud": 43.31376,
+      "longitud": -3.01251
+    },
+    {
+      "id": "38.2",
+      "nombre": "11 (Abatxolo)",
+      "tipo": "Metro",
+      "latitud": 43.31488,
+      "longitud": -3.01327
+    },
+    {
+      "id": "38.3",
+      "nombre": "9 (Abatxolo)",
+      "tipo": "Metro",
+      "latitud": 43.31465,
+      "longitud": -3.01366
+    },
+    {
+      "id": "39.1",
+      "nombre": "200 (Portugalete)",
+      "tipo": "Metro",
+      "latitud": 43.31795,
+      "longitud": -3.02144
+    },
+    {
+      "id": "39.2",
+      "nombre": "201 (Portugalete)",
+      "tipo": "Metro",
+      "latitud": 43.31809,
+      "longitud": -3.02212
+    },
+    {
+      "id": "39.3",
+      "nombre": "202 (Portugalete)",
+      "tipo": "Metro",
+      "latitud": 43.31796,
+      "longitud": -3.01981
+    },
+    {
+      "id": "40.1",
+      "nombre": "189 (Peñota)",
+      "tipo": "Metro",
+      "latitud": 43.322,
+      "longitud": -3.02593
+    },
+    {
+      "id": "40.2",
+      "nombre": "190 (Peñota)",
+      "tipo": "Metro",
+      "latitud": 43.32316,
+      "longitud": -3.02489
+    },
+    {
+      "id": "40.3",
+      "nombre": "191 (Peñota)",
+      "tipo": "Metro",
+      "latitud": 43.32201,
+      "longitud": -3.02453
+    },
+    {
+      "id": "41.1",
+      "nombre": "253 (Santurtzi)",
+      "tipo": "Metro",
+      "latitud": 43.32923,
+      "longitud": -3.03426
+    },
+    {
+      "id": "41.2",
+      "nombre": "254 (Santurtzi)",
+      "tipo": "Metro",
+      "latitud": 43.32857,
+      "longitud": -3.03476
+    },
+    {
+      "id": "41.3",
+      "nombre": "255 (Santurtzi)",
+      "tipo": "Metro",
+      "latitud": 43.32968,
+      "longitud": -3.03398
+    },
+    {
+      "id": "41.4",
+      "nombre": "256 (Santurtzi)",
+      "tipo": "Metro",
+      "latitud": 43.33167,
+      "longitud": -3.03812
+    },
+    {
+      "id": "42.1",
+      "nombre": "143 (Kabiezes)",
+      "tipo": "Metro",
+      "latitud": 43.32231,
+      "longitud": -3.03661
+    },
+    {
+      "id": "42.2",
+      "nombre": "144 (Kabiezes)",
+      "tipo": "Metro",
+      "latitud": 43.32224,
+      "longitud": -3.03726
+    },
+    {
+      "id": "42.3",
+      "nombre": "145 (Kabiezes)",
+      "tipo": "Metro",
+      "latitud": 43.32253,
+      "longitud": -3.03896
+    },
+    {
+      "id": "51.1",
+      "nombre": "89 (Basauri)",
+      "tipo": "Metro",
+      "latitud": 43.23656,
+      "longitud": -2.89457
+    },
+    {
+      "id": "51.2",
+      "nombre": "90 (Basauri)",
+      "tipo": "Metro",
+      "latitud": 43.23521,
+      "longitud": -2.89202
+    },
+    {
+      "id": "51.3",
+      "nombre": "91 (Basauri)",
+      "tipo": "Metro",
+      "latitud": 43.23753,
+      "longitud": -2.89476
+    },
+    {
+      "id": "ARZ",
+      "nombre": "Ariz",
+      "tipo": "Metro",
+      "latitud": 43.23801,
+      "longitud": -2.88203
+    },
+    {
+      "id": "SAM",
+      "nombre": "Santimami/San Mamés",
+      "tipo": "Metro",
+      "latitud": 43.26252,
+      "longitud": -2.94751
+    },
+    {
+      "id": "BAR",
+      "nombre": "Barakaldo",
+      "tipo": "Metro",
+      "latitud": 43.29563,
+      "longitud": -2.98936
+    },
+    {
+      "id": "SES",
+      "nombre": "Sestao",
+      "tipo": "Metro",
+      "latitud": 43.30912,
+      "longitud": -3.00567
+    },
+    {
+      "id": "ETX",
+      "nombre": "Etxebarri",
+      "tipo": "Metro",
+      "latitud": 43.24386,
+      "longitud": -2.89771
+    },
+    {
+      "id": "BER",
+      "nombre": "Berango",
+      "tipo": "Metro",
+      "latitud": 43.36704,
+      "longitud": -2.99949
+    },
+    {
+      "id": "ANS",
+      "nombre": "Ansio",
+      "tipo": "Metro",
+      "latitud": 43.28919,
+      "longitud": -2.98716
+    },
+    {
+      "id": "BSR",
+      "nombre": "Basauri",
+      "tipo": "Metro",
+      "latitud": 43.23624,
+      "longitud": -2.8934
+    },
+    {
+      "id": "NEG",
+      "nombre": "Neguri",
+      "tipo": "Metro",
+      "latitud": 43.34024,
+      "longitud": -3.00562
+    },
+    {
+      "id": "ALG",
+      "nombre": "Algorta",
+      "tipo": "Metro",
+      "latitud": 43.35045,
+      "longitud": -3.00935
+    },
+    {
+      "id": "BID",
+      "nombre": "Bidezabal",
+      "tipo": "Metro",
+      "latitud": 43.35644,
+      "longitud": -3.01127
+    },
+    {
+      "id": "BAG",
+      "nombre": "Bagatza",
+      "tipo": "Metro",
+      "latitud": 43.29885,
+      "longitud": -2.99268
+    },
+    {
+      "id": "CAV",
+      "nombre": "Zazpikaleak/Casco Viejo",
+      "tipo": "Metro",
+      "latitud": 43.25968,
+      "longitud": -2.92071
+    },
+    {
+      "id": "ABA",
+      "nombre": "Abando",
+      "tipo": "Metro",
+      "latitud": 43.2614,
+      "longitud": -2.92761
+    },
+    {
+      "id": "LUT",
+      "nombre": "Lutxana",
+      "tipo": "Metro",
+      "latitud": 43.29098,
+      "longitud": -2.96992
+    },
+    {
+      "id": "ERA",
+      "nombre": "Erandio",
+      "tipo": "Metro",
+      "latitud": 43.30338,
+      "longitud": -2.97437
+    },
+    {
+      "id": "AST",
+      "nombre": "Astrabudua",
+      "tipo": "Metro",
+      "latitud": 43.31463,
+      "longitud": -2.98681
+    },
+    {
+      "id": "GOB",
+      "nombre": "Gobela",
+      "tipo": "Metro",
+      "latitud": 43.33308,
+      "longitud": -3.00735
+    },
+    {
+      "id": "GUR",
+      "nombre": "Gurutzeta/Cruces",
+      "tipo": "Metro",
+      "latitud": 43.28301,
+      "longitud": -2.98245
+    },
+    {
+      "id": "BOL",
+      "nombre": "Bolueta",
+      "tipo": "Metro",
+      "latitud": 43.247,
+      "longitud": -2.90573
+    },
+    {
+      "id": "DEU",
+      "nombre": "Deustu",
+      "tipo": "Metro",
+      "latitud": 43.27145,
+      "longitud": -2.94954
+    },
+    {
+      "id": "AIB",
+      "nombre": "Aiboa",
+      "tipo": "Metro",
+      "latitud": 43.34414,
+      "longitud": -3.00267
+    },
+    {
+      "id": "SOP",
+      "nombre": "Sopela",
+      "tipo": "Metro",
+      "latitud": 43.38021,
+      "longitud": -2.97899
+    },
+    {
+      "id": "URD",
+      "nombre": "Urduliz",
+      "tipo": "Metro",
+      "latitud": 43.379,
+      "longitud": -2.95811
+    },
+    {
+      "id": "STZ",
+      "nombre": "Santurtzi",
+      "tipo": "Metro",
+      "latitud": 43.32895,
+      "longitud": -3.03421
+    },
+    {
+      "id": "BAS",
+      "nombre": "Basarrate",
+      "tipo": "Metro",
+      "latitud": 43.25116,
+      "longitud": -2.91082
+    },
+    {
+      "id": "SAN",
+      "nombre": "Santutxu",
+      "tipo": "Metro",
+      "latitud": 43.2543,
+      "longitud": -2.91335
+    },
+    {
+      "id": "URB",
+      "nombre": "Urbinaga",
+      "tipo": "Metro",
+      "latitud": 43.3057,
+      "longitud": -2.9926
+    },
+    {
+      "id": "PEN",
+      "nombre": "Peñota",
+      "tipo": "Metro",
+      "latitud": 43.32198,
+      "longitud": -3.0254
+    },
+    {
+      "id": "ABT",
+      "nombre": "Abatxolo",
+      "tipo": "Metro",
+      "latitud": 43.31436,
+      "longitud": -3.01357
+    },
+    {
+      "id": "POR",
+      "nombre": "Portugalete",
+      "tipo": "Metro",
+      "latitud": 43.31777,
+      "longitud": -3.02076
+    },
+    {
+      "id": "LEI",
+      "nombre": "Leioa",
+      "tipo": "Metro",
+      "latitud": 43.31788,
+      "longitud": -2.99168
+    },
+    {
+      "id": "LAM",
+      "nombre": "Lamiako",
+      "tipo": "Metro",
+      "latitud": 43.32133,
+      "longitud": -3.00102
+    },
+    {
+      "id": "IBB",
+      "nombre": "Ibarbengoa",
+      "tipo": "Metro",
+      "latitud": 43.3632,
+      "longitud": -3.00699
+    },
+    {
+      "id": "LAR",
+      "nombre": "Larrabasterra",
+      "tipo": "Metro",
+      "latitud": 43.37573,
+      "longitud": -2.99147
+    },
+    {
+      "id": "PLE",
+      "nombre": "Plentzia",
+      "tipo": "Metro",
+      "latitud": 43.40134,
+      "longitud": -2.94636
+    },
+    {
+      "id": "MOY",
+      "nombre": "Moyua",
+      "tipo": "Metro",
+      "latitud": 43.26259,
+      "longitud": -2.93308
+    },
+    {
+      "id": "IND",
+      "nombre": "Indautxu",
+      "tipo": "Metro",
+      "latitud": 43.26127,
+      "longitud": -2.94179
+    },
+    {
+      "id": "SAR",
+      "nombre": "Sarriko",
+      "tipo": "Metro",
+      "latitud": 43.27495,
+      "longitud": -2.95874
+    },
+    {
+      "id": "SIN",
+      "nombre": "San Ignazio",
+      "tipo": "Metro",
+      "latitud": 43.28068,
+      "longitud": -2.96239
+    },
+    {
+      "id": "ARE",
+      "nombre": "Areeta",
+      "tipo": "Metro",
+      "latitud": 43.32595,
+      "longitud": -3.00961
+    },
+    {
+      "id": "KAB",
+      "nombre": "Kabiezes",
+      "tipo": "Metro",
+      "latitud": 43.32238,
+      "longitud": -3.03777
+    }
+  ]
+}

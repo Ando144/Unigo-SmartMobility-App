@@ -1,0 +1,690 @@
+{
+  "listaParadas": [
+    {
+      "id": "11305",
+      "nombre": "Brinkola",
+      "tipo": "Renfe",
+      "latitud": 43.0189865,
+      "longitud": -2.3346811
+    },
+    {
+      "id": "11306",
+      "nombre": "Legazpi",
+      "tipo": "Renfe",
+      "latitud": 43.0510385,
+      "longitud": -2.3306103
+    },
+    {
+      "id": "11400",
+      "nombre": "Zumarraga",
+      "tipo": "Renfe",
+      "latitud": 43.0870824,
+      "longitud": -2.3202298
+    },
+    {
+      "id": "11402",
+      "nombre": "Ormáiztegui",
+      "tipo": "Renfe",
+      "latitud": 43.0402752,
+      "longitud": -2.256462
+    },
+    {
+      "id": "11404",
+      "nombre": "Beasain",
+      "tipo": "Renfe",
+      "latitud": 43.0462687,
+      "longitud": -2.2022994
+    },
+    {
+      "id": "11405",
+      "nombre": "Ordizia",
+      "tipo": "Renfe",
+      "latitud": 43.0527547,
+      "longitud": -2.1791923
+    },
+    {
+      "id": "11406",
+      "nombre": "Itsasondo",
+      "tipo": "Renfe",
+      "latitud": 43.0683298,
+      "longitud": -2.162485
+    },
+    {
+      "id": "11407",
+      "nombre": "Legorreta",
+      "tipo": "Renfe",
+      "latitud": 43.0856948,
+      "longitud": -2.1408977
+    },
+    {
+      "id": "11408",
+      "nombre": "Ikaztegieta",
+      "tipo": "Renfe",
+      "latitud": 43.0940398,
+      "longitud": -2.1255773
+    },
+    {
+      "id": "11409",
+      "nombre": "Alegia",
+      "tipo": "Renfe",
+      "latitud": 43.1017599,
+      "longitud": -2.09714
+    },
+    {
+      "id": "11500",
+      "nombre": "Tolosa",
+      "tipo": "Renfe",
+      "latitud": 43.1354472,
+      "longitud": -2.0790886
+    },
+    {
+      "id": "11501",
+      "nombre": "Tolosa-Centro",
+      "tipo": "Renfe",
+      "latitud": 43.1393963,
+      "longitud": -2.0741122
+    },
+    {
+      "id": "11502",
+      "nombre": "Anoeta",
+      "tipo": "Renfe",
+      "latitud": 43.1626064,
+      "longitud": -2.0703897
+    },
+    {
+      "id": "11503",
+      "nombre": "Billabona-Zizurkil",
+      "tipo": "Renfe",
+      "latitud": 43.1891906,
+      "longitud": -2.0553722
+    },
+    {
+      "id": "11504",
+      "nombre": "Andoain-Centro",
+      "tipo": "Renfe",
+      "latitud": 43.2155738,
+      "longitud": -2.0204595
+    },
+    {
+      "id": "11505",
+      "nombre": "Andoain",
+      "tipo": "Renfe",
+      "latitud": 43.2220458,
+      "longitud": -2.0156757
+    },
+    {
+      "id": "11506",
+      "nombre": "Urnieta",
+      "tipo": "Renfe",
+      "latitud": 43.2474669,
+      "longitud": -1.9884271
+    },
+    {
+      "id": "11507",
+      "nombre": "Hernani-Erdia",
+      "tipo": "Renfe",
+      "latitud": 43.2664779,
+      "longitud": -1.9726232
+    },
+    {
+      "id": "11508",
+      "nombre": "Hernani",
+      "tipo": "Renfe",
+      "latitud": 43.2725113,
+      "longitud": -1.9637735
+    },
+    {
+      "id": "11509",
+      "nombre": "Martutene",
+      "tipo": "Renfe",
+      "latitud": 43.2991128,
+      "longitud": -1.9561747
+    },
+    {
+      "id": "11510",
+      "nombre": "Loiola",
+      "tipo": "Renfe",
+      "latitud": 43.3046746,
+      "longitud": -1.9636294
+    },
+    {
+      "id": "11511",
+      "nombre": "San Sebastián-Donostia",
+      "tipo": "Renfe",
+      "latitud": 43.3176961,
+      "longitud": -1.9767172
+    },
+    {
+      "id": "11512",
+      "nombre": "Gros",
+      "tipo": "Renfe",
+      "latitud": 43.3218457,
+      "longitud": -1.9738835
+    },
+    {
+      "id": "11513",
+      "nombre": "Ategorrieta",
+      "tipo": "Renfe",
+      "latitud": 43.3203225,
+      "longitud": -1.9598127
+    },
+    {
+      "id": "11514",
+      "nombre": "Herrera",
+      "tipo": "Renfe",
+      "latitud": 43.3193537,
+      "longitud": -1.9370173
+    },
+    {
+      "id": "11515",
+      "nombre": "Pasaia",
+      "tipo": "Renfe",
+      "latitud": 43.3189428,
+      "longitud": -1.9171727
+    },
+    {
+      "id": "11516",
+      "nombre": "Lezo-Rentería",
+      "tipo": "Renfe",
+      "latitud": 43.3159364,
+      "longitud": -1.8994386
+    },
+    {
+      "id": "11518",
+      "nombre": "Ventas De Irún",
+      "tipo": "Renfe",
+      "latitud": 43.3304116,
+      "longitud": -1.8167813
+    },
+    {
+      "id": "11522",
+      "nombre": "Intxaurrondo",
+      "tipo": "Renfe",
+      "latitud": 43.3200487,
+      "longitud": -1.9517673
+    },
+    {
+      "id": "11600",
+      "nombre": "Irun",
+      "tipo": "Renfe",
+      "latitud": 43.3395365,
+      "longitud": -1.8012519
+    },
+    {
+      "id": "13100",
+      "nombre": "Orduña",
+      "tipo": "Renfe",
+      "latitud": 42.9946191,
+      "longitud": -3.0158139
+    },
+    {
+      "id": "13101",
+      "nombre": "Amurrio",
+      "tipo": "Renfe",
+      "latitud": 43.049051,
+      "longitud": -3.0020176
+    },
+    {
+      "id": "13102",
+      "nombre": "Salbio",
+      "tipo": "Renfe",
+      "latitud": 43.074172,
+      "longitud": -2.9993953
+    },
+    {
+      "id": "13103",
+      "nombre": "Luiaondo",
+      "tipo": "Renfe",
+      "latitud": 43.0935926,
+      "longitud": -2.9996644
+    },
+    {
+      "id": "13104",
+      "nombre": "Santa Cruz De Llodio",
+      "tipo": "Renfe",
+      "latitud": 43.132863,
+      "longitud": -2.9698375
+    },
+    {
+      "id": "13106",
+      "nombre": "Llodio",
+      "tipo": "Renfe",
+      "latitud": 43.1423514,
+      "longitud": -2.9606511
+    },
+    {
+      "id": "13107",
+      "nombre": "Areta",
+      "tipo": "Renfe",
+      "latitud": 43.1451273,
+      "longitud": -2.9433913
+    },
+    {
+      "id": "13108",
+      "nombre": "Arbide",
+      "tipo": "Renfe",
+      "latitud": 43.1632587,
+      "longitud": -2.9278362
+    },
+    {
+      "id": "13109",
+      "nombre": "Arrankudiaga",
+      "tipo": "Renfe",
+      "latitud": 43.1694994,
+      "longitud": -2.9184485
+    },
+    {
+      "id": "13110",
+      "nombre": "Ugao-Miraballes",
+      "tipo": "Renfe",
+      "latitud": 43.1790833,
+      "longitud": -2.902696
+    },
+    {
+      "id": "13111",
+      "nombre": "Arrigorriaga",
+      "tipo": "Renfe",
+      "latitud": 43.2100868,
+      "longitud": -2.8885723
+    },
+    {
+      "id": "13112",
+      "nombre": "Basauri",
+      "tipo": "Renfe",
+      "latitud": 43.2235298,
+      "longitud": -2.8823858
+    },
+    {
+      "id": "13113",
+      "nombre": "Bidebieta-Basauri",
+      "tipo": "Renfe",
+      "latitud": 43.237057,
+      "longitud": -2.8894856
+    },
+    {
+      "id": "13114",
+      "nombre": "Ollargan",
+      "tipo": "Renfe",
+      "latitud": 43.2424974,
+      "longitud": -2.9164564
+    },
+    {
+      "id": "13115",
+      "nombre": "Bakiola",
+      "tipo": "Renfe",
+      "latitud": 43.1769858,
+      "longitud": -2.90907
+    },
+    {
+      "id": "13116",
+      "nombre": "Iñarratxu",
+      "tipo": "Renfe",
+      "latitud": 43.0358243,
+      "longitud": -3.0038794
+    },
+    {
+      "id": "13117",
+      "nombre": "Arakaldo",
+      "tipo": "Renfe",
+      "latitud": 43.1535592,
+      "longitud": -2.9382027
+    },
+    {
+      "id": "13118",
+      "nombre": "Abaroa-San Miguel",
+      "tipo": "Renfe",
+      "latitud": 43.225648,
+      "longitud": -2.8871139
+    },
+    {
+      "id": "13119",
+      "nombre": "La Peña De Bilbao",
+      "tipo": "Renfe",
+      "latitud": 43.2401669,
+      "longitud": -2.9240429
+    },
+    {
+      "id": "13120",
+      "nombre": "Miribilla",
+      "tipo": "Renfe",
+      "latitud": 43.250429,
+      "longitud": -2.9305155
+    },
+    {
+      "id": "13121",
+      "nombre": "Amurrio Iparralde",
+      "tipo": "Renfe",
+      "latitud": 43.0578453,
+      "longitud": -2.9960659
+    },
+    {
+      "id": "13200",
+      "nombre": "Bilbao-Intermod. Abando Indalecio Prieto",
+      "tipo": "Renfe",
+      "latitud": 43.2601304,
+      "longitud": -2.9285592
+    },
+    {
+      "id": "13205",
+      "nombre": "Zabalburu",
+      "tipo": "Renfe",
+      "latitud": 43.2567911,
+      "longitud": -2.9322841
+    },
+    {
+      "id": "13206",
+      "nombre": "Ametzola",
+      "tipo": "Renfe",
+      "latitud": 43.2547065,
+      "longitud": -2.9436598
+    },
+    {
+      "id": "13207",
+      "nombre": "Autonomía",
+      "tipo": "Renfe",
+      "latitud": 43.2581339,
+      "longitud": -2.9460321
+    },
+    {
+      "id": "13208",
+      "nombre": "San Mamés",
+      "tipo": "Renfe",
+      "latitud": 43.2615306,
+      "longitud": -2.9488341
+    },
+    {
+      "id": "13303",
+      "nombre": "Olabeaga",
+      "tipo": "Renfe",
+      "latitud": 43.2643804,
+      "longitud": -2.9553272
+    },
+    {
+      "id": "13304",
+      "nombre": "Zorrotza",
+      "tipo": "Renfe",
+      "latitud": 43.2778039,
+      "longitud": -2.9721188
+    },
+    {
+      "id": "13305",
+      "nombre": "Lutxana-Barakaldo",
+      "tipo": "Renfe",
+      "latitud": 43.2878137,
+      "longitud": -2.9754132
+    },
+    {
+      "id": "13400",
+      "nombre": "Desertu-Barakaldo",
+      "tipo": "Renfe",
+      "latitud": 43.3000264,
+      "longitud": -2.984409
+    },
+    {
+      "id": "13401",
+      "nombre": "Sestao",
+      "tipo": "Renfe",
+      "latitud": 43.3085201,
+      "longitud": -2.9940107
+    },
+    {
+      "id": "13402",
+      "nombre": "La Iberia",
+      "tipo": "Renfe",
+      "latitud": 43.3127031,
+      "longitud": -3.0044959
+    },
+    {
+      "id": "13403",
+      "nombre": "Portugalete",
+      "tipo": "Renfe",
+      "latitud": 43.318676,
+      "longitud": -3.0152296
+    },
+    {
+      "id": "13404",
+      "nombre": "Peñota",
+      "tipo": "Renfe",
+      "latitud": 43.3263563,
+      "longitud": -3.0234574
+    },
+    {
+      "id": "13405",
+      "nombre": "Santurtzi",
+      "tipo": "Renfe",
+      "latitud": 43.3286605,
+      "longitud": -3.0295685
+    },
+    {
+      "id": "13501",
+      "nombre": "Galindo",
+      "tipo": "Renfe",
+      "latitud": 43.3041349,
+      "longitud": -3.0101966
+    },
+    {
+      "id": "13502",
+      "nombre": "Trápaga",
+      "tipo": "Renfe",
+      "latitud": 43.3030265,
+      "longitud": -3.0169907
+    },
+    {
+      "id": "13503",
+      "nombre": "Valle De Trápaga/Trapagaran",
+      "tipo": "Renfe",
+      "latitud": 43.3014842,
+      "longitud": -3.0287951
+    },
+    {
+      "id": "13504",
+      "nombre": "Ortuella",
+      "tipo": "Renfe",
+      "latitud": 43.3115122,
+      "longitud": -3.0603549
+    },
+    {
+      "id": "13505",
+      "nombre": "Putxeta",
+      "tipo": "Renfe",
+      "latitud": 43.3156801,
+      "longitud": -3.0911356
+    },
+    {
+      "id": "13506",
+      "nombre": "Muskiz",
+      "tipo": "Renfe",
+      "latitud": 43.3215111,
+      "longitud": -3.1123207
+    },
+    {
+      "id": "13507",
+      "nombre": "Urioste",
+      "tipo": "Renfe",
+      "latitud": 43.3075315,
+      "longitud": -3.041072
+    },
+    {
+      "id": "13508",
+      "nombre": "Gallarta",
+      "tipo": "Renfe",
+      "latitud": 43.3193319,
+      "longitud": -3.0674521
+    },
+    {
+      "id": "13509",
+      "nombre": "Sagrada Familia",
+      "tipo": "Renfe",
+      "latitud": 43.3082365,
+      "longitud": -3.0528979
+    },
+    {
+      "id": "05451",
+      "nombre": "Bilbao La Concordia",
+      "tipo": "Renfe",
+      "latitud": 43.2601901,
+      "longitud": -2.9263839
+    },
+    {
+      "id": "05455",
+      "nombre": "Basurto Hospital",
+      "tipo": "Renfe",
+      "latitud": 43.2597699,
+      "longitud": -2.9538267
+    },
+    {
+      "id": "05457",
+      "nombre": "Zorrotza Zorrozgoiti",
+      "tipo": "Renfe",
+      "latitud": 43.2740398,
+      "longitud": -2.9740116
+    },
+    {
+      "id": "05459",
+      "nombre": "Santa águeda",
+      "tipo": "Renfe",
+      "latitud": 43.261857,
+      "longitud": -2.9730218
+    },
+    {
+      "id": "05460",
+      "nombre": "Kastrexana",
+      "tipo": "Renfe",
+      "latitud": 43.2554758,
+      "longitud": -2.9721445
+    },
+    {
+      "id": "05461",
+      "nombre": "Irauregui",
+      "tipo": "Renfe",
+      "latitud": 43.248418,
+      "longitud": -2.9900734
+    },
+    {
+      "id": "05463",
+      "nombre": "Zaramillo",
+      "tipo": "Renfe",
+      "latitud": 43.2332894,
+      "longitud": -3.015904
+    },
+    {
+      "id": "05465",
+      "nombre": "La Quadra",
+      "tipo": "Renfe",
+      "latitud": 43.222723,
+      "longitud": -3.0249848
+    },
+    {
+      "id": "05467",
+      "nombre": "Sodupe",
+      "tipo": "Renfe",
+      "latitud": 43.2020301,
+      "longitud": -3.050517
+    },
+    {
+      "id": "05469",
+      "nombre": "Artxube",
+      "tipo": "Renfe",
+      "latitud": 43.200993,
+      "longitud": -3.0715031
+    },
+    {
+      "id": "05470",
+      "nombre": "Lambarri",
+      "tipo": "Renfe",
+      "latitud": 43.2060733,
+      "longitud": -3.0825107
+    },
+    {
+      "id": "05471",
+      "nombre": "Güeñes",
+      "tipo": "Renfe",
+      "latitud": 43.2090276,
+      "longitud": -3.0952113
+    },
+    {
+      "id": "05473",
+      "nombre": "Aranguren",
+      "tipo": "Renfe",
+      "latitud": 43.2104561,
+      "longitud": -3.108399
+    },
+    {
+      "id": "05474",
+      "nombre": "Aranguren-Apeadero",
+      "tipo": "Renfe",
+      "latitud": 43.2103517,
+      "longitud": -3.1140505
+    },
+    {
+      "id": "05475",
+      "nombre": "Zalla",
+      "tipo": "Renfe",
+      "latitud": 43.2129096,
+      "longitud": -3.1333368
+    },
+    {
+      "id": "05477",
+      "nombre": "Colegio",
+      "tipo": "Renfe",
+      "latitud": 43.2112674,
+      "longitud": -3.1381409
+    },
+    {
+      "id": "05479",
+      "nombre": "Ibarra",
+      "tipo": "Renfe",
+      "latitud": 43.203959,
+      "longitud": -3.1448388
+    },
+    {
+      "id": "05481",
+      "nombre": "La Herrera",
+      "tipo": "Renfe",
+      "latitud": 43.2034521,
+      "longitud": -3.1705687
+    },
+    {
+      "id": "05483",
+      "nombre": "Balmaseda",
+      "tipo": "Renfe",
+      "latitud": 43.1963551,
+      "longitud": -3.1899562
+    },
+    {
+      "id": "05484",
+      "nombre": "Mimetiz",
+      "tipo": "Renfe",
+      "latitud": 43.2158138,
+      "longitud": -3.1312555
+    },
+    {
+      "id": "05485",
+      "nombre": "La Calzada",
+      "tipo": "Renfe",
+      "latitud": 43.1901154,
+      "longitud": -3.1974062
+    },
+    {
+      "id": "05487",
+      "nombre": "Traslaviña",
+      "tipo": "Renfe",
+      "latitud": 43.23329,
+      "longitud": -3.198304
+    },
+    {
+      "id": "05489",
+      "nombre": "Artzentales",
+      "tipo": "Renfe",
+      "latitud": 43.2355083,
+      "longitud": -3.2133583
+    },
+    {
+      "id": "05497",
+      "nombre": "Karrantza",
+      "tipo": "Renfe",
+      "latitud": 43.238854,
+      "longitud": -3.357827
+    }
+  ]
+}

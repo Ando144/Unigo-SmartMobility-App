@@ -1,0 +1,340 @@
+{
+  "listaParadas": [
+    {
+      "id": "1",
+      "nombre": "ARAGOI",
+      "tipo": "Bicicleta",
+      "latitud": 43.282177,
+      "longitud": -2.963784
+    },
+    {
+      "id": "2",
+      "nombre": "BLAS DE OTERO",
+      "tipo": "Bicicleta",
+      "latitud": 43.269920,
+      "longitud": -2.949002
+    },
+    {
+      "id": "3",
+      "nombre": "UDALETXEA",
+      "tipo": "Bicicleta",
+      "latitud": 43.264305,
+      "longitud": -2.922908
+    },
+    {
+      "id": "4",
+      "nombre": "ARRIAGA",
+      "tipo": "Bicicleta",
+      "latitud": 43.259439,
+      "longitud": -2.924337
+    },
+    {
+      "id": "5",
+      "nombre": "ASKATASUNA",
+      "tipo": "Bicicleta",
+      "latitud": 43.250960,
+      "longitud": -2.932140
+    },
+    {
+      "id": "6",
+      "nombre": "ERREKALDE",
+      "tipo": "Bicicleta",
+      "latitud": 43.252169,
+      "longitud": -2.946360
+    },
+    {
+      "id": "7",
+      "nombre": "AREILTZA",
+      "tipo": "Bicicleta",
+      "latitud": 43.258498,
+      "longitud": -2.943619
+    },
+    {
+      "id": "8",
+      "nombre": "ASTILLERO",
+      "tipo": "Bicicleta",
+      "latitud": 43.275317,
+      "longitud": -2.974043
+    },
+    {
+      "id": "9",
+      "nombre": "EGILEOR",
+      "tipo": "Bicicleta",
+      "latitud": 43.261173,
+      "longitud": -2.933869
+    },
+    {
+      "id": "10",
+      "nombre": "ANSELMO CLAVÉ",
+      "tipo": "Bicicleta",
+      "latitud": 43.265614,
+      "longitud": -2.944637
+    },
+    {
+      "id": "11",
+      "nombre": "INDAUTXU",
+      "tipo": "Bicicleta",
+      "latitud": 43.260763,
+      "longitud": -2.939577
+    },
+    {
+      "id": "12",
+      "nombre": "LEIZAOLA",
+      "tipo": "Bicicleta",
+      "latitud": 43.267325,
+      "longitud": -2.939573
+    },
+    {
+      "id": "13",
+      "nombre": "IBAIZABAL",
+      "tipo": "Bicicleta",
+      "latitud": 43.243798,
+      "longitud": -2.925982
+    },
+    {
+      "id": "14",
+      "nombre": "ENKARNAZIOA",
+      "tipo": "Bicicleta",
+      "latitud": 43.253866,
+      "longitud": -2.920940
+    },
+    {
+      "id": "15",
+      "nombre": "SAN PEDRO",
+      "tipo": "Bicicleta",
+      "latitud": 43.271683,
+      "longitud": -2.945759
+    },
+    {
+      "id": "16",
+      "nombre": "KARMELO",
+      "tipo": "Bicicleta",
+      "latitud": 43.254095,
+      "longitud": -2.912795
+    },
+    {
+      "id": "17",
+      "nombre": "BOLUETA",
+      "tipo": "Bicicleta",
+      "latitud": 43.248249,
+      "longitud": -2.907671
+    },
+    {
+      "id": "18",
+      "nombre": "OTXARKOAGA",
+      "tipo": "Bicicleta",
+      "latitud": 43.258515,
+      "longitud": -2.899282
+    },
+    {
+      "id": "19",
+      "nombre": "OLABEAGA",
+      "tipo": "Bicicleta",
+      "latitud": 43.265864,
+      "longitud": -2.960483
+    },
+    {
+      "id": "20",
+      "nombre": "SARRIKO",
+      "tipo": "Bicicleta",
+      "latitud": 43.273953,
+      "longitud": -2.958311
+    },
+    {
+      "id": "21",
+      "nombre": "HEROS",
+      "tipo": "Bicicleta",
+      "latitud": 43.264475,
+      "longitud": -2.932712
+    },
+    {
+      "id": "22",
+      "nombre": "EGAÑA",
+      "tipo": "Bicicleta",
+      "latitud": 43.257898,
+      "longitud": -2.935609
+    },
+    {
+      "id": "23",
+      "nombre": "ETXEBARRIA",
+      "tipo": "Bicicleta",
+      "latitud": 43.261089,
+      "longitud": -2.916882
+    },
+    {
+      "id": "24",
+      "nombre": "GABRIEL ARESTI",
+      "tipo": "Bicicleta",
+      "latitud": 43.256787,
+      "longitud": -2.907686
+    },
+    {
+      "id": "25",
+      "nombre": "ABANDO",
+      "tipo": "Bicicleta",
+      "latitud": 43.261101,
+      "longitud": -2.927215
+    },
+    {
+      "id": "26",
+      "nombre": "ESTRADA CALEROS",
+      "tipo": "Bicicleta",
+      "latitud": 43.249368,
+      "longitud": -2.947053
+    },
+    {
+      "id": "27",
+      "nombre": "EPALZA",
+      "tipo": "Bicicleta",
+      "latitud": 43.267019,
+      "longitud": -2.926942
+    },
+    {
+      "id": "28",
+      "nombre": "AMETZOLA",
+      "tipo": "Bicicleta",
+      "latitud": 43.253955,
+      "longitud": -2.938431
+    },
+    {
+      "id": "29",
+      "nombre": "SABINO ARANA",
+      "tipo": "Bicicleta",
+      "latitud": 43.256459,
+      "longitud": -2.948483
+    },
+    {
+      "id": "30",
+      "nombre": "CORAZÓN DE MARÍA",
+      "tipo": "Bicicleta",
+      "latitud": 43.255997,
+      "longitud": -2.927717
+    },
+    {
+      "id": "31",
+      "nombre": "ARANGOITI",
+      "tipo": "Bicicleta",
+      "latitud": 43.274962,
+      "longitud": -2.949612
+    },
+    {
+      "id": "32",
+      "nombre": "ERRIBERAKO MERKATUA",
+      "tipo": "Bicicleta",
+      "latitud": 43.256228,
+      "longitud": -2.925386
+    },
+    {
+      "id": "33",
+      "nombre": "ESKURTZE",
+      "tipo": "Bicicleta",
+      "latitud": 43.252280,
+      "longitud": -2.939340
+    },
+    {
+      "id": "34",
+      "nombre": "ZORROTZAKO KIROLDEGIA",
+      "tipo": "Bicicleta",
+      "latitud": 43.277869,
+      "longitud": -2.973557
+    },
+    {
+      "id": "35",
+      "nombre": "RAMÓN RUBIAL",
+      "tipo": "Bicicleta",
+      "latitud": 43.268551,
+      "longitud": -2.937350
+    },
+    {
+      "id": "36",
+      "nombre": "BASARRATE",
+      "tipo": "Bicicleta",
+      "latitud": 43.251081,
+      "longitud": -2.910688
+    },
+    {
+      "id": "37",
+      "nombre": "SAN NIKOLAS",
+      "tipo": "Bicicleta",
+      "latitud": 43.259945,
+      "longitud": -2.922451
+    },
+    {
+      "id": "38",
+      "nombre": "MOYÚA",
+      "tipo": "Bicicleta",
+      "latitud": 43.263403,
+      "longitud": -2.934195
+    },
+    {
+      "id": "39",
+      "nombre": "ZORROTZAURRE",
+      "tipo": "Bicicleta",
+      "latitud": 43.268230,
+      "longitud": -2.961671
+    },
+    {
+      "id": "40",
+      "nombre": "INTERMODAL",
+      "tipo": "Bicicleta",
+      "latitud": 43.260616,
+      "longitud": -2.949252
+    },
+    {
+      "id": "41",
+      "nombre": "ARTATZAMINA",
+      "tipo": "Bicicleta",
+      "latitud": 43.269198,
+      "longitud": -2.925627
+    },
+    {
+      "id": "42",
+      "nombre": "LARRASKITU",
+      "tipo": "Bicicleta",
+      "latitud": 43.243355,
+      "longitud": -2.931940
+    },
+    {
+      "id": "43",
+      "nombre": "GOIKOTORRE",
+      "tipo": "Bicicleta",
+      "latitud": 43.246733,
+      "longitud": -2.931209
+    },
+    {
+      "id": "44",
+      "nombre": "ZUMAIA",
+      "tipo": "Bicicleta",
+      "latitud": 43.265600,
+      "longitud": -2.915970
+    },
+    {
+      "id": "45",
+      "nombre": "ALTAMIRA",
+      "tipo": "Bicicleta",
+      "latitud": 43.261581,
+      "longitud": -2.962992
+    },
+    {
+      "id": "46",
+      "nombre": "JULIAN GAIARRE",
+      "tipo": "Bicicleta",
+      "latitud": 43.253381,
+      "longitud": -2.901960
+    },
+    {
+      "id": "47",
+      "nombre": "ZURBARANBARRI",
+      "tipo": "Bicicleta",
+      "latitud": 43.264080,
+      "longitud": -2.912630
+    },
+    {
+      "id": "48",
+      "nombre": "IGNACIO ELLACURÍA",
+      "tipo": "Bicicleta",
+      "latitud": 43.284377,
+      "longitud": -2.965294
+    }
+  ]
+}

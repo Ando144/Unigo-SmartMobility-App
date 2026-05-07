@@ -7,16 +7,23 @@ public class Centro {
     private String ubicacion;
     private boolean isStarred;
 
-    // NUEVOS CAMPOS
+    // CAMPOS DE TRANSPORTE
     private String infoTransporte;
     private boolean isExpanded;
 
-    public Centro(String id, String nombre, String universidad, String ubicacion, String infoTransporte) {
+    // CAMPOS DE COORDENADAS PARA LA RUTA
+    private double latitud;
+    private double longitud;
+
+    public Centro(String id, String nombre, String universidad, String ubicacion, String infoTransporte, double latitud, double longitud) {
         this.id = id;
         this.nombre = nombre;
         this.universidad = universidad;
         this.ubicacion = ubicacion;
         this.infoTransporte = infoTransporte;
+        this.latitud = latitud;
+        this.longitud = longitud;
+
         this.isStarred = false;
         this.isExpanded = false; // Por defecto, la tarjeta está cerrada
     }
@@ -28,8 +35,16 @@ public class Centro {
     public boolean isStarred() { return isStarred; }
     public void setStarred(boolean starred) { isStarred = starred; }
 
-    // NUEVOS GETTERS Y SETTERS
     public String getInfoTransporte() { return infoTransporte; }
     public boolean isExpanded() { return isExpanded; }
     public void setExpanded(boolean expanded) { isExpanded = expanded; }
+
+    public double getLatitud() { return latitud; }
+    public double getLongitud() { return longitud; }
+
+    // --- ¡ESTO ES LO QUE HACE QUE EL BUSCADOR DEL MAPA FUNCIONE! ---
+    @Override
+    public String toString() {
+        return nombre + " (" + universidad + ")";
+    }
 }

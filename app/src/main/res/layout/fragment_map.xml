@@ -7,43 +7,102 @@
     android:layout_height="match_parent"
     tools:context=".fragments.MapFragment">
 
-    <!-- Contenedor optimizado para anidar SupportMapFragment de forma dinámica -->
+    <!-- 1. EL MAPA (Al fondo) -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map_container"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    <!-- Buscador Flotante (Personalizado para el Proyecto UNIGO) -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/campus_search_card"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+    <!-- 2. EL BUSCADOR FALSO (Flotando en el mapa) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_buscador_falso"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
         android:layout_margin="16dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:cardCornerRadius="25dp"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <EditText
-            android:id="@+id/campus_search_input"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@android:color/transparent"
-            android:drawableStart="@android:drawable/ic_menu_search"
-            android:drawablePadding="12dp"
-            android:hint="Buscar ubicación (Ej: Facultad de Bellas Artes)..."
-            android:inputType="text"
-            android:maxLines="1"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:textColorHint="#757575" />
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="?attr/selectableItemBackground"> <!-- Efecto click -->
 
-    </androidx.cardview.widget.CardView>
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="#757575"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Buscar centro o facultad..."
+                android:textColor="#757575"
+                android:textSize="16sp"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 3. LA PANTALLA COMPLETA DE BÚSQUEDA (Oculta al inicio) -->
+    <LinearLayout
+        android:id="@+id/pantalla_busqueda_completa"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="#FFFFFF"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:clickable="true"
+        android:focusable="true"> <!-- Evita que los clicks pasen al mapa que hay debajo -->
+
+        <!-- Cabecera real (Flecha volver + Buscador) -->
+        <LinearLayout
+            android:id="@+id/header_busqueda"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="8dp"
+            android:background="#FFFFFF">
+
+            <ImageView
+                android:id="@+id/btn_cerrar_busqueda"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="#333333"
+                android:background="?attr/selectableItemBackgroundBorderless"/>
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/searchViewReal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:iconifiedByDefault="false"
+                app:queryHint="¿A dónde quieres ir?"
+                app:queryBackground="@android:color/transparent"
+                app:searchIcon="@null" /> <!-- Quitamos la lupa porque ya está la flecha -->
+        </LinearLayout>
+
+        <!-- Divisor -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#EEEEEE"/>
+
+        <!-- La lista que ocupa todo el resto de la pantalla -->
+        <ListView
+            android:id="@+id/lv_search_results"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="#EEEEEE"
+            android:dividerHeight="1dp"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

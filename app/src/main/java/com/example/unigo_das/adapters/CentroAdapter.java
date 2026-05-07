@@ -21,16 +21,24 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
     private List<Centro> centroListFull;
     private List<Centro> centroList;
     private OnStarClickListener starClickListener;
+    private OnItemClickListener itemListener; // 1. NUEVO: Variable para el clic general
 
     // Interfaz para avisar al Fragment cuando se pulsa una estrella
     public interface OnStarClickListener {
         void onStarClick(Centro centro, int position);
     }
 
-    public CentroAdapter(List<Centro> centroList, OnStarClickListener listener) {
+    // 2. NUEVO: Interfaz para el clic en toda la tarjeta
+    public interface OnItemClickListener {
+        void onItemClick(Centro centro);
+    }
+
+    // 3. ACTUALIZADO: El constructor ahora recibe ambas interfaces
+    public CentroAdapter(List<Centro> centroList, OnStarClickListener starListener, OnItemClickListener itemListener) {
         this.centroListFull = new ArrayList<>(centroList);
         this.centroList = centroList;
-        this.starClickListener = listener;
+        this.starClickListener = starListener;
+        this.itemListener = itemListener;
     }
 
     @NonNull
@@ -80,7 +88,19 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             public void onClick(View v) {
                 centro.setStarred(!centro.isStarred());
                 notifyItemChanged(currentPosition);
-                starClickListener.onStarClick(centro, currentPosition);
+                if (starClickListener != null) {
+                    starClickListener.onStarClick(centro, currentPosition);
+                }
+            }
+        });
+
+        // 4. NUEVO: Evento de clic para TODA la tarjeta (Activa la ruta en el mapa)
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (itemListener != null) {
+                    itemListener.onItemClick(centro);
+                }
             }
         });
 
@@ -110,7 +130,6 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
     public int getItemCount() {
         return centroList.size();
     }
-
 
     public void actualizarListaCompleta(List<Centro> nuevaLista) {
         this.centroList = nuevaLista;

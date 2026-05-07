@@ -7,11 +7,11 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.unigo_das.R;
 import com.example.unigo_das.fragments.MapFragment;
@@ -23,77 +23,108 @@ import com.google.android.material.navigation.NavigationBarView;
 
 public class MainActivity extends AppCompatActivity {
 
+    // 1. Guardamos los fragmentos en memoria para no destruirlos
+    private Fragment mapFragment, schoolFragment, weatherFragment, settingsFragment;
+    private Fragment activeFragment; // Para saber cuál estamos viendo ahora
+    private FragmentManager fm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 1. Configuramos la app para que siempre dibuje detrás de las barras (Edge-to-Edge)
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
-        FrameLayout fragmentContainer = findViewById(R.id.fragment_container);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-
-        // 2. Controlador para cambiar el color de los iconos de la hora y batería
         WindowInsetsControllerCompat insetsController = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+
+        fm = getSupportFragmentManager();
 
         bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                Fragment selectedFragment = null;
                 int itemId = item.getItemId();
 
+                // Iniciamos la transacción para cambiar de pantalla
+                FragmentTransaction transaction = fm.beginTransaction();
+
+                // Opcional: Si hiciste las animaciones rápidas, ponlas aquí
+                // transaction.setCustomAnimations(R.anim.fade_in_fast, R.anim.fade_out_fast);
+
+                // Ocultamos el fragmento que esté activo actualmente
+                if (activeFragment != null) {
+                    transaction.hide(activeFragment);
+                }
+
                 if (itemId == R.id.nav_map) {
-                    // --- MODO MAPA (Pantalla Completa) ---
+                    // --- MODO MAPA ---
                     getWindow().setStatusBarColor(Color.TRANSPARENT);
                     insetsController.setAppearanceLightStatusBars(true);
 
-                    // 1. ANULAMOS el listener para evitar que Android recalcule el padding
-                    ViewCompat.setOnApplyWindowInsetsListener(fragmentContainer, null);
+                    // Si el mapa no existe, lo creamos y lo añadimos. Si ya existe, solo lo mostramos.
+                    if (mapFragment == null) {
+                        mapFragment = new MapFragment();
+                        transaction.add(R.id.fragment_container, mapFragment, "map");
+                    } else {
+                        transaction.show(mapFragment);
+                    }
+                    activeFragment = mapFragment;
 
-                    // 2. Quitamos el padding para que el mapa ocupe todo el espacio
-                    fragmentContainer.setPadding(0, 0, 0, 0);
-
-                    // 3. Forzamos la actualización visual
-                    fragmentContainer.requestApplyInsets();
-
-                    selectedFragment = new MapFragment();
                 } else {
-                    // --- MODO NORMAL (Otros Fragments) ---
-                    getWindow().setStatusBarColor(Color.parseColor("#333333")); // Tu color principal
+                    // --- MODO NORMAL ---
+                    getWindow().setStatusBarColor(Color.parseColor("#333333")); // Tu color oscuro
                     insetsController.setAppearanceLightStatusBars(false);
 
-                    // VOLVIMOS A CONECTAR el listener para proteger la UI de la barra de estado
-                    ViewCompat.setOnApplyWindowInsetsListener(fragmentContainer, (v, windowInsets) -> {
-                        int topInset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
-                        v.setPadding(0, topInset, 0, 0);
-                        return windowInsets;
-                    });
-                    fragmentContainer.requestApplyInsets();
-
-                    // Asignamos el fragmento correspondiente
                     if (itemId == R.id.nav_school) {
-                        selectedFragment = new SchoolFragment();
+                        if (schoolFragment == null) {
+                            schoolFragment = new SchoolFragment();
+                            transaction.add(R.id.fragment_container, schoolFragment, "school");
+                        } else {
+                            transaction.show(schoolFragment);
+                        }
+                        activeFragment = schoolFragment;
+
                     } else if (itemId == R.id.nav_weather) {
-                        selectedFragment = new WeatherFragment();
+                        if (weatherFragment == null) {
+                            weatherFragment = new WeatherFragment();
+                            transaction.add(R.id.fragment_container, weatherFragment, "weather");
+                        } else {
+                            transaction.show(weatherFragment);
+                        }
+                        activeFragment = weatherFragment;
+
                     } else if (itemId == R.id.nav_settings) {
-                        selectedFragment = new SettingsFragment();
+                        if (settingsFragment == null) {
+                            settingsFragment = new SettingsFragment();
+                            transaction.add(R.id.fragment_container, settingsFragment, "settings");
+                        } else {
+                            transaction.show(settingsFragment);
+                        }
+                        activeFragment = settingsFragment;
                     }
                 }
 
-                // Reemplazamos el fragmento
-                if (selectedFragment != null) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, selectedFragment)
-                            .commit();
-                }
+                // Ejecutamos los cambios
+                transaction.commit();
                 return true;
             }
         });
 
-        // Seleccionar el mapa por defecto al abrir la aplicación
+        // Al abrir la app, forzamos que se seleccione el mapa la primera vez
         if (savedInstanceState == null) {
             bottomNav.setSelectedItemId(R.id.nav_map);
+        }
+    }
+
+    // --- NUEVO MÉTODO PUENTE PARA DIBUJAR LA RUTA ---
+    public void irRutaEnMapa(String nombreCentro, double latDestino, double lngDestino) {
+        // 1. Cambiamos visualmente a la pestaña del mapa
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setSelectedItemId(R.id.nav_map);
+
+        // 2. Le pasamos los datos al MapFragment para que dibuje la línea
+        if (mapFragment != null) {
+            ((MapFragment) mapFragment).dibujarLineaHastaDestino(nombreCentro, latDestino, lngDestino);
         }
     }
 }

@@ -21,19 +21,19 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
     private List<Centro> centroListFull;
     private List<Centro> centroList;
     private OnStarClickListener starClickListener;
-    private OnItemClickListener itemListener; // 1. NUEVO: Variable para el clic general
+    private OnItemClickListener itemListener;
 
     // Interfaz para avisar al Fragment cuando se pulsa una estrella
     public interface OnStarClickListener {
         void onStarClick(Centro centro, int position);
     }
 
-    // 2. NUEVO: Interfaz para el clic en toda la tarjeta
+    // Interfaz para el clic en toda la tarjeta
     public interface OnItemClickListener {
         void onItemClick(Centro centro);
     }
 
-    // 3. ACTUALIZADO: El constructor ahora recibe ambas interfaces
+    // El constructor ahora recibe ambas interfaces
     public CentroAdapter(List<Centro> centroList, OnStarClickListener starListener, OnItemClickListener itemListener) {
         this.centroListFull = new ArrayList<>(centroList);
         this.centroList = centroList;
@@ -50,19 +50,19 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
 
     @Override
     public void onBindViewHolder(@NonNull CentroViewHolder holder, int position) {
-        // Hacemos la posición final para poder usarla dentro de las clases anónimas (estándar en Java clásico)
         final int currentPosition = position;
         final Centro centro = centroList.get(currentPosition);
 
         holder.tvNombre.setText(centro.getNombre());
-        holder.tvUniUbi.setText(centro.getUniversidad() + " - " + centro.getUbicacion());
 
+        // ACTUALIZADO: Ya no concatenamos "ubicación", solo mostramos la Universidad
+        holder.tvUniUbi.setText(centro.getUbicacion());
         String uni = centro.getUniversidad();
 
         // Limpiamos cualquier tinte
         holder.ivLogo.clearColorFilter();
 
-        if ("EHU".equals(uni)) {
+        if ("UPV/EHU".equals(uni) || "EHU".equals(uni)) {
             holder.ivLogo.setImageResource(R.drawable.logo_ehu);
         } else if ("Deusto".equals(uni)) {
             holder.ivLogo.setImageResource(R.drawable.logo_deusto);
@@ -94,7 +94,7 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             }
         });
 
-        // 4. NUEVO: Evento de clic para TODA la tarjeta (Activa la ruta en el mapa)
+        // Evento de clic para TODA la tarjeta (Activa la ruta en el mapa)
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,8 +104,9 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             }
         });
 
-        // --- LÓGICA DEL DESPLEGABLE DE TRANSPORTE ---
-        holder.tvTransporteInfo.setText(centro.getInfoTransporte());
+        // --- LÓGICA DEL DESPLEGABLE ---
+        // ACTUALIZADO: Usamos la nueva "descripcion" en lugar de "infoTransporte"
+        holder.tvTransporteInfo.setText(centro.getDescripcion());
 
         // Mostrar u ocultar según el estado y rotar flecha
         if (centro.isExpanded()) {
@@ -148,8 +149,10 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
                 } else {
                     String filterPattern = constraint.toString().toLowerCase().trim();
                     for (Centro item : centroListFull) {
+                        // ACTUALIZADO: Buscamos también dentro de la "descripcion"
                         if (item.getNombre().toLowerCase().contains(filterPattern) ||
-                                item.getUniversidad().toLowerCase().contains(filterPattern)) {
+                                item.getUniversidad().toLowerCase().contains(filterPattern) ||
+                                (item.getDescripcion() != null && item.getDescripcion().toLowerCase().contains(filterPattern))) {
                             filteredList.add(item);
                         }
                     }
@@ -169,7 +172,6 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
     }
 
     static class CentroViewHolder extends RecyclerView.ViewHolder {
-        // VARIABLES AÑADIDAS AQUÍ PARA QUE NO FALLE EL CONSTRUCTOR
         TextView tvNombre, tvUniUbi, tvTransporteInfo;
         ImageView ivStar, ivLogo, ivExpand;
         View layoutTransporte;

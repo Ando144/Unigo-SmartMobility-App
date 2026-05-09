@@ -28,6 +28,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.unigo_das.R;
+import com.example.unigo_das.db.DataBaseHelper;
+import com.example.unigo_das.item.Centro;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -375,13 +377,15 @@ public class WeatherFragment extends Fragment {
         }
     }
 
-    // Lee los IDs guardados en SharedPreferences y crea dinámicamente las tarjetas en el GridLayout.
+    // ACTUALIZADO: Lee los IDs guardados en la Base de Datos Local y crea dinámicamente las tarjetas consultando la BD.
     private void cargarClimaFavoritos(View view) {
         android.widget.GridLayout contenedor = view.findViewById(R.id.glFavoritosContainer);
         contenedor.removeAllViews();
 
-        android.content.SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", android.content.Context.MODE_PRIVATE);
-        java.util.Set<String> favoritos = prefs.getStringSet("centros_favoritos", new java.util.HashSet<String>());
+        DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
+        int idUsuarioActual = 1; // ID temporal hasta hacer el Login real
+
+        List<String> favoritos = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
 
         if (favoritos.isEmpty()) {
             TextView tvVacio = new TextView(requireContext());
@@ -392,95 +396,33 @@ public class WeatherFragment extends Fragment {
         }
 
         for (String idCampus : favoritos) {
-            View tarjeta = getLayoutInflater().inflate(R.layout.item_clima_favorito, contenedor, false);
-            TextView tvNombre = tarjeta.findViewById(R.id.tvNombreCampus);
-            TextView tvTemp = tarjeta.findViewById(R.id.tvTempCampus);
-            TextView tvUni = tarjeta.findViewById(R.id.tvUniCampus);
+            // Obtenemos los datos dinámicamente desde la BD en lugar de tenerlos hardcodeados
+            Centro centro = dbHelper.obtenerCentroPorId(idCampus);
 
-            String nombreMostrar = "";
-            String uniNombre = "";
-            int uniColor = android.graphics.Color.GRAY;
-            double lat = 0.0;
-            double lon = 0.0;
+            if (centro != null) {
+                View tarjeta = getLayoutInflater().inflate(R.layout.item_clima_favorito, contenedor, false);
+                TextView tvNombre = tarjeta.findViewById(R.id.tvNombreCampus);
+                TextView tvTemp = tarjeta.findViewById(R.id.tvTempCampus);
+                TextView tvUni = tarjeta.findViewById(R.id.tvUniCampus);
 
-            // Detección de la universidad a la que pertenece el campus mediante su prefijo y poniendo el color correspondiente a cada una
-            if (idCampus.startsWith("EHU_")) {
-                uniNombre = "UPV/EHU";
-                uniColor = android.graphics.Color.parseColor("#D32F2F");
-            } else if (idCampus.startsWith("MU_")) {
-                uniNombre = "Mondragon";
-                uniColor = android.graphics.Color.parseColor("#557755");
-            } else if (idCampus.startsWith("DEU_")) {
-                uniNombre = "Deusto";
-                uniColor = android.graphics.Color.parseColor("#1976D2");
-            }
+                tvNombre.setText(centro.getNombre());
+                tvUni.setText(centro.getUniversidad());
 
-            // Mapeo manual de IDs a nombres y coordenadas (Hardcoded y habra que meterlo en la BD)
-            switch (idCampus) {
-                case "EHU_345": case "EHU_363": case "EHU_364":
-                    nombreMostrar = getString(R.string.centro_ehu_ingenieria_bilbao); lat = 43.2638; lon = -2.9511; break;
-                case "EHU_350":
-                    nombreMostrar = getString(R.string.centro_ehu_ingenieria_bilbao); lat = 43.3308; lon = -3.0186; break;
-                case "EHU_320":
-                    nombreMostrar = getString(R.string.centro_ehu_bellas_artes); lat = 43.3301; lon = -2.9678; break;
-                case "EHU_310":
-                    nombreMostrar = getString(R.string.centro_ehu_ciencia_tecnologia); lat = 43.3301; lon = -2.9678; break;
-                case "EHU_323":
-                    nombreMostrar = getString(R.string.centro_ehu_ciencias_sociales_comunicacion); lat = 43.3301; lon = -2.9678; break;
-                case "EHU_324":
-                    nombreMostrar = getString(R.string.centro_ehu_derecho); lat = 43.3301; lon = -2.9678; break;
-                case "EHU_321":
-                    nombreMostrar = getString(R.string.centro_ehu_economia_empresa); lat = 43.2721; lon = -2.9566; break;
-                case "EHU_351":
-                    nombreMostrar = getString(R.string.centro_ehu_economia_empresa_elcano); lat = 43.2642; lon = -2.9355; break;
-                case "EHU_354":
-                    nombreMostrar = getString(R.string.centro_ehu_educacion_bilbao); lat = 43.3301; lon = -2.9678; break;
-                case "EHU_327": case "EHU_352":
-                    nombreMostrar = getString(R.string.centro_ehu_medicina_enfermeria); lat = 43.3301; lon = -2.9678; break;
-                case "EHU_332":
-                    nombreMostrar = getString(R.string.centro_ehu_unidad_docente_medicina); lat = 43.2289; lon = -2.8360; break;
-                case "EHU_328":
-                    nombreMostrar = getString(R.string.centro_ehu_unidad_docente_medicina); lat = 43.2605; lon = -2.9490; break;
-                case "EHU_329":
-                    nombreMostrar = getString(R.string.centro_ehu_unidad_docente_medicina); lat = 43.2847; lon = -2.9829; break;
-                case "EHU_EXP":
-                    nombreMostrar = getString(R.string.centro_ehu_aulas_experiencia); lat = 43.2576; lon = -2.9238; break;
-                case "MU_BBF_EMP":
-                    nombreMostrar = getString(R.string.centro_mu_bbf_empresariales); lat = 43.2665; lon = -2.9304; break;
-                case "MU_BBF_LEINN":
-                    nombreMostrar = getString(R.string.centro_mu_bbf_leinn); lat = 43.2665; lon = -2.9304; break;
-                case "MU_AS_POL":
-                    nombreMostrar = getString(R.string.centro_mu_as_politecnica); lat = 43.2764; lon = -2.9642; break;
-                case "MU_AS_HUM":
-                    nombreMostrar = getString(R.string.centro_mu_as_humanidades); lat = 43.2764; lon = -2.9642; break;
-                case "DEU_DBS":
-                    nombreMostrar = getString(R.string.centro_deusto_business); lat = 43.2713; lon = -2.9379; break;
-                case "DEU_DER":
-                    nombreMostrar = getString(R.string.centro_deusto_derecho); lat = 43.2713; lon = -2.9379; break;
-                case "DEU_CSH":
-                    nombreMostrar = getString(R.string.centro_deusto_sociales_humanas); lat = 43.2713; lon = -2.9379; break;
-                case "DEU_ING":
-                    nombreMostrar = getString(R.string.centro_deusto_ingenieria); lat = 43.2713; lon = -2.9379; break;
-                case "DEU_EDU":
-                    nombreMostrar = getString(R.string.centro_deusto_educacion_deporte); lat = 43.2713; lon = -2.9379; break;
-                case "DEU_SAL":
-                    nombreMostrar = getString(R.string.centro_deusto_salud); lat = 43.2713; lon = -2.9379; break;
-                case "DEU_CSC":
-                    nombreMostrar = getString(R.string.centro_deusto_sociales_comunicacion); lat = 43.2713; lon = -2.9379; break;
-            }
+                if (centro.getUniversidad().equals("UPV/EHU")) {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+                } else if (centro.getUniversidad().equals("Mondragon")) {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#557755"));
+                } else {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#1976D2"));
+                }
 
-            if (lat != 0.0 && lon != 0.0) {
-                tvNombre.setText(nombreMostrar);
-                tvUni.setText(uniNombre);
-                tvUni.setTextColor(uniColor);
-
-                obtenerClimaConCola(lat, lon, tvTemp);
+                obtenerClimaConCola(centro.getLatitud(), centro.getLongitud(), tvTemp);
                 contenedor.addView(tarjeta);
             }
         }
     }
 
-    // Petición de red asíncrona  para cargar la temperatura de los campus favoritos usando la RequestQueue global.
+    // Petición de red asíncrona para cargar la temperatura de los campus favoritos usando la RequestQueue global.
     private void obtenerClimaConCola(double lat, double lon, final TextView tvTemp) {
         String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,

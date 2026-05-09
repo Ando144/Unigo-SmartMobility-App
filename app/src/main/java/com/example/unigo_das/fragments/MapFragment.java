@@ -31,6 +31,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.unigo_das.R;
+import com.example.unigo_das.db.DataBaseHelper; // NUEVO IMPORT
 import com.example.unigo_das.item.Centro;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -340,44 +341,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return poly;
     }
 
+    // NUEVO MÉTODO: Ahora extraemos la información dinámicamente de la base de datos
     private void cargarDatosBuscador() {
-        listaTodosLosCentros = new ArrayList<>();
-        listaTodosLosCentros.add(new Centro("EHU_345", getString(R.string.centro_ehu_ingenieria_bilbao), "EHU", "Edif II", "...", 43.2638, -2.9511));
-        listaTodosLosCentros.add(new Centro("EHU_350", getString(R.string.centro_ehu_ingenieria_bilbao), "EHU", "Náutica", "...", 43.3308, -3.0186));
-        listaTodosLosCentros.add(new Centro("EHU_363", getString(R.string.centro_ehu_ingenieria_bilbao), "EHU", "Edif II", "...", 43.2638, -2.9511));
-        listaTodosLosCentros.add(new Centro("EHU_364", getString(R.string.centro_ehu_ingenieria_bilbao), "EHU", "Edif II", "...", 43.2638, -2.9511));
-        listaTodosLosCentros.add(new Centro("EHU_320", getString(R.string.centro_ehu_bellas_artes), "EHU", "Leioa", "...", 43.3301, -2.9678));
-        listaTodosLosCentros.add(new Centro("EHU_310", getString(R.string.centro_ehu_ciencia_tecnologia), "EHU", "Leioa", "...", 43.3301, -2.9678));
-        listaTodosLosCentros.add(new Centro("EHU_323", getString(R.string.centro_ehu_ciencias_sociales_comunicacion), "EHU", "Leioa", "...", 43.3301, -2.9678));
-        listaTodosLosCentros.add(new Centro("EHU_324", getString(R.string.centro_ehu_derecho), "EHU", "Leioa", "...", 43.3301, -2.9678));
-        listaTodosLosCentros.add(new Centro("EHU_321", getString(R.string.centro_ehu_economia_empresa), "EHU", "Sarriko", "...", 43.2721, -2.9566));
-        listaTodosLosCentros.add(new Centro("EHU_351", getString(R.string.centro_ehu_economia_empresa_elcano), "EHU", "Bilbao", "...", 43.2642, -2.9355));
-        listaTodosLosCentros.add(new Centro("EHU_354", getString(R.string.centro_ehu_educacion_bilbao), "EHU", "Leioa", "...", 43.3301, -2.9678));
-        listaTodosLosCentros.add(new Centro("EHU_327", getString(R.string.centro_ehu_medicina_enfermeria), "EHU", "Leioa", "...", 43.3301, -2.9678));
-        listaTodosLosCentros.add(new Centro("EHU_352", getString(R.string.centro_ehu_medicina_enfermeria), "EHU", "Leioa", "...", 43.3301, -2.9678));
-        listaTodosLosCentros.add(new Centro("EHU_332", getString(R.string.centro_ehu_unidad_docente_medicina), "EHU", "Galdakao", "...", 43.2289, -2.8360));
-        listaTodosLosCentros.add(new Centro("EHU_328", getString(R.string.centro_ehu_unidad_docente_medicina), "EHU", "Basurto - Bilbao", "...", 43.2605, -2.9490));
-        listaTodosLosCentros.add(new Centro("EHU_329", getString(R.string.centro_ehu_unidad_docente_medicina), "EHU", "Cruces", "...", 43.2847, -2.9829));
-        listaTodosLosCentros.add(new Centro("EHU_EXP", getString(R.string.centro_ehu_aulas_experiencia), "EHU", "Bilbao", "...", 43.2576, -2.9238));
-
-        listaTodosLosCentros.add(new Centro("MU_BBF_EMP", getString(R.string.centro_mu_bbf_empresariales), "Mondragon", "Uribitarte, 6", "...", 43.2665, -2.9304));
-        listaTodosLosCentros.add(new Centro("MU_BBF_LEINN", getString(R.string.centro_mu_bbf_leinn), "Mondragon", "Uribitarte, 6", "...", 43.2665, -2.9304));
-        listaTodosLosCentros.add(new Centro("MU_AS_POL", getString(R.string.centro_mu_as_politecnica), "Mondragon", "Zorrotzaurre", "...", 43.2764, -2.9642));
-        listaTodosLosCentros.add(new Centro("MU_AS_HUM", getString(R.string.centro_mu_as_humanidades), "Mondragon", "Zorrotzaurre", "...", 43.2764, -2.9642));
-
-        listaTodosLosCentros.add(new Centro("DEU_DBS", getString(R.string.centro_deusto_business), "Deusto", "Deusto", "...", 43.2713, -2.9379));
-        listaTodosLosCentros.add(new Centro("DEU_DER", getString(R.string.centro_deusto_derecho), "Deusto", "Deusto", "...", 43.2713, -2.9379));
-        listaTodosLosCentros.add(new Centro("DEU_CSH", getString(R.string.centro_deusto_sociales_humanas), "Deusto", "Deusto", "...", 43.2713, -2.9379));
-        listaTodosLosCentros.add(new Centro("DEU_ING", getString(R.string.centro_deusto_ingenieria), "Deusto", "Deusto", "...", 43.2713, -2.9379));
-        listaTodosLosCentros.add(new Centro("DEU_EDU", getString(R.string.centro_deusto_educacion_deporte), "Deusto", "Deusto", "...", 43.2713, -2.9379));
-        listaTodosLosCentros.add(new Centro("DEU_SAL", getString(R.string.centro_deusto_salud), "Deusto", "Deusto", "...", 43.2713, -2.9379));
-        listaTodosLosCentros.add(new Centro("DEU_CSC", getString(R.string.centro_deusto_sociales_comunicacion), "Deusto", "Deusto", "...", 43.2713, -2.9379));
+        DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
+        listaTodosLosCentros = dbHelper.obtenerTodosLosCentros();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        searchViewReal = null; // <--- CÓDIGO CORREGIDO
+        searchViewReal = null;
         campusMap = null;
     }
 
@@ -417,7 +390,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false);
             }
             TextView textView = convertView.findViewById(android.R.id.text1);
-            textView.setText(getItem(position).toString());
+            textView.setText(getItem(position).getNombre()); // Mostrar el nombre del centro en la lista
             return convertView;
         }
 
@@ -440,8 +413,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 } else {
                     String query = constraint.toString().toLowerCase().trim();
                     for (Centro c : listaOriginal) {
+                        // ACTUALIZADO: Filtramos usando el nuevo campo "descripcion"
                         if (c.getNombre().toLowerCase().contains(query) ||
-                                c.getUbicacion().toLowerCase().contains(query) ||
+                                (c.getDescripcion() != null && c.getDescripcion().toLowerCase().contains(query)) ||
                                 c.getUniversidad().toLowerCase().contains(query)) {
                             filtrados.add(c);
                         }

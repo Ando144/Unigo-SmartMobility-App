@@ -23,7 +23,6 @@ public class LanguageDialogFragment extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Intentar obtener el listener del fragmento padre o de la actividad
         if (getParentFragment() instanceof LanguageChangeListener) {
             listener = (LanguageChangeListener) getParentFragment();
         } else if (getActivity() instanceof LanguageChangeListener) {
@@ -42,7 +41,6 @@ public class LanguageDialogFragment extends DialogFragment {
         
         String[] languageCodes = {"es", "eu", "en"};
 
-        // Obtener el idioma actual desde AppCompatDelegate (API persistente)
         String currentLang = "es";
         LocaleListCompat currentLocales = AppCompatDelegate.getApplicationLocales();
         if (!currentLocales.isEmpty()) {
@@ -61,16 +59,16 @@ public class LanguageDialogFragment extends DialogFragment {
         builder.setTitle(R.string.select_language)
                 .setSingleChoiceItems(languages, checkedItem, (dialog, which) -> {
                     String selectedLang = languageCodes[which];
-                    updateLanguage(selectedLang);
+                    // Primero cerramos el diálogo
                     dismiss();
+                    // Luego aplicamos el idioma. AppCompatDelegate recreará la actividad automáticamente.
+                    updateLanguage(selectedLang);
                 });
 
         return builder.create();
     }
 
     private void updateLanguage(String langCode) {
-        // AppCompatDelegate.setApplicationLocales gestiona la persistencia global del idioma.
-        // Esto garantiza que el idioma no se pierda al cambiar de Modo Claro a Oscuro.
         LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
         AppCompatDelegate.setApplicationLocales(appLocales);
 

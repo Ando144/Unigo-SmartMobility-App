@@ -1,6 +1,7 @@
 package com.example.unigo_das.fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -71,7 +72,6 @@ public class WeatherFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_weather, container, false);
 
-        // Enlace de las variables con los elementos visuales del XML
         ivIconoClimaPrincipal = view.findViewById(R.id.ivIconoClimaPrincipal);
         tvTemperaturaPrincipal = view.findViewById(R.id.tvTemperaturaPrincipal);
         tvPronosticoBilbao = view.findViewById(R.id.tvPronosticoBilbao);
@@ -80,11 +80,8 @@ public class WeatherFragment extends Fragment {
         wvRadarLluvia = view.findViewById(R.id.wvRadarLluvia);
 
         requestQueue = Volley.newRequestQueue(requireContext());
-
-        // Inicialización del servicio de localización de Google
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
-        // Redondeo de las esquinas del WebView
         wvRadarLluvia.setOutlineProvider(new android.view.ViewOutlineProvider() {
             @Override
             public void getOutline(android.view.View view, android.graphics.Outline outline) {
@@ -93,7 +90,6 @@ public class WeatherFragment extends Fragment {
         });
         wvRadarLluvia.setClipToOutline(true);
 
-        // Evita conflictos al tocar el mapa, bloquea el scroll de la pantalla principal
         wvRadarLluvia.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -102,7 +98,6 @@ public class WeatherFragment extends Fragment {
             }
         });
 
-        // Llamadas iniciales para cargar los datos de la pantalla
         cargarRadarRainViewer();
         obtenerUbicacionYClima();
         obtenerPronosticoOpenData();
@@ -110,9 +105,9 @@ public class WeatherFragment extends Fragment {
         return view;
     }
 
-    // Comprueba los permisos y obtiene la posición GPS actual.
-    // Si falla o no hay permisos, establece Bilbao como ubicación por defecto.
     private void obtenerUbicacionYClima() {
+        if (!isAdded() || getContext() == null) return;
+        
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             actualizarClimaConNombre(43.26, -2.94, "Bilbao");
             return;
@@ -121,6 +116,7 @@ public class WeatherFragment extends Fragment {
         fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
+                if (!isAdded() || getContext() == null) return;
                 if (location != null) {
                     String nombreCiudad = obtenerNombreCiudad(location.getLatitude(), location.getLongitude());
                     actualizarClimaConNombre(location.getLatitude(), location.getLongitude(), nombreCiudad);
@@ -131,8 +127,9 @@ public class WeatherFragment extends Fragment {
         });
     }
 
-    // Utiliza el Geocoder de Android para transformar coordenadas (Lat/Lon) en un nombre de ciudad/pueblo
     private String obtenerNombreCiudad(double lat, double lon) {
+        if (!isAdded() || getContext() == null) return "Tu ubicación";
+        
         Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
@@ -146,7 +143,6 @@ public class WeatherFragment extends Fragment {
         return "Tu ubicación";
     }
 
-    // Metodo auxiliar que actualiza el texto de la cabecera y lanza la petición a la API del clima.
     private void actualizarClimaConNombre(double lat, double lon, String nombre) {
         if (tvUbicacionPrincipal != null) {
             tvUbicacionPrincipal.setText(nombre);
@@ -154,23 +150,20 @@ public class WeatherFragment extends Fragment {
         obtenerClimaPorCoordenadas(lat, lon, ivIconoClimaPrincipal, tvTemperaturaPrincipal);
     }
 
-    //Se dispara al volver a la pestaña (por ejemplo, tras abrir la app desde segundo plano).
     @Override
     public void onResume() {
         super.onResume();
-        if (getView() != null) cargarClimaFavoritos(getView());
+        if (getView() != null && isAdded()) cargarClimaFavoritos(getView());
     }
 
-    // Se dispara al navegar entre pestañas del menú inferior
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if (!hidden && getView() != null) {
+        if (!hidden && getView() != null && isAdded()) {
             cargarClimaFavoritos(getView());
         }
     }
 
-    // Configura e inyecta el mapa interactivo de precipitaciones (RainViewer) en el WebView.
     private void cargarRadarRainViewer() {
         WebSettings settings = wvRadarLluvia.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -185,14 +178,12 @@ public class WeatherFragment extends Fragment {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest request) {
                 String urlDestino = request.getUrl().toString();
-                // Bloquea enlaces externos para evitar que el usuario salga del radar
                 return !urlDestino.contains("rainviewer.com/map.html");
             }
         });
         wvRadarLluvia.loadUrl("https://www.rainviewer.com/map.html?loc=43.26,-2.93,8&oFa=0&oC=1&oU=0&oCS=1&oF=0&oAP=1&c=1&o=83&lm=0&layer=radar&sm=1&sn=1");
     }
 
-    // Descarga el XML de pronóstico oficial de Euskalmet usando la RequestQueue global en OpenData.
     private void obtenerPronosticoOpenData() {
         String urlXmlOpenData = "https://opendata.euskadi.eus/contenidos/prevision_tiempo/met_forecast_zone/opendata/met_forecast_zone.xml";
 
@@ -200,21 +191,19 @@ public class WeatherFragment extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        procesarXmlOpenData(response);
+                        if (isAdded()) procesarXmlOpenData(response);
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error conectando con Euskalmet.");
+                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error conectando con Euskalmet.");
                     }
                 }
         );
         requestQueue.add(peticion);
     }
 
-    // Analiza el XML recibido, busca la región del Gran Bilbao (areaId=8) y extrae el texto del pronóstico
-    // según el idioma actual del teléfono.
     private void procesarXmlOpenData(String xml) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -235,12 +224,10 @@ public class WeatherFragment extends Fragment {
                                 Element descElement = (Element) descriptions.item(0);
                                 String idioma = java.util.Locale.getDefault().getLanguage();
 
-                                // Si el móvil está en Español o Euskera, usa el texto oficial
                                 if (idioma.equals("es") || idioma.equals("eu")) {
                                     String textoNativo = descElement.getElementsByTagName(idioma).item(0).getTextContent().trim();
-                                    tvPronosticoBilbao.setText(textoNativo);
+                                    if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoNativo);
                                 } else {
-                                    // Si es otro idioma, traduce el texto en español usando la IA de Google ML kit
                                     String textoEspanol = descElement.getElementsByTagName("es").item(0).getTextContent().trim();
                                     traducirConIA(textoEspanol, idioma);
                                 }
@@ -252,18 +239,19 @@ public class WeatherFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            tvPronosticoBilbao.setText("Error analizando datos.");
+            if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error analizando datos.");
         }
     }
 
-    // Utiliza el modelo On-Device de Google ML Kit para traducir texto localmente sin APIs de pago.
     private void traducirConIA(String textoEspanol, String idiomaDestino) {
+        if (!isAdded()) return;
         String mlKitLang = TranslateLanguage.fromLanguageTag(idiomaDestino);
         if (mlKitLang == null) {
-            tvPronosticoBilbao.setText(textoEspanol);
+            if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
             return;
         }
-        tvPronosticoBilbao.setText("Traduciendo pronóstico...");
+        if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Traduciendo pronóstico...");
+        
         TranslatorOptions options = new TranslatorOptions.Builder()
                 .setSourceLanguage(TranslateLanguage.SPANISH)
                 .setTargetLanguage(mlKitLang)
@@ -279,7 +267,7 @@ public class WeatherFragment extends Fragment {
                                 .addOnSuccessListener(new OnSuccessListener<String>() {
                                     @Override
                                     public void onSuccess(String textoTraducido) {
-                                        tvPronosticoBilbao.setText(textoTraducido);
+                                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoTraducido);
                                     }
                                 });
                     }
@@ -287,48 +275,46 @@ public class WeatherFragment extends Fragment {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        tvPronosticoBilbao.setText(textoEspanol);
+                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
                     }
                 });
     }
 
-    // Realiza la petición a la API de Open-Meteo usando la RequestQueue global para obtener clima.
     private void obtenerClimaPorCoordenadas(double latitud, double longitud, final ImageView ivIcono, final TextView tvTemp) {
         String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitud + "&longitude=" + longitud + "&current_weather=true";
         JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, urlOpenMeteo, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        if (!isAdded()) return;
                         try {
                             JSONObject current = response.getJSONObject("current_weather");
                             double temperatura = current.getDouble("temperature");
                             int codigoClima = current.getInt("weathercode");
-                            tvTemp.setText(temperatura + " ºC");
+                            if (tvTemp != null) tvTemp.setText(temperatura + " ºC");
 
                             if (ivIcono != null) {
                                 asignarIconoYTexto(codigoClima, ivIcono);
                             }
                         } catch (Exception e) {
-                            tvTemp.setText("Error");
+                            if (tvTemp != null) tvTemp.setText("Error");
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        tvTemp.setText("Err Red");
+                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
                     }
                 }
         );
         requestQueue.add(peticion);
     }
 
-    // Convierte los códigos numéricos WMO internacionales en descripciones legibles y asocia el icono vectorial correspondiente.
     private void asignarIconoYTexto(int code, ImageView iv) {
         String desc = "Desconocido";
         int resId = R.drawable.ic_clima_nubes;
 
-        // 1. Traducción del código WMO a texto
         if (code == 0) desc = "Cielo despejado";
         else if (code == 1) desc = "Mayormente despejado";
         else if (code == 2) desc = "Parcialmente nublado";
@@ -351,7 +337,6 @@ public class WeatherFragment extends Fragment {
         else if (code == 95) desc = "Tormenta eléctrica";
         else if (code == 96 || code == 99) desc = "Tormenta con granizo";
 
-        // 2. Agrupación visual por tipo de clima
         if (code == 0) {
             resId = R.drawable.ic_clima_sol;
         } else if (code >= 1 && code <= 3) {
@@ -368,7 +353,6 @@ public class WeatherFragment extends Fragment {
 
         iv.setImageResource(resId);
 
-        // Si es el clima principal de la pantalla, actualiza el texto y colorea el icono de rojo
         if (iv == ivIconoClimaPrincipal) {
             if (tvDescripcionClima != null) tvDescripcionClima.setText(desc);
             iv.setColorFilter(android.graphics.Color.parseColor("#D32F2F"));
@@ -377,13 +361,14 @@ public class WeatherFragment extends Fragment {
         }
     }
 
-    // ACTUALIZADO: Lee los IDs guardados en la Base de Datos Local y crea dinámicamente las tarjetas consultando la BD.
     private void cargarClimaFavoritos(View view) {
+        if (!isAdded()) return;
         android.widget.GridLayout contenedor = view.findViewById(R.id.glFavoritosContainer);
+        if (contenedor == null) return;
         contenedor.removeAllViews();
 
         DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
-        int idUsuarioActual = 1; // ID temporal hasta hacer el Login real
+        int idUsuarioActual = 1;
 
         List<String> favoritos = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
 
@@ -396,7 +381,6 @@ public class WeatherFragment extends Fragment {
         }
 
         for (String idCampus : favoritos) {
-            // Obtenemos los datos dinámicamente desde la BD en lugar de tenerlos hardcodeados
             Centro centro = dbHelper.obtenerCentroPorId(idCampus);
 
             if (centro != null) {
@@ -422,17 +406,20 @@ public class WeatherFragment extends Fragment {
         }
     }
 
-    // Petición de red asíncrona para cargar la temperatura de los campus favoritos usando la RequestQueue global.
     private void obtenerClimaConCola(double lat, double lon, final TextView tvTemp) {
         String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
-                    try {
-                        double t = response.getJSONObject("current_weather").getDouble("temperature");
-                        tvTemp.setText(t + " ºC");
-                    } catch (Exception e) { tvTemp.setText("Error"); }
+                    if (isAdded() && tvTemp != null) {
+                        try {
+                            double t = response.getJSONObject("current_weather").getDouble("temperature");
+                            tvTemp.setText(t + " ºC");
+                        } catch (Exception e) { tvTemp.setText("Error"); }
+                    }
                 },
-                error -> tvTemp.setText("Err Red")
+                error -> {
+                    if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                }
         );
         requestQueue.add(request);
     }

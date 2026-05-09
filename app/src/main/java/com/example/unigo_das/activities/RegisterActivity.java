@@ -8,71 +8,110 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import com.example.unigo_das.R;
+import com.example.unigo_das.network.NetworkWorker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText etNombreReg, etEmailReg, etPasswordReg;
-    private MaterialButton btnDoRegister, btnBackToLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Enlazamos las vistas
         etNombreReg = findViewById(R.id.etNombreReg);
         etEmailReg = findViewById(R.id.etEmailReg);
         etPasswordReg = findViewById(R.id.etPasswordReg);
-        btnDoRegister = findViewById(R.id.btnDoRegister);
-        btnBackToLogin = findViewById(R.id.btnBackToLogin);
+        MaterialButton btnDoRegister = findViewById(R.id.btnDoRegister);
+        MaterialButton btnBackToLogin = findViewById(R.id.btnBackToLogin);
 
-        // Acción de Registrarse
         btnDoRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String nombre = etNombreReg.getText().toString().trim();
-                String email = etEmailReg.getText().toString().trim();
-                String pass = etPasswordReg.getText().toString().trim();
+                String nombre = etNombreReg.getText() != null ? etNombreReg.getText().toString().trim() : "";
+                String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
+                String pass = etPasswordReg.getText() != null ? etPasswordReg.getText().toString().trim() : "";
 
                 if (!nombre.isEmpty() && !email.isEmpty() && !pass.isEmpty()) {
-                    // TODO: Futura llamada a WorkManager para conectar con registro.php
-
-                    Toast.makeText(RegisterActivity.this, "¡Registro exitoso!", Toast.LENGTH_SHORT).show();
-
-                    // Guardamos el estado: Ha entrado con cuenta (no es invitado)
-                    marcarEstadoUsuario(false);
-
-                    // Redirigimos al mapa principal
-                    Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                    // Limpiamos la pila para que no pueda volver atrás al registro/login
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
+                    ejecutarRegistro(nombre, email, pass);
                 } else {
                     Toast.makeText(RegisterActivity.this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
-        // Acción de volver al Login
-        btnBackToLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Como el Login nos llamó, simplemente cerramos esta actividad y el Login aparecerá
-                finish();
-            }
-        });
+        btnBackToLogin.setOnClickListener(v -> finish());
     }
 
-    // Método auxiliar igual que en el Login
-    private void marcarEstadoUsuario(boolean esInvitado) {
+    private void ejecutarRegistro(String username, String email, String password) {
+        Data inputData = new Data.Builder()
+                .putString("script", "registro.php")
+                .putString("username", username)
+                .putString("email", email)
+                .putString("password", password)
+                .build();
+
+        OneTimeWorkRequest registerRequest = new OneTimeWorkRequest.Builder(NetworkWorker.class)
+                .setInputData(inputData)
+                .build();
+
+        WorkManager.getInstance(this).enqueue(registerRequest);
+
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(registerRequest.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        String response = workInfo.getOutputData().getString("response");
+                        if (response != null && !response.isEmpty()) {
+                            procesarRespuestaServidor(response);
+                        } else {
+                            Toast.makeText(this, "Fallo crítico: Respuesta vacía del servidor (PHP Crash)", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    private void procesarRespuestaServidor(String jsonResponse) {
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(jsonResponse);
+
+            if (json.containsKey("success") && (Boolean) json.get("success")) {
+                Toast.makeText(this, "¡Usuario registrado!", Toast.LENGTH_SHORT).show();
+                marcarEstadoUsuario();
+                irAMainActivity();
+            } else {
+                String error = (String) json.get("error");
+                Toast.makeText(this, "Error: " + (error != null ? error : "Fallo"), Toast.LENGTH_LONG).show();
+            }
+        } catch (ParseException e) {
+            // Si el servidor escupe un error de PHP (HTML), lo verás aquí
+            Toast.makeText(this, "ERROR SERVIDOR: " + jsonResponse, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void irAMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void marcarEstadoUsuario() {
         SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean("isGuest", esInvitado);
+        editor.putBoolean("isGuest", false);
         editor.apply();
     }
 }

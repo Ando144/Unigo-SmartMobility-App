@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
+    android:paddingTop="40dp"
+    android:clipToPadding="false"
     android:background="#F5F7FA">
 
     <LinearLayout
@@ -11,37 +13,68 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="32dp"
-            android:background="@android:color/white"
-            android:elevation="4dp">
+            android:layout_margin="16dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/white">
 
-            <ImageView
-                android:id="@+id/ivIconoClimaPrincipal"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@android:drawable/ic_menu_help" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp">
 
-            <TextView
-                android:id="@+id/tvTemperaturaPrincipal"
+                <TextView
+                    android:id="@+id/tvUbicacionPrincipal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Detectando ubicación..."
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#1A1A1A"
+                    android:letterSpacing="0.02" />
+
+                <ImageView
+                    android:id="@+id/ivIconoClimaPrincipal"
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
+                    android:layout_marginTop="16dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_clima_nubes"
+                    app:tint="#D32F2F" /> <TextView
+                android:id="@+id/tvDescripcionClima"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-- ºC"
-                android:textSize="48sp"
-                android:textStyle="bold"
-                android:textColor="#333333" />
+                android:text="Cargando..."
+                android:textSize="15sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1"
+                android:textColor="#D32F2F"
+                android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bilbao"
-                android:textSize="18sp"
-                android:textColor="#666666" />
-        </LinearLayout>
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="2dp"
+                    android:background="#EEEEEE"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/tvTemperaturaPrincipal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-- ºC"
+                    android:textSize="56sp"
+                    android:textStyle="bold"
+                    android:textColor="#1A1A1A"
+                    android:includeFontPadding="false" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:layout_width="match_parent"
@@ -53,17 +86,13 @@
             android:paddingTop="16dp"
             android:paddingBottom="8dp" />
 
-        <HorizontalScrollView
+        <GridLayout
+            android:id="@+id/glFavoritosContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="none">
-            <LinearLayout
-                android:id="@+id/llFavoritosContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingHorizontal="12dp" />
-        </HorizontalScrollView>
+            android:columnCount="3"
+            android:paddingHorizontal="12dp"
+            android:alignmentMode="alignMargins" />
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -73,28 +102,30 @@
             android:layout_marginBottom="8dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="#FFF5F5"> <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
-
-            <TextView
-                android:layout_width="wrap_content"
+            app:cardBackgroundColor="#FFF5F5">
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Pronóstico Euskalmet"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:textColor="#D32F2F" /> <TextView
-            android:id="@+id/tvPronosticoBilbao"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Cargando información oficial..."
-            android:textSize="14sp"
-            android:lineHeight="20sp"
-            android:textColor="#444444" />
-        </LinearLayout>
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pronóstico Euskalmet"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:textColor="#D32F2F" />
+                <TextView
+                    android:id="@+id/tvPronosticoBilbao"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Cargando información oficial..."
+                    android:textSize="14sp"
+                    android:lineHeight="20sp"
+                    android:textColor="#444444" />
+            </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <TextView

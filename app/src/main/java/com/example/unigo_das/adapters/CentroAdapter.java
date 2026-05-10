@@ -23,17 +23,14 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
     private OnStarClickListener starClickListener;
     private OnItemClickListener itemListener;
 
-    // Interfaz para avisar al Fragment cuando se pulsa una estrella
     public interface OnStarClickListener {
         void onStarClick(Centro centro, int position);
     }
 
-    // Interfaz para el clic en toda la tarjeta
     public interface OnItemClickListener {
         void onItemClick(Centro centro);
     }
 
-    // El constructor ahora recibe ambas interfaces
     public CentroAdapter(List<Centro> centroList, OnStarClickListener starListener, OnItemClickListener itemListener) {
         this.centroListFull = new ArrayList<>(centroList);
         this.centroList = centroList;
@@ -54,12 +51,9 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
         final Centro centro = centroList.get(currentPosition);
 
         holder.tvNombre.setText(centro.getNombre());
-
-        // ACTUALIZADO: Ya no concatenamos "ubicación", solo mostramos la Universidad
         holder.tvUniUbi.setText(centro.getUbicacion());
         String uni = centro.getUniversidad();
 
-        // Limpiamos cualquier tinte
         holder.ivLogo.clearColorFilter();
 
         if ("UPV/EHU".equals(uni) || "EHU".equals(uni)) {
@@ -69,7 +63,6 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
         } else if ("Mondragon".equals(uni)) {
             holder.ivLogo.setImageResource(R.drawable.logo_mondragon);
         } else {
-            // Si no hay logo, usamos el birrete genérico
             holder.ivLogo.setImageResource(R.drawable.ic_menu_school);
             holder.ivLogo.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.bilbao_grey_dark));
         }
@@ -82,7 +75,6 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             holder.ivStar.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.bilbao_grey_light));
         }
 
-        // Clic de la estrella con sintaxis clásica
         holder.ivStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,7 +86,6 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             }
         });
 
-        // Evento de clic para TODA la tarjeta (Activa la ruta en el mapa)
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,20 +95,19 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             }
         });
 
-        // --- LÓGICA DEL DESPLEGABLE ---
-        // ACTUALIZADO: Usamos la nueva "descripcion" en lugar de "infoTransporte"
-        holder.tvTransporteInfo.setText(centro.getDescripcion());
+        // --- NUEVA LÓGICA DEL MAPA DESPLEGABLE ---
 
-        // Mostrar u ocultar según el estado y rotar flecha
+        // Inyectamos la imagen correspondiente al ID del centro
+        holder.ivMapaCentro.setImageResource(obtenerMapaPorCentro(centro.getId()));
+
         if (centro.isExpanded()) {
             holder.layoutTransporte.setVisibility(View.VISIBLE);
-            holder.ivExpand.setRotation(180f); // La flecha apunta hacia arriba
+            holder.ivExpand.setRotation(180f);
         } else {
             holder.layoutTransporte.setVisibility(View.GONE);
-            holder.ivExpand.setRotation(0f); // La flecha apunta hacia abajo
+            holder.ivExpand.setRotation(0f);
         }
 
-        // Clic del icono de información con sintaxis clásica
         holder.ivExpand.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,7 +127,6 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
         notifyDataSetChanged();
     }
 
-    // Buscador
     @Override
     public Filter getFilter() {
         return new Filter() {
@@ -149,7 +138,6 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
                 } else {
                     String filterPattern = constraint.toString().toLowerCase().trim();
                     for (Centro item : centroListFull) {
-                        // ACTUALIZADO: Buscamos también dentro de la "descripcion"
                         if (item.getNombre().toLowerCase().contains(filterPattern) ||
                                 item.getUniversidad().toLowerCase().contains(filterPattern) ||
                                 (item.getDescripcion() != null && item.getDescripcion().toLowerCase().contains(filterPattern))) {
@@ -171,20 +159,100 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
         };
     }
 
+    // --- DICCIONARIO DE IMÁGENES ---
+    private int obtenerMapaPorCentro(String idCentro) {
+        switch (idCentro) {
+            // ==========================================
+            // UPV/EHU
+            // ==========================================
+            case "EHU_345":
+                 return R.drawable.foto_sanma_viejo;
+            case "EHU_363":
+                 return R.drawable.foto_sanma_nuevo;
+            case "EHU_364":
+                 return R.drawable.foto_sanma_nuevo;
+            case "EHU_350":
+                 return R.drawable.foto_nautica;
+            case "EHU_320":
+                 return R.drawable.foto_bellas_artes;
+            case "EHU_310":
+                 return R.drawable.foto_ciencia_y_tecnologia;
+            case "EHU_323":
+                 return R.drawable.foto_sociales_comunicacion;
+            case "EHU_324":
+                 return R.drawable.foto_derecho;
+            case "EHU_321":
+                 return R.drawable.foto_sarriko;
+            case "EHU_351":
+                 return R.drawable.foto_elcano;
+            case "EHU_354":
+                 return R.drawable.foto_educacion;
+            case "EHU_327":
+                 return R.drawable.foto_medicina_y_enfermeria;
+            case "EHU_352":
+                return R.drawable.foto_medicina_y_enfermeria;
+            case "EHU_332":
+                 return R.drawable.foto_galdakao;
+            case "EHU_328":
+                 return R.drawable.foto_basurto;
+            case "EHU_329":
+                 return R.drawable.foto_cruces;
+            case "EHU_EXP":
+                 return R.drawable.foto_experiencia;
+
+                // ==========================================
+                // MONDRAGON UNIBERTSITATEA
+                // ==========================================
+            case "MU_BBF_EMP":
+                 return R.drawable.foto_mondragon_empresariales_leinn;
+            case "MU_BBF_LEINN":
+                return R.drawable.foto_mondragon_empresariales_leinn;
+            case "MU_AS_POL":
+                 return R.drawable.foto_as_fabrik;
+            case "MU_AS_HUM":
+                return R.drawable.foto_as_fabrik;
+
+                // ==========================================
+                // UNIVERSIDAD DE DEUSTO
+                // ==========================================
+            case "DEU_DBS":
+                 return R.drawable.foto_deusto;
+            case "DEU_DER":
+                return R.drawable.foto_deusto;
+            case "DEU_CSH":
+                return R.drawable.foto_deusto;
+            case "DEU_ING":
+                return R.drawable.foto_deusto;
+            case "DEU_EDU":
+                return R.drawable.foto_deusto;
+            case "DEU_SAL":
+                return R.drawable.foto_deusto;
+            case "DEU_CSC":
+                return R.drawable.foto_deusto;
+
+            default:
+                // Devuelve una imagen gris por defecto si aún no tienes el plano de ese centro
+                // IMPORTANTE: Asegúrate de tener una imagen llamada ic_menu_school (o cámbialo por otro nombre válido)
+                return R.drawable.ic_menu_school;
+        }
+    }
+
     static class CentroViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNombre, tvUniUbi, tvTransporteInfo;
-        ImageView ivStar, ivLogo, ivExpand;
+        TextView tvNombre, tvUniUbi;
+        ImageView ivStar, ivLogo, ivExpand, ivMapaCentro; // Añadido ivMapaCentro
         View layoutTransporte;
 
         CentroViewHolder(View itemView) {
             super(itemView);
             tvNombre = itemView.findViewById(R.id.tvNombreCentro);
             tvUniUbi = itemView.findViewById(R.id.tvUniUbi);
-            tvTransporteInfo = itemView.findViewById(R.id.tvTransporteInfo);
             ivStar = itemView.findViewById(R.id.ivStar);
             ivLogo = itemView.findViewById(R.id.ivLogoCentro);
             ivExpand = itemView.findViewById(R.id.ivExpand);
             layoutTransporte = itemView.findViewById(R.id.layoutTransporte);
+
+            // Enlazamos el nuevo ImageView y quitamos el TextView antiguo
+            ivMapaCentro = itemView.findViewById(R.id.ivMapaCentro);
         }
     }
 }

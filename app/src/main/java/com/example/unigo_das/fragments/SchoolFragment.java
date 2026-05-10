@@ -1,6 +1,7 @@
 package com.example.unigo_das.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.example.unigo_das.R;
 import com.example.unigo_das.adapters.CentroAdapter;
 import com.example.unigo_das.db.DataBaseHelper;
 import com.example.unigo_das.item.Centro;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder; // NUEVO IMPORT
 
 public class SchoolFragment extends Fragment {
 
@@ -70,8 +72,19 @@ public class SchoolFragment extends Fragment {
         }, new CentroAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Centro centro) {
-                ((com.example.unigo_das.activities.MainActivity) requireActivity())
-                        .irRutaEnMapa(centro.getNombre(), centro.getLatitud(), centro.getLongitud());
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Ruta al campus")
+                        .setIcon(R.drawable.ic_menu_school) // Añade el icono para hacerlo más visual
+                        .setMessage("¿Quieres abrir el mapa para ver cómo llegar a " + centro.getNombre() + "?")
+                        .setPositiveButton("Sí, trazar ruta", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ((com.example.unigo_das.activities.MainActivity) requireActivity())
+                                        .irRutaEnMapa(centro.getNombre(), centro.getLatitud(), centro.getLongitud());
+                            }
+                        })
+                        .setNegativeButton("Cancelar", null)
+                        .show();
             }
         });
         rvCentros.setAdapter(adapter);
@@ -95,7 +108,6 @@ public class SchoolFragment extends Fragment {
         btnFiltroEHU.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // CORRECCIÓN: El string debe coincidir exactamente con la base de datos ("UPV/EHU")
                 filtroUniversidadActual = "UPV/EHU";
                 aplicarFiltrosCombinados();
                 actualizarBotonActivo(btnFiltroEHU);
@@ -157,7 +169,6 @@ public class SchoolFragment extends Fragment {
         for (Centro c : listaOriginalCompletita) {
             boolean pasaFiltroUni = filtroUniversidadActual.equals("Todas") || c.getUniversidad().equals(filtroUniversidadActual);
 
-            // CORRECCIÓN: Añadida la comprobación "c.getUniversidad()" al buscador de texto
             boolean pasaFiltroTexto = c.getNombre().toLowerCase().contains(busquedaActual.toLowerCase()) ||
                     (c.getDescripcion() != null && c.getDescripcion().toLowerCase().contains(busquedaActual.toLowerCase())) ||
                     c.getUniversidad().toLowerCase().contains(busquedaActual.toLowerCase());

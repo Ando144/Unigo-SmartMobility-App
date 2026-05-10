@@ -19,7 +19,7 @@ android {
     }
 
     buildFeatures {
-        buildConfig = true // Añadir para habilitar BuildConfig
+        buildConfig = true
     }
 
     buildTypes {

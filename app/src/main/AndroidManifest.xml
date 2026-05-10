@@ -44,6 +44,10 @@
         </activity>
         <activity android:name=".activities.MainActivity" />
         <activity android:name=".activities.RegisterActivity" />
+        <activity
+            android:name=".activities.HeatmapActivity"
+            android:theme="@style/TemaVentanaFlotante"
+            android:exported="false" />
     </application>
 
 </manifest>

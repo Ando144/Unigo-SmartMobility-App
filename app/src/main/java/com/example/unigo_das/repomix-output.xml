@@ -1,0 +1,2846 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+activities/LoginActivity.java
+activities/MainActivity.java
+activities/RegisterActivity.java
+adapters/CentroAdapter.java
+db/DataBaseHelper.java
+fragments/AccountDetailFragment.java
+fragments/LanguageDialogFragment.java
+fragments/MapFragment.java
+fragments/ProfileDialogFragment.java
+fragments/ProfileHeaderPreference.java
+fragments/SchoolFragment.java
+fragments/SettingsFragment.java
+fragments/WeatherFragment.java
+item/Centro.java
+item/Parada.java
+network/NetworkWorker.java
+UnigoApplication.java
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="activities/LoginActivity.java">
+package com.example.unigo_das.activities;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.network.NetworkWorker;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.util.UUID;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private EditText etEmail, etPassword;
+    private Button btnLogin, btnRegister, btnGuest;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        btnRegister = findViewById(R.id.btnRegister);
+        btnGuest = findViewById(R.id.btnGuest);
+
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = etEmail.getText().toString().trim();
+                String pass = etPassword.getText().toString().trim();
+
+                if (!email.isEmpty() && !pass.isEmpty()) {
+                    ejecutarLogin(email, pass);
+                } else {
+                    Toast.makeText(LoginActivity.this, "Por favor, llena los campos", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        btnRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnGuest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                marcarEstadoUsuario(true);
+                irAMainActivity();
+            }
+        });
+    }
+
+    private void ejecutarLogin(String email, String password) {
+        Data inputData = new Data.Builder()
+                .putString("script", "login.php")
+                .putString("email", email)
+                .putString("password", password)
+                .build();
+
+        OneTimeWorkRequest loginRequest = new OneTimeWorkRequest.Builder(NetworkWorker.class)
+                .setInputData(inputData)
+                .build();
+
+        WorkManager.getInstance(this).enqueue(loginRequest);
+
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(loginRequest.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                            String response = workInfo.getOutputData().getString("response");
+                            procesarRespuestaLogin(response);
+                        } else {
+                            String errorResponse = workInfo.getOutputData().getString("response");
+                            procesarError(errorResponse);
+                        }
+                    }
+                });
+    }
+
+    private void procesarRespuestaLogin(String jsonResponse) {
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(jsonResponse);
+            
+            if (json.containsKey("success") && (Boolean) json.get("success")) {
+                String nombre = (String) json.get("nombre");
+                Toast.makeText(this, "Bienvenido " + nombre, Toast.LENGTH_SHORT).show();
+                
+                marcarEstadoUsuario(false);
+                irAMainActivity();
+            } else {
+                String error = (String) json.get("error");
+                Toast.makeText(this, "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        } catch (ParseException e) {
+            Toast.makeText(this, "Error al procesar respuesta del servidor", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void procesarError(String errorResponse) {
+        if (errorResponse != null) {
+            try {
+                JSONParser parser = new JSONParser();
+                JSONObject json = (JSONObject) parser.parse(errorResponse);
+                String error = (String) json.get("error");
+                Toast.makeText(this, error != null ? error : "Error en la conexión", Toast.LENGTH_SHORT).show();
+            } catch (ParseException e) {
+                Toast.makeText(this, "Error de red o credenciales incorrectas", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Error de conexión con el servidor", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void irAMainActivity() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void marcarEstadoUsuario(boolean esInvitado) {
+        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("isGuest", esInvitado);
+        editor.apply();
+    }
+}
+</file>
+
+<file path="activities/MainActivity.java">
+package com.example.unigo_das.activities;
+
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.MenuItem;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.db.DataBaseHelper;
+import com.example.unigo_das.fragments.MapFragment;
+import com.example.unigo_das.fragments.SchoolFragment;
+import com.example.unigo_das.fragments.SettingsFragment;
+import com.example.unigo_das.fragments.WeatherFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+
+public class MainActivity extends AppCompatActivity {
+
+    private FragmentManager fm;
+    private WindowInsetsControllerCompat insetsController;
+    private static final String KEY_SELECTED_TAB = "selected_tab_id";
+
+    private Bundle mapArgs = null;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Forzar actualización de textos en BD según el idioma actual
+        inicializarCampus();
+        inicializarParadasTransporte();
+
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        insetsController = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        fm = getSupportFragmentManager();
+
+        // 1. Establecer el listener PRIMERO
+        bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                navegarA(item.getItemId());
+                return true;
+            }
+        });
+
+        // 2. Manejar el estado inicial o la recreación
+        if (savedInstanceState == null) {
+            bottomNav.setSelectedItemId(R.id.nav_map);
+        } else {
+            int selectedId = savedInstanceState.getInt(KEY_SELECTED_TAB, R.id.nav_map);
+            // Esto dispara el listener que llama a navegarA() automáticamente
+            bottomNav.setSelectedItemId(selectedId);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        if (bottomNav != null) {
+            outState.putInt(KEY_SELECTED_TAB, bottomNav.getSelectedItemId());
+        }
+    }
+
+    private void navegarA(int itemId) {
+        FragmentTransaction transaction = fm.beginTransaction();
+        String tag = "";
+        Fragment targetFragment = null;
+
+        // Identificamos el tag según la opción seleccionada
+        if (itemId == R.id.nav_map) tag = "map";
+        else if (itemId == R.id.nav_school) tag = "school";
+        else if (itemId == R.id.nav_weather) tag = "weather";
+        else if (itemId == R.id.nav_settings) tag = "settings";
+
+        // Buscamos si el fragmento ya existe en la memoria
+        targetFragment = fm.findFragmentByTag(tag);
+
+        // Ocultamos todos los fragmentos activos
+        for (Fragment frag : fm.getFragments()) {
+            if (frag.isVisible()) {
+                transaction.hide(frag);
+            }
+        }
+
+        // Si NO existe, lo instanciamos y lo AGREGAMOS (add en vez de replace)
+        if (targetFragment == null) {
+            if (itemId == R.id.nav_map) {
+                targetFragment = new MapFragment();
+                // Si es la primera vez que creamos el mapa y hay una ruta pendiente:
+                if (mapArgs != null) {
+                    targetFragment.setArguments(mapArgs);
+                    mapArgs = null;
+                }
+            } else if (itemId == R.id.nav_school) {
+                targetFragment = new SchoolFragment();
+            } else if (itemId == R.id.nav_weather) {
+                targetFragment = new WeatherFragment();
+            } else if (itemId == R.id.nav_settings) {
+                targetFragment = new SettingsFragment();
+            }
+            transaction.add(R.id.fragment_container, targetFragment, tag);
+        }
+        // Si YA EXISTE, simplemente lo MOSTRAMOS
+        else {
+            transaction.show(targetFragment);
+
+            // Si volvemos al mapa existente y hay una petición de ruta pendiente:
+            if (itemId == R.id.nav_map && mapArgs != null) {
+                ((MapFragment) targetFragment).dibujarLineaHastaDestino(
+                        mapArgs.getString("destino_nombre"),
+                        mapArgs.getDouble("destino_lat"),
+                        mapArgs.getDouble("destino_lng"),
+                        "walking" // Por defecto en walking
+                );
+                mapArgs = null; // Limpiamos tras consumir
+            }
+        }
+
+        syncStatusBar(itemId);
+        transaction.commit();
+    }
+
+    private void syncStatusBar(int itemId) {
+        if (itemId == R.id.nav_map) {
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            if (insetsController != null) insetsController.setAppearanceLightStatusBars(true);
+        } else {
+            getWindow().setStatusBarColor(Color.parseColor("#333333"));
+            if (insetsController != null) insetsController.setAppearanceLightStatusBars(false);
+        }
+    }
+
+    public void irRutaEnMapa(String nombreCentro, double latDestino, double lngDestino) {
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+
+        // 1. Guardamos la petición de ruta
+        mapArgs = new Bundle();
+        mapArgs.putString("destino_nombre", nombreCentro);
+        mapArgs.putDouble("destino_lat", latDestino);
+        mapArgs.putDouble("destino_lng", lngDestino);
+
+        // 2. Si ya estamos en la pestaña del mapa, lo dibujamos directamente
+        if (bottomNav.getSelectedItemId() == R.id.nav_map) {
+            MapFragment mapFragment = (MapFragment) fm.findFragmentByTag("map");
+            if (mapFragment != null) {
+                mapFragment.dibujarLineaHastaDestino(nombreCentro, latDestino, lngDestino, "walking");
+                mapArgs = null; // Lo limpiamos para que no lo repita
+            }
+        } else {
+            // 3. Si estamos en otra pestaña, forzamos el cambio al mapa.
+            // Esto dispara el Listener -> navegarA() -> Muestra el mapa y detecta el mapArgs
+            bottomNav.setSelectedItemId(R.id.nav_map);
+        }
+    }
+
+    private void inicializarCampus() {
+        DataBaseHelper dbHelper = new DataBaseHelper(this);
+        dbHelper.insertarCentro("EHU_345", getString(R.string.centro_ehu_ingenieria_bilbao), "UPV/EHU", "Sede principal...", "San Mamés", 43.2638, -2.9511);
+        dbHelper.insertarCentro("EHU_363", getString(R.string.centro_ehu_ingenieria_bilbao), "UPV/EHU", "Centro especializado...", "San Mamés", 43.2638, -2.9511);
+        dbHelper.insertarCentro("EHU_364", getString(R.string.centro_ehu_ingenieria_bilbao), "UPV/EHU", "Instalaciones...", "San Mamés", 43.2638, -2.9511);
+        dbHelper.insertarCentro("EHU_350", getString(R.string.centro_ehu_ingenieria_bilbao), "UPV/EHU", "Escuela técnica...", "Portugalete", 43.3308, -3.0186);
+        dbHelper.insertarCentro("EHU_320", getString(R.string.centro_ehu_bellas_artes), "UPV/EHU", "Facultad...", "Leioa", 43.3301, -2.9678);
+        dbHelper.insertarCentro("EHU_310", getString(R.string.centro_ehu_ciencia_tecnologia), "UPV/EHU", "Centro de referencia...", "Leioa", 43.3301, -2.9678);
+        dbHelper.insertarCentro("EHU_323", getString(R.string.centro_ehu_ciencias_sociales_comunicacion), "UPV/EHU", "Campus centrado...", "Leioa", 43.3301, -2.9678);
+        dbHelper.insertarCentro("EHU_324", getString(R.string.centro_ehu_derecho), "UPV/EHU", "Facultad especializada...", "Leioa", 43.3301, -2.9678);
+        dbHelper.insertarCentro("EHU_321", getString(R.string.centro_ehu_economia_empresa), "UPV/EHU", "Principal centro...", "Sarriko", 43.2721, -2.9566);
+        dbHelper.insertarCentro("EHU_351", getString(R.string.centro_ehu_economia_empresa_elcano), "UPV/EHU", "Escuela universitaria...", "Bilbao Centro", 43.2642, -2.9355);
+        dbHelper.insertarCentro("EHU_354", getString(R.string.centro_ehu_educacion_bilbao), "UPV/EHU", "Centro dedicado...", "Leioa", 43.3301, -2.9678);
+        dbHelper.insertarCentro("EHU_327", getString(R.string.centro_ehu_medicina_enfermeria), "UPV/EHU", "Facultad dedicada...", "Leioa", 43.3301, -2.9678);
+        dbHelper.insertarCentro("EHU_352", getString(R.string.centro_ehu_medicina_enfermeria), "UPV/EHU", "Instalaciones...", "Leioa", 43.3301, -2.9678);
+        dbHelper.insertarCentro("EHU_332", getString(R.string.centro_ehu_unidad_docente_medicina), "UPV/EHU", "Centro hospitalario...", "Galdakao", 43.2289, -2.8360);
+        dbHelper.insertarCentro("EHU_328", getString(R.string.centro_ehu_unidad_docente_medicina), "UPV/EHU", "Unidad docente...", "Basurto", 43.2605, -2.9490);
+        dbHelper.insertarCentro("EHU_329", getString(R.string.centro_ehu_unidad_docente_medicina), "UPV/EHU", "Formación práctica...", "Cruces", 43.2847, -2.9829);
+        dbHelper.insertarCentro("EHU_EXP", getString(R.string.centro_ehu_aulas_experiencia), "UPV/EHU", "Espacio universitario...", "Casco Viejo", 43.2576, -2.9238);
+
+        dbHelper.insertarCentro("MU_BBF_EMP", getString(R.string.centro_mu_bbf_empresariales), "Mondragon", "Ecosistema...", "Uribitarte", 43.2665, -2.9304);
+        dbHelper.insertarCentro("MU_BBF_LEINN", getString(R.string.centro_mu_bbf_leinn), "Mondragon", "Centro especializado...", "Uribitarte", 43.2665, -2.9304);
+        dbHelper.insertarCentro("MU_AS_POL", getString(R.string.centro_mu_as_politecnica), "Mondragon", "Escuela politécnica...", "Zorrotzaurre", 43.2764, -2.9642);
+        dbHelper.insertarCentro("MU_AS_HUM", getString(R.string.centro_mu_as_humanidades), "Mondragon", "Facultad de humanidades...", "Zorrotzaurre", 43.2764, -2.9642);
+
+        dbHelper.insertarCentro("DEU_DBS", getString(R.string.centro_deusto_business), "Deusto", "Histórica escuela...", "Deusto", 43.2713, -2.9379);
+        dbHelper.insertarCentro("DEU_DER", getString(R.string.centro_deusto_derecho), "Deusto", "Centro de referencia...", "Deusto", 43.2713, -2.9379);
+        dbHelper.insertarCentro("DEU_CSH", getString(R.string.centro_deusto_sociales_humanas), "Deusto", "Facultad dedicada...", "Deusto", 43.2713, -2.9379);
+        dbHelper.insertarCentro("DEU_ING", getString(R.string.centro_deusto_ingenieria), "Deusto", "Campus tecnológico...", "Deusto", 43.2713, -2.9379);
+        dbHelper.insertarCentro("DEU_EDU", getString(R.string.centro_deusto_educacion_deporte), "Deusto", "Formación superior...", "Deusto", 43.2713, -2.9379);
+        dbHelper.insertarCentro("DEU_SAL", getString(R.string.centro_deusto_salud), "Deusto", "Nueva facultad...", "Deusto", 43.2713, -2.9379);
+        dbHelper.insertarCentro("DEU_CSC", getString(R.string.centro_deusto_sociales_comunicacion), "Deusto", "Especialidad en comunicación...", "Deusto", 43.2713, -2.9379);
+    }
+
+    private void inicializarParadasTransporte() {
+        DataBaseHelper dbHelper = new DataBaseHelper(this);
+        if (dbHelper.paradasEstaVacia()) {
+            java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newSingleThreadExecutor();
+            executor.execute(() -> {
+                try {
+                    String[] archivosAssets = getAssets().list("");
+                    java.util.List<com.example.unigo_das.item.Parada> paradasAInsertar = new java.util.ArrayList<>();
+                    for (String nombreArchivo : archivosAssets) {
+                        if (nombreArchivo != null && nombreArchivo.endsWith(".json")) {
+                            java.io.InputStream is = getAssets().open(nombreArchivo);
+                            byte[] buffer = new byte[is.available()];
+                            is.read(buffer);
+                            is.close();
+                            String jsonString = new String(buffer, "UTF-8");
+                            org.json.JSONObject objetoRaiz = new org.json.JSONObject(jsonString);
+                            if (objetoRaiz.has("listaParadas")) {
+                                org.json.JSONArray jsonArray = objetoRaiz.getJSONArray("listaParadas");
+                                for (int i = 0; i < jsonArray.length(); i++) {
+                                    org.json.JSONObject obj = jsonArray.getJSONObject(i);
+                                    String id = obj.optString("id", nombreArchivo + "_" + i);
+                                    String nombre = obj.optString("nombre", "Desconocida");
+                                    String tipo = obj.optString("tipo", "Transporte");
+                                    double lat = obj.optDouble("latitud", 0.0);
+                                    double lon = obj.optDouble("longitud", 0.0);
+                                    paradasAInsertar.add(new com.example.unigo_das.item.Parada(id, nombre, tipo, lat, lon));
+                                }
+                            }
+                        }
+                    }
+                    dbHelper.insertarParadasMasivas(paradasAInsertar);
+                } catch (Exception e) { e.printStackTrace(); }
+            });
+        }
+    }
+
+}
+</file>
+
+<file path="activities/RegisterActivity.java">
+package com.example.unigo_das.activities;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.network.NetworkWorker;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+public class RegisterActivity extends AppCompatActivity {
+
+    private TextInputEditText etNombreReg, etEmailReg, etPasswordReg;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+        etNombreReg = findViewById(R.id.etNombreReg);
+        etEmailReg = findViewById(R.id.etEmailReg);
+        etPasswordReg = findViewById(R.id.etPasswordReg);
+        MaterialButton btnDoRegister = findViewById(R.id.btnDoRegister);
+        MaterialButton btnBackToLogin = findViewById(R.id.btnBackToLogin);
+
+        btnDoRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String nombre = etNombreReg.getText() != null ? etNombreReg.getText().toString().trim() : "";
+                String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
+                String pass = etPasswordReg.getText() != null ? etPasswordReg.getText().toString().trim() : "";
+
+                if (!nombre.isEmpty() && !email.isEmpty() && !pass.isEmpty()) {
+                    ejecutarRegistro(nombre, email, pass);
+                } else {
+                    Toast.makeText(RegisterActivity.this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        btnBackToLogin.setOnClickListener(v -> finish());
+    }
+
+    private void ejecutarRegistro(String username, String email, String password) {
+        Data inputData = new Data.Builder()
+                .putString("script", "registro.php")
+                .putString("username", username)
+                .putString("email", email)
+                .putString("password", password)
+                .build();
+
+        OneTimeWorkRequest registerRequest = new OneTimeWorkRequest.Builder(NetworkWorker.class)
+                .setInputData(inputData)
+                .build();
+
+        WorkManager.getInstance(this).enqueue(registerRequest);
+
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(registerRequest.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        String response = workInfo.getOutputData().getString("response");
+                        if (response != null && !response.isEmpty()) {
+                            procesarRespuestaServidor(response);
+                        } else {
+                            Toast.makeText(this, "Fallo crítico: Respuesta vacía del servidor (PHP Crash)", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    private void procesarRespuestaServidor(String jsonResponse) {
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(jsonResponse);
+
+            if (json.containsKey("success") && (Boolean) json.get("success")) {
+                Toast.makeText(this, "¡Usuario registrado!", Toast.LENGTH_SHORT).show();
+                marcarEstadoUsuario();
+                irAMainActivity();
+            } else {
+                String error = (String) json.get("error");
+                Toast.makeText(this, "Error: " + (error != null ? error : "Fallo"), Toast.LENGTH_LONG).show();
+            }
+        } catch (ParseException e) {
+            // Si el servidor escupe un error de PHP (HTML), lo verás aquí
+            Toast.makeText(this, "ERROR SERVIDOR: " + jsonResponse, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void irAMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void marcarEstadoUsuario() {
+        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("isGuest", false);
+        editor.apply();
+    }
+}
+</file>
+
+<file path="adapters/CentroAdapter.java">
+package com.example.unigo_das.adapters;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.item.Centro;
+
+public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroViewHolder> implements Filterable {
+
+    private List<Centro> centroListFull;
+    private List<Centro> centroList;
+    private OnStarClickListener starClickListener;
+    private OnItemClickListener itemListener;
+
+    // Interfaz para avisar al Fragment cuando se pulsa una estrella
+    public interface OnStarClickListener {
+        void onStarClick(Centro centro, int position);
+    }
+
+    // Interfaz para el clic en toda la tarjeta
+    public interface OnItemClickListener {
+        void onItemClick(Centro centro);
+    }
+
+    // El constructor ahora recibe ambas interfaces
+    public CentroAdapter(List<Centro> centroList, OnStarClickListener starListener, OnItemClickListener itemListener) {
+        this.centroListFull = new ArrayList<>(centroList);
+        this.centroList = centroList;
+        this.starClickListener = starListener;
+        this.itemListener = itemListener;
+    }
+
+    @NonNull
+    @Override
+    public CentroViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_centro, parent, false);
+        return new CentroViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull CentroViewHolder holder, int position) {
+        final int currentPosition = position;
+        final Centro centro = centroList.get(currentPosition);
+
+        holder.tvNombre.setText(centro.getNombre());
+
+        // ACTUALIZADO: Ya no concatenamos "ubicación", solo mostramos la Universidad
+        holder.tvUniUbi.setText(centro.getUbicacion());
+        String uni = centro.getUniversidad();
+
+        // Limpiamos cualquier tinte
+        holder.ivLogo.clearColorFilter();
+
+        if ("UPV/EHU".equals(uni) || "EHU".equals(uni)) {
+            holder.ivLogo.setImageResource(R.drawable.logo_ehu);
+        } else if ("Deusto".equals(uni)) {
+            holder.ivLogo.setImageResource(R.drawable.logo_deusto);
+        } else if ("Mondragon".equals(uni)) {
+            holder.ivLogo.setImageResource(R.drawable.logo_mondragon);
+        } else {
+            // Si no hay logo, usamos el birrete genérico
+            holder.ivLogo.setImageResource(R.drawable.ic_menu_school);
+            holder.ivLogo.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.bilbao_grey_dark));
+        }
+
+        if (centro.isStarred()) {
+            holder.ivStar.setImageResource(android.R.drawable.btn_star_big_on);
+            holder.ivStar.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.bilbao_red));
+        } else {
+            holder.ivStar.setImageResource(android.R.drawable.btn_star_big_off);
+            holder.ivStar.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.bilbao_grey_light));
+        }
+
+        // Clic de la estrella con sintaxis clásica
+        holder.ivStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                centro.setStarred(!centro.isStarred());
+                notifyItemChanged(currentPosition);
+                if (starClickListener != null) {
+                    starClickListener.onStarClick(centro, currentPosition);
+                }
+            }
+        });
+
+        // Evento de clic para TODA la tarjeta (Activa la ruta en el mapa)
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (itemListener != null) {
+                    itemListener.onItemClick(centro);
+                }
+            }
+        });
+
+        // --- LÓGICA DEL DESPLEGABLE ---
+        // ACTUALIZADO: Usamos la nueva "descripcion" en lugar de "infoTransporte"
+        holder.tvTransporteInfo.setText(centro.getDescripcion());
+
+        // Mostrar u ocultar según el estado y rotar flecha
+        if (centro.isExpanded()) {
+            holder.layoutTransporte.setVisibility(View.VISIBLE);
+            holder.ivExpand.setRotation(180f); // La flecha apunta hacia arriba
+        } else {
+            holder.layoutTransporte.setVisibility(View.GONE);
+            holder.ivExpand.setRotation(0f); // La flecha apunta hacia abajo
+        }
+
+        // Clic del icono de información con sintaxis clásica
+        holder.ivExpand.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                centro.setExpanded(!centro.isExpanded());
+                notifyItemChanged(currentPosition);
+            }
+        });
+    }
+
+    @Override
+    public int getItemCount() {
+        return centroList.size();
+    }
+
+    public void actualizarListaCompleta(List<Centro> nuevaLista) {
+        this.centroList = nuevaLista;
+        notifyDataSetChanged();
+    }
+
+    // Buscador
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                List<Centro> filteredList = new ArrayList<>();
+                if (constraint == null || constraint.length() == 0) {
+                    filteredList.addAll(centroListFull);
+                } else {
+                    String filterPattern = constraint.toString().toLowerCase().trim();
+                    for (Centro item : centroListFull) {
+                        // ACTUALIZADO: Buscamos también dentro de la "descripcion"
+                        if (item.getNombre().toLowerCase().contains(filterPattern) ||
+                                item.getUniversidad().toLowerCase().contains(filterPattern) ||
+                                (item.getDescripcion() != null && item.getDescripcion().toLowerCase().contains(filterPattern))) {
+                            filteredList.add(item);
+                        }
+                    }
+                }
+                FilterResults results = new FilterResults();
+                results.values = filteredList;
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                centroList.clear();
+                centroList.addAll((List) results.values);
+                notifyDataSetChanged();
+            }
+        };
+    }
+
+    static class CentroViewHolder extends RecyclerView.ViewHolder {
+        TextView tvNombre, tvUniUbi, tvTransporteInfo;
+        ImageView ivStar, ivLogo, ivExpand;
+        View layoutTransporte;
+
+        CentroViewHolder(View itemView) {
+            super(itemView);
+            tvNombre = itemView.findViewById(R.id.tvNombreCentro);
+            tvUniUbi = itemView.findViewById(R.id.tvUniUbi);
+            tvTransporteInfo = itemView.findViewById(R.id.tvTransporteInfo);
+            ivStar = itemView.findViewById(R.id.ivStar);
+            ivLogo = itemView.findViewById(R.id.ivLogoCentro);
+            ivExpand = itemView.findViewById(R.id.ivExpand);
+            layoutTransporte = itemView.findViewById(R.id.layoutTransporte);
+        }
+    }
+}
+</file>
+
+<file path="db/DataBaseHelper.java">
+package com.example.unigo_das.db;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import androidx.annotation.Nullable;
+import com.example.unigo_das.item.Centro;
+import java.util.ArrayList;
+import java.util.List;
+import com.example.unigo_das.item.Parada;
+
+public class DataBaseHelper extends SQLiteOpenHelper {
+
+    private static final String DATABASE_NAME = "Unigo.db";
+    private static final int DATABASE_VERSION = 3; // SUBIMOS A VERSIÓN 3
+
+    public DataBaseHelper(@Nullable Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.execSQL("CREATE TABLE Usuarios (" +
+                "id_usuario INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                "nombre VARCHAR(255), " +
+                "email VARCHAR(255) UNIQUE, " +
+                "password VARCHAR(255))");
+
+        sqLiteDatabase.execSQL("CREATE TABLE Centros (" +
+                "id_centro VARCHAR(255) PRIMARY KEY, " +
+                "nombre VARCHAR(255), " +
+                "universidad VARCHAR(255), " +
+                "descripcion TEXT, " +
+                "ubicacion VARCHAR(255), " +
+                "latitud REAL, " +
+                "longitud REAL)");
+
+        sqLiteDatabase.execSQL("CREATE TABLE Favoritos (" +
+                "id_usuario INTEGER, " +
+                "id_centro VARCHAR(255), " +
+                "PRIMARY KEY (id_usuario, id_centro), " +
+                "FOREIGN KEY(id_usuario) REFERENCES Usuarios(id_usuario) ON DELETE CASCADE, " +
+                "FOREIGN KEY(id_centro) REFERENCES Centros(id_centro) ON DELETE CASCADE)");
+
+        sqLiteDatabase.execSQL("CREATE TABLE Paradas (" +
+                "id_parada VARCHAR(255) PRIMARY KEY, " +
+                "nombre VARCHAR(255), " +
+                "tipo_transporte VARCHAR(255), " +
+                "latitud REAL, " +
+                "longitud REAL)");
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Favoritos");
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Paradas");
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Centros");
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Usuarios");
+        onCreate(sqLiteDatabase);
+    }
+
+    public boolean insertarUsuario(String nombre, String email, String password) {
+        SQLiteDatabase bd = getWritableDatabase();
+        ContentValues nuevo = new ContentValues();
+        nuevo.put("nombre", nombre);
+        nuevo.put("email", email);
+        nuevo.put("password", password);
+        long resultado = bd.insert("Usuarios", null, nuevo);
+        bd.close();
+        return resultado != -1;
+    }
+
+    public int comprobarLogin(String email, String password) {
+        SQLiteDatabase bd = getReadableDatabase();
+        String[] argumentos = new String[] {email, password};
+        Cursor c = bd.rawQuery("SELECT id_usuario FROM Usuarios WHERE email=? AND password=?", argumentos);
+        int idUsuario = -1;
+        if (c.moveToFirst()) idUsuario = c.getInt(0);
+        c.close();
+        bd.close();
+        return idUsuario;
+    }
+
+    // AÑADIDO PARÁMETRO UBICACION - Modificado para actualizar si ya existe (para cambio de idioma)
+    public boolean insertarCentro(String id_centro, String nombre, String universidad, String descripcion, String ubicacion, double latitud, double longitud) {
+        SQLiteDatabase bd = getWritableDatabase();
+        ContentValues nuevo = new ContentValues();
+        nuevo.put("id_centro", id_centro);
+        nuevo.put("nombre", nombre);
+        nuevo.put("universidad", universidad);
+        nuevo.put("descripcion", descripcion);
+        nuevo.put("ubicacion", ubicacion);
+        nuevo.put("latitud", latitud);
+        nuevo.put("longitud", longitud);
+        
+        // Usamos IGNORE para no fallar si existe, y luego UPDATE para refrescar los campos de texto
+        long resultado = bd.insertWithOnConflict("Centros", null, nuevo, SQLiteDatabase.CONFLICT_IGNORE);
+        if (resultado == -1) {
+            bd.update("Centros", nuevo, "id_centro=?", new String[]{id_centro});
+        }
+        bd.close();
+        return true;
+    }
+
+    public boolean centrosEstaVacia() {
+        SQLiteDatabase bd = getReadableDatabase();
+        Cursor cursor = bd.rawQuery("SELECT COUNT(*) FROM Centros", null);
+        cursor.moveToFirst();
+        int count = cursor.getInt(0);
+        cursor.close();
+        bd.close();
+        return count == 0;
+    }
+
+    public Centro obtenerCentroPorId(String id_centro) {
+        SQLiteDatabase bd = getReadableDatabase();
+        Cursor cursor = bd.rawQuery("SELECT * FROM Centros WHERE id_centro = ?", new String[]{id_centro});
+        Centro centro = null;
+        if (cursor.moveToFirst()) {
+            String id = cursor.getString(cursor.getColumnIndexOrThrow("id_centro"));
+            String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
+            String uni = cursor.getString(cursor.getColumnIndexOrThrow("universidad"));
+            String desc = cursor.getString(cursor.getColumnIndexOrThrow("descripcion"));
+            String ubi = cursor.getString(cursor.getColumnIndexOrThrow("ubicacion"));
+            double lat = cursor.getDouble(cursor.getColumnIndexOrThrow("latitud"));
+            double lon = cursor.getDouble(cursor.getColumnIndexOrThrow("longitud"));
+            centro = new Centro(id, nombre, uni, desc, ubi, lat, lon);
+        }
+        cursor.close();
+        bd.close();
+        return centro;
+    }
+
+    public List<Centro> obtenerTodosLosCentros() {
+        List<Centro> listaCentros = new ArrayList<>();
+        SQLiteDatabase bd = getReadableDatabase();
+        Cursor cursor = bd.rawQuery("SELECT * FROM Centros ORDER BY nombre ASC", null);
+        if (cursor.moveToFirst()) {
+            do {
+                String id = cursor.getString(cursor.getColumnIndexOrThrow("id_centro"));
+                String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
+                String uni = cursor.getString(cursor.getColumnIndexOrThrow("universidad"));
+                String desc = cursor.getString(cursor.getColumnIndexOrThrow("descripcion"));
+                String ubi = cursor.getString(cursor.getColumnIndexOrThrow("ubicacion"));
+                double lat = cursor.getDouble(cursor.getColumnIndexOrThrow("latitud"));
+                double lon = cursor.getDouble(cursor.getColumnIndexOrThrow("longitud"));
+                listaCentros.add(new Centro(id, nombre, uni, desc, ubi, lat, lon));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        bd.close();
+        return listaCentros;
+    }
+
+    public boolean anadirFavorito(int id_usuario, String id_centro) {
+        SQLiteDatabase bd = getWritableDatabase();
+        ContentValues nuevo = new ContentValues();
+        nuevo.put("id_usuario", id_usuario);
+        nuevo.put("id_centro", id_centro);
+        long resultado = bd.insertWithOnConflict("Favoritos", null, nuevo, SQLiteDatabase.CONFLICT_IGNORE);
+        bd.close();
+        return resultado != -1;
+    }
+
+    public void borrarFavorito(int id_usuario, String id_centro) {
+        SQLiteDatabase bd = getWritableDatabase();
+        String[] argumentos = new String[]{String.valueOf(id_usuario), id_centro};
+        bd.delete("Favoritos", "id_usuario=? AND id_centro=?", argumentos);
+        bd.close();
+    }
+
+    public List<String> obtenerIdsFavoritosUsuario(int id_usuario) {
+        List<String> listaFavoritos = new ArrayList<>();
+        SQLiteDatabase bd = getReadableDatabase();
+        String[] argumentos = new String[]{String.valueOf(id_usuario)};
+        Cursor cursor = bd.rawQuery("SELECT id_centro FROM Favoritos WHERE id_usuario=?", argumentos);
+        if (cursor.moveToFirst()) {
+            do {
+                listaFavoritos.add(cursor.getString(0));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        bd.close();
+        return listaFavoritos;
+    }
+
+    public boolean paradasEstaVacia() {
+        SQLiteDatabase bd = getReadableDatabase();
+        Cursor cursor = bd.rawQuery("SELECT COUNT(*) FROM Paradas", null);
+        cursor.moveToFirst();
+        int count = cursor.getInt(0);
+        cursor.close();
+        bd.close();
+        return count == 0;
+    }
+
+    public void insertarParadasMasivas(List<Parada> listaParadas) {
+        SQLiteDatabase bd = getWritableDatabase();
+        bd.beginTransaction();
+        try {
+            for (Parada p : listaParadas) {
+                ContentValues nuevo = new ContentValues();
+                nuevo.put("id_parada", p.getId());
+                nuevo.put("nombre", p.getNombre());
+                nuevo.put("tipo_transporte", p.getTipo());
+                nuevo.put("latitud", p.getLatitud());
+                nuevo.put("longitud", p.getLongitud());
+
+                bd.insertWithOnConflict("Paradas", null, nuevo, SQLiteDatabase.CONFLICT_IGNORE);
+            }
+            bd.setTransactionSuccessful();
+        } finally {
+            bd.endTransaction();
+            bd.close();
+        }
+    }
+}
+</file>
+
+<file path="fragments/AccountDetailFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import com.example.unigo_das.R;
+
+public class AccountDetailFragment extends Fragment {
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_account_detail, container, false);
+
+        TextView tvEmail = view.findViewById(R.id.tvAccountEmail);
+        TextView tvName = view.findViewById(R.id.tvAccountName);
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        tvEmail.setText(prefs.getString("user_email", "usuario@example.com"));
+        tvName.setText(prefs.getString("user_name", "Juan Pérez"));
+
+        view.findViewById(R.id.btnChangePassword).setOnClickListener(v -> {
+            // Sin lógica funcional por ahora
+        });
+
+        return view;
+    }
+}
+</file>
+
+<file path="fragments/LanguageDialogFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.app.Dialog;
+import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
+import androidx.fragment.app.DialogFragment;
+
+import com.example.unigo_das.R;
+
+public class LanguageDialogFragment extends DialogFragment {
+
+    public interface LanguageChangeListener {
+        void onLanguageChanged();
+    }
+
+    private LanguageChangeListener listener;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getParentFragment() instanceof LanguageChangeListener) {
+            listener = (LanguageChangeListener) getParentFragment();
+        } else if (getActivity() instanceof LanguageChangeListener) {
+            listener = (LanguageChangeListener) getActivity();
+        }
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        String[] languages = {
+                getString(R.string.lang_es),
+                getString(R.string.lang_eu),
+                getString(R.string.lang_en)
+        };
+        
+        String[] languageCodes = {"es", "eu", "en"};
+
+        String currentLang = "es";
+        LocaleListCompat currentLocales = AppCompatDelegate.getApplicationLocales();
+        if (!currentLocales.isEmpty()) {
+            currentLang = currentLocales.get(0).getLanguage();
+        }
+        
+        int checkedItem = 0;
+        for (int i = 0; i < languageCodes.length; i++) {
+            if (languageCodes[i].equals(currentLang)) {
+                checkedItem = i;
+                break;
+            }
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        builder.setTitle(R.string.select_language)
+                .setSingleChoiceItems(languages, checkedItem, (dialog, which) -> {
+                    String selectedLang = languageCodes[which];
+                    // Primero cerramos el diálogo
+                    dismiss();
+                    // Luego aplicamos el idioma. AppCompatDelegate recreará la actividad automáticamente.
+                    updateLanguage(selectedLang);
+                });
+
+        return builder.create();
+    }
+
+    private void updateLanguage(String langCode) {
+        LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
+        AppCompatDelegate.setApplicationLocales(appLocales);
+
+        if (listener != null) {
+            listener.onLanguageChanged();
+        }
+    }
+}
+</file>
+
+<file path="fragments/MapFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.BuildConfig;
+import com.example.unigo_das.db.DataBaseHelper;
+import com.example.unigo_das.item.Centro;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Dot;
+import com.google.android.gms.maps.model.Gap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PatternItem;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class MapFragment extends Fragment implements OnMapReadyCallback {
+
+    private GoogleMap campusMap;
+    private ActivityResultLauncher<String[]> locationPermissionRequest;
+
+    // Vistas de UI
+    private View cardBuscadorFalso;
+    private View pantallaBusquedaCompleta;
+    private View headerBusqueda;
+    private ImageView btnCerrarBusqueda;
+    private SearchView searchViewReal;
+    private ListView lvSearchResults;
+
+    // Nuevas Vistas para Tarjeta de Rutas
+    private View cardInfoRutas;
+    private LinearLayout llListaInstrucciones;
+
+    private List<Centro> listaTodosLosCentros;
+    private BuscadorMapaAdapter searchAdapter;
+
+    // Variables de estado
+    private String currentTransportMode = "walking";
+    private LatLng destinoPendiente = null;
+    private String tituloPendiente = null;
+    private LatLng destinoActual = null;
+    private String tituloDestinoActual = null;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        locationPermissionRequest = registerForActivityResult(
+                new ActivityResultContracts.RequestMultiplePermissions(),
+                result -> {
+                    Boolean fineLocationGranted = result.get(Manifest.permission.ACCESS_FINE_LOCATION);
+                    Boolean coarseLocationGranted = result.get(Manifest.permission.ACCESS_COARSE_LOCATION);
+
+                    if ((fineLocationGranted != null && fineLocationGranted) ||
+                            (coarseLocationGranted != null && coarseLocationGranted)) {
+                        activarUbicacionEnMapa();
+                        procesarRutaPendiente();
+                    }
+                }
+        );
+
+        cargarDatosBuscador();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_map, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Enlazamos las vistas
+        cardBuscadorFalso = view.findViewById(R.id.card_buscador_falso);
+        pantallaBusquedaCompleta = view.findViewById(R.id.pantalla_busqueda_completa);
+        headerBusqueda = view.findViewById(R.id.header_busqueda);
+        btnCerrarBusqueda = view.findViewById(R.id.btn_cerrar_busqueda);
+        searchViewReal = view.findViewById(R.id.searchViewReal);
+        lvSearchResults = view.findViewById(R.id.lv_search_results);
+
+        // Enlazamos tarjeta de rutas
+        cardInfoRutas = view.findViewById(R.id.card_info_rutas);
+        llListaInstrucciones = view.findViewById(R.id.ll_lista_instrucciones);
+
+        // Selector de transporte
+        RadioGroup rgModoTransporte = view.findViewById(R.id.rg_modo_transporte);
+        if (rgModoTransporte != null) {
+            rgModoTransporte.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup group, int checkedId) {
+                    if (checkedId == R.id.rb_bici) {
+                        currentTransportMode = "bicycling";
+                    } else if (checkedId == R.id.rb_transporte_publico) {
+                        currentTransportMode = "transit";
+                    } else {
+                        currentTransportMode = "walking";
+                    }
+
+                    // Si ya hay una ruta activa, la recalculamos
+                    if (destinoActual != null && tituloDestinoActual != null) {
+                        dibujarLineaHastaDestino(
+                                tituloDestinoActual,
+                                destinoActual.latitude,
+                                destinoActual.longitude,
+                                currentTransportMode
+                        );
+                    }
+                }
+            });
+        }
+
+        searchAdapter = new BuscadorMapaAdapter(requireContext(), listaTodosLosCentros);
+        lvSearchResults.setAdapter(searchAdapter);
+
+        // --- LÓGICA DEL BUSCADOR ---
+        cardBuscadorFalso.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pantallaBusquedaCompleta.setVisibility(View.VISIBLE);
+                searchViewReal.requestFocus();
+
+                InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null) {
+                    imm.showSoftInput(searchViewReal.findFocus(), InputMethodManager.SHOW_IMPLICIT);
+                }
+            }
+        });
+
+        btnCerrarBusqueda.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cerrarPantallaBusqueda();
+            }
+        });
+
+        searchViewReal.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchViewReal.clearFocus();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                searchAdapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+
+        lvSearchResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Centro centroSeleccionado = searchAdapter.getItem(position);
+
+                if (centroSeleccionado != null) {
+                    cerrarPantallaBusqueda();
+                    dibujarLineaHastaDestino(
+                            centroSeleccionado.getNombre(),
+                            centroSeleccionado.getLatitud(),
+                            centroSeleccionado.getLongitud(),
+                            currentTransportMode
+                    );
+                }
+            }
+        });
+
+        // --- MAPA E INSETS ---
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map_container);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(view, new androidx.core.view.OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat windowInsets) {
+                androidx.core.graphics.Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                ViewGroup.MarginLayoutParams mlp = (ViewGroup.MarginLayoutParams) cardBuscadorFalso.getLayoutParams();
+                mlp.topMargin = insets.top + (int) (16 * getResources().getDisplayMetrics().density);
+                cardBuscadorFalso.setLayoutParams(mlp);
+
+                headerBusqueda.setPadding(0, insets.top, 0, 0);
+
+                return windowInsets;
+            }
+        });
+    }
+
+    private void cerrarPantallaBusqueda() {
+        pantallaBusquedaCompleta.setVisibility(View.GONE);
+        searchViewReal.setQuery("", false);
+        searchViewReal.clearFocus();
+
+        InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(searchViewReal.getWindowToken(), 0);
+        }
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        this.campusMap = googleMap;
+
+        LatLng campusLocationEIB = new LatLng(43.265842, -2.940452);
+        campusMap.moveCamera(CameraUpdateFactory.newLatLngZoom(campusLocationEIB, 15f));
+
+        if (getArguments() != null && getArguments().containsKey("destino_nombre")) {
+            tituloPendiente = getArguments().getString("destino_nombre");
+            destinoPendiente = new LatLng(
+                    getArguments().getDouble("destino_lat"),
+                    getArguments().getDouble("destino_lng")
+            );
+        }
+
+        comprobarPermisosDeUbicacion();
+    }
+
+    private void comprobarPermisosDeUbicacion() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            activarUbicacionEnMapa();
+            procesarRutaPendiente();
+        } else {
+            locationPermissionRequest.launch(new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            });
+        }
+    }
+
+    private void procesarRutaPendiente() {
+        if (destinoPendiente != null && tituloPendiente != null) {
+            dibujarLineaHastaDestino(tituloPendiente, destinoPendiente.latitude, destinoPendiente.longitude, currentTransportMode);
+            destinoPendiente = null;
+            tituloPendiente = null;
+        }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    private void activarUbicacionEnMapa() {
+        if (campusMap != null) {
+            campusMap.setMyLocationEnabled(true);
+            campusMap.getUiSettings().setMyLocationButtonEnabled(true);
+        }
+    }
+
+    public void dibujarLineaHastaDestino(String titulo, double latDestino, double lngDestino, String modoTransporte) {
+        if (campusMap == null) return;
+
+        // Guardamos el destino para posibles recálculos al cambiar de transporte
+        destinoActual = new LatLng(latDestino, lngDestino);
+        tituloDestinoActual = titulo;
+
+        LatLng destino = new LatLng(latDestino, lngDestino);
+        campusMap.clear();
+
+        // Ocultar tarjeta hasta cargar nuevos datos
+        cardInfoRutas.setVisibility(View.GONE);
+        llListaInstrucciones.removeAllViews();
+
+        campusMap.addMarker(new MarkerOptions().position(destino).title(titulo));
+        campusMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destino, 14f));
+
+        com.google.android.gms.location.FusedLocationProviderClient proveedorLocalizacion =
+                com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        try {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                Log.e("UnigoDAS_Location", "Permisos denegados.");
+                return;
+            }
+
+            proveedorLocalizacion.getCurrentLocation(com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY, null)
+                    .addOnSuccessListener(requireActivity(), new com.google.android.gms.tasks.OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null) {
+                                LatLng origen = new LatLng(location.getLatitude(), location.getLongitude());
+                                obtenerRutaRealGoogle(origen, destino, modoTransporte);
+                            } else {
+                                Log.w("UnigoDAS_Location", "Ubicación null. Asegúrate de tener GPS encendido.");
+                            }
+                        }
+                    })
+                    .addOnFailureListener(requireActivity(), new com.google.android.gms.tasks.OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("UnigoDAS_Location", "Error obteniendo ubicación: " + e.getMessage());
+                        }
+                    });
+        } catch (SecurityException e) {
+            Log.e("UnigoDAS_Location", "Sin permisos: " + e.getMessage());
+        }
+    }
+
+    private void obtenerRutaRealGoogle(final LatLng origen, final LatLng destino, final String modoTransporte) {
+        String apiKey = BuildConfig.DIRECTIONS_API_KEY;
+
+        Uri.Builder builderUrl = Uri.parse("https://maps.googleapis.com/maps/api/directions/json").buildUpon();
+        builderUrl.appendQueryParameter("origin", origen.latitude + "," + origen.longitude);
+        builderUrl.appendQueryParameter("destination", destino.latitude + "," + destino.longitude);
+        builderUrl.appendQueryParameter("mode", modoTransporte);
+        builderUrl.appendQueryParameter("key", apiKey);
+
+        if ("transit".equals(modoTransporte)) {
+            builderUrl.appendQueryParameter("departure_time", "now");
+        }
+
+        final String directionsApiUrl = builderUrl.build().toString();
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                HttpURLConnection connection = null;
+                try {
+                    URL url = new URL(directionsApiUrl);
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(5000);
+                    connection.setReadTimeout(5000);
+
+                    int statusCode = connection.getResponseCode();
+                    if (statusCode == 200) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        StringBuilder campusRouteResponse = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            campusRouteResponse.append(line);
+                        }
+                        reader.close();
+
+                        final JSONObject jsonResponse = new JSONObject(campusRouteResponse.toString());
+                        final String apiStatus = jsonResponse.getString("status");
+
+                        if ("OK".equals(apiStatus)) {
+                            JSONArray routes = jsonResponse.getJSONArray("routes");
+                            JSONObject route = routes.getJSONObject(0);
+
+                            final List<SegmentoRuta> listaSegmentos = new ArrayList<>();
+                            final List<LatLng> puntosTotalesParaCamara = new ArrayList<>();
+
+                            if ("transit".equals(modoTransporte)) {
+                                JSONArray legs = route.getJSONArray("legs");
+                                JSONObject leg = legs.getJSONObject(0);
+                                JSONArray steps = leg.getJSONArray("steps");
+
+                                for (int i = 0; i < steps.length(); i++) {
+                                    JSONObject step = steps.getJSONObject(i);
+                                    String travelMode = step.getString("travel_mode");
+                                    String points = step.getJSONObject("polyline").getString("points");
+                                    List<LatLng> decodificados = decodificarPolyline(points);
+                                    puntosTotalesParaCamara.addAll(decodificados);
+
+                                    SegmentoRuta segmento = new SegmentoRuta();
+                                    segmento.puntos = decodificados;
+                                    segmento.esCaminando = "WALKING".equals(travelMode);
+                                    segmento.duracion = step.getJSONObject("duration").getString("text");
+
+                                    JSONObject startLoc = step.getJSONObject("start_location");
+                                    segmento.puntoInicio = new LatLng(startLoc.getDouble("lat"), startLoc.getDouble("lng"));
+
+                                    if (!segmento.esCaminando && step.has("transit_details")) {
+                                        JSONObject transitDetails = step.getJSONObject("transit_details");
+                                        JSONObject lineData = transitDetails.getJSONObject("line");
+
+                                        segmento.paradaOrigen = transitDetails.getJSONObject("departure_stop").getString("name");
+                                        segmento.paradaDestino = transitDetails.getJSONObject("arrival_stop").getString("name");
+                                        segmento.direccion = transitDetails.optString("headsign", "Destino final");
+                                        segmento.numParadas = transitDetails.optString("num_stops", "0");
+
+                                        if (lineData.has("color")) {
+                                            try {
+                                                segmento.color = Color.parseColor(lineData.getString("color"));
+                                            } catch (Exception e) { segmento.color = Color.RED; }
+                                        } else {
+                                            segmento.color = Color.RED;
+                                        }
+
+                                        String nombreVehiculo = "";
+                                        if (lineData.has("vehicle") && lineData.getJSONObject("vehicle").has("name")) {
+                                            nombreVehiculo = lineData.getJSONObject("vehicle").getString("name");
+                                        }
+                                        String nombreLinea = lineData.has("short_name") ? lineData.getString("short_name") : lineData.optString("name", "");
+                                        segmento.tituloInstruccion = nombreVehiculo + " " + nombreLinea;
+                                    } else {
+                                        segmento.color = Color.GRAY;
+                                        segmento.tituloInstruccion = "Andando";
+                                    }
+                                    listaSegmentos.add(segmento);
+                                }
+                            } else {
+                                JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
+                                String points = overviewPolyline.getString("points");
+                                List<LatLng> decodificados = decodificarPolyline(points);
+                                puntosTotalesParaCamara.addAll(decodificados);
+
+                                SegmentoRuta segmentoUnico = new SegmentoRuta();
+                                segmentoUnico.puntos = decodificados;
+                                segmentoUnico.esCaminando = false;
+                                segmentoUnico.color = "bicycling".equals(modoTransporte) ? Color.GREEN : Color.BLUE;
+                                segmentoUnico.duracion = route.getJSONArray("legs").getJSONObject(0).getJSONObject("duration").getString("text");
+                                listaSegmentos.add(segmentoUnico);
+                            }
+
+                            // --- VOLVEMOS AL HILO PRINCIPAL ---
+                            mainHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (campusMap != null && isAdded()) {
+                                        llListaInstrucciones.removeAllViews();
+
+                                        for (SegmentoRuta seg : listaSegmentos) {
+                                            PolylineOptions opcionesLinea = new PolylineOptions()
+                                                    .addAll(seg.puntos)
+                                                    .width(12f)
+                                                    .color(seg.color)
+                                                    .geodesic(true);
+
+                                            TextView tvInstruccion = new TextView(requireContext());
+                                            tvInstruccion.setTextSize(14f);
+                                            tvInstruccion.setPadding(0, 16, 0, 16);
+                                            tvInstruccion.setTextColor(Color.DKGRAY);
+
+                                            if (seg.esCaminando && "transit".equals(modoTransporte)) {
+                                                List<PatternItem> patron = Arrays.asList(new Dot(), new Gap(15f));
+                                                opcionesLinea.pattern(patron);
+                                                tvInstruccion.setText("🚶 Caminar (" + seg.duracion + ")");
+
+                                            } else if (!seg.esCaminando && "transit".equals(modoTransporte)) {
+                                                campusMap.addMarker(new MarkerOptions()
+                                                        .position(seg.puntoInicio)
+                                                        .title(seg.tituloInstruccion)
+                                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+                                                String infoTransporte = "🚆 " + seg.tituloInstruccion + " (" + seg.duracion + ")\n" +
+                                                        "↳ Dirección: " + seg.direccion + "\n" +
+                                                        "↳ Desde: " + seg.paradaOrigen + "\n" +
+                                                        "↳ Hasta: " + seg.paradaDestino + " (" + seg.numParadas + " paradas)";
+
+                                                tvInstruccion.setText(infoTransporte);
+                                                tvInstruccion.setTextColor(seg.color);
+                                                tvInstruccion.setTypeface(null, Typeface.BOLD);
+                                            } else {
+                                                String emoji = "bicycling".equals(modoTransporte) ? "🚲 Bici " : "🚶 Caminar ";
+                                                tvInstruccion.setText(emoji + "(" + seg.duracion + ")");
+                                            }
+
+                                            llListaInstrucciones.addView(tvInstruccion);
+                                            campusMap.addPolyline(opcionesLinea);
+                                        }
+
+                                        if (!listaSegmentos.isEmpty()) {
+                                            cardInfoRutas.setVisibility(View.VISIBLE);
+                                        }
+
+                                        if (!puntosTotalesParaCamara.isEmpty()) {
+                                            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                                            for (LatLng point : puntosTotalesParaCamara) {
+                                                builder.include(point);
+                                            }
+                                            campusMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
+                                        }
+                                    }
+                                }
+                            });
+                        } else {
+                            Log.e("UnigoDAS_Net", "Error API Google (" + apiStatus + ")");
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e("UnigoDAS_Net", "Excepción en red: " + e.getMessage());
+                } finally {
+                    if (connection != null) connection.disconnect();
+                }
+            }
+        });
+    }
+
+    private List<LatLng> decodificarPolyline(String encoded) {
+        List<LatLng> poly = new ArrayList<>();
+        int index = 0, len = encoded.length();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            LatLng p = new LatLng((((double) lat / 1E5)), (((double) lng / 1E5)));
+            poly.add(p);
+        }
+        return poly;
+    }
+
+    private void cargarDatosBuscador() {
+        DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
+        listaTodosLosCentros = dbHelper.obtenerTodosLosCentros();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        searchViewReal = null;
+        campusMap = null;
+    }
+
+    // =======================================================================
+    // Adaptador Personalizado (Buscador Inteligente)
+    // =======================================================================
+    private class BuscadorMapaAdapter extends BaseAdapter implements Filterable {
+        private Context context;
+        private List<Centro> listaOriginal;
+        private List<Centro> listaFiltrada;
+        private CentroFilter filtro;
+
+        public BuscadorMapaAdapter(Context context, List<Centro> lista) {
+            this.context = context;
+            this.listaOriginal = new ArrayList<>(lista);
+            this.listaFiltrada = new ArrayList<>(lista);
+        }
+
+        @Override
+        public int getCount() {
+            return listaFiltrada.size();
+        }
+
+        @Override
+        public Centro getItem(int position) {
+            return listaFiltrada.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false);
+            }
+            TextView textView = convertView.findViewById(android.R.id.text1);
+            textView.setText(getItem(position).getNombre());
+            return convertView;
+        }
+
+        @Override
+        public Filter getFilter() {
+            if (filtro == null) {
+                filtro = new CentroFilter();
+            }
+            return filtro;
+        }
+
+        private class CentroFilter extends Filter {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+                List<Centro> filtrados = new ArrayList<>();
+
+                if (constraint == null || constraint.length() == 0) {
+                    filtrados.addAll(listaOriginal);
+                } else {
+                    String query = constraint.toString().toLowerCase().trim();
+                    for (Centro c : listaOriginal) {
+                        if (c.getNombre().toLowerCase().contains(query) ||
+                                (c.getDescripcion() != null && c.getDescripcion().toLowerCase().contains(query)) ||
+                                c.getUniversidad().toLowerCase().contains(query)) {
+                            filtrados.add(c);
+                        }
+                    }
+                }
+                results.values = filtrados;
+                results.count = filtrados.size();
+                return results;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                listaFiltrada.clear();
+                if (results.values != null) {
+                    listaFiltrada.addAll((List<Centro>) results.values);
+                }
+                notifyDataSetChanged();
+            }
+        }
+    }
+
+    // =======================================================================
+    // Clase auxiliar para guardar los trozos de la ruta
+    // =======================================================================
+    private static class SegmentoRuta {
+        List<LatLng> puntos;
+        int color;
+        boolean esCaminando;
+        String tituloInstruccion;
+        LatLng puntoInicio;
+
+        String duracion;
+        String paradaOrigen;
+        String paradaDestino;
+        String direccion;
+        String numParadas;
+    }
+}
+</file>
+
+<file path="fragments/ProfileDialogFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.app.Dialog;
+import android.content.Intent;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
+import com.example.unigo_das.R;
+
+public class ProfileDialogFragment extends DialogFragment {
+
+    public interface ProfileAction {
+        void onRemovePhoto();
+    }
+
+    private ProfileAction listener;
+
+    public void setListener(ProfileAction listener) {
+        this.listener = listener;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        builder.setTitle(R.string.profile_image_options)
+                .setItems(new CharSequence[]{getString(R.string.remove_photo), getString(R.string.change_photo)}, (dialog, which) -> {
+                    if (which == 0) {
+                        if (listener != null) listener.onRemovePhoto();
+                    } else {
+                        openGallery();
+                    }
+                });
+        return builder.create();
+    }
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        getActivity().startActivityForResult(intent, 1001); // Simplified for this context
+    }
+}
+</file>
+
+<file path="fragments/ProfileHeaderPreference.java">
+package com.example.unigo_das.fragments;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.AttributeSet;
+import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
+
+import com.example.unigo_das.R;
+
+public class ProfileHeaderPreference extends Preference {
+
+    public ProfileHeaderPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        setLayoutResource(R.layout.preference_profile_header);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        
+        ImageView profileImage = (ImageView) holder.findViewById(R.id.profile_image);
+        if (profileImage != null) {
+            SharedPreferences prefs = getContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+            boolean isGuest = prefs.getBoolean("isGuest", true);
+            
+            // Lógica: Si es invitado, silueta. Si no, podrías cargar la foto real.
+            profileImage.setImageResource(R.drawable.ic_account_circle);
+        }
+    }
+}
+</file>
+
+<file path="fragments/SchoolFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.adapters.CentroAdapter;
+import com.example.unigo_das.db.DataBaseHelper;
+import com.example.unigo_das.item.Centro;
+
+public class SchoolFragment extends Fragment {
+
+    private RecyclerView rvCentros;
+    private CentroAdapter adapter;
+    private List<Centro> listaCentros;
+    private List<Centro> listaOriginalCompletita;
+    private SearchView searchView;
+
+    private android.widget.Button btnFiltroTodas, btnFiltroEHU, btnFiltroDeusto, btnFiltroMondragon;
+
+    private DataBaseHelper dbHelper;
+
+    private String filtroUniversidadActual = "Todas";
+    private String busquedaActual = "";
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_school, container, false);
+
+        ViewCompat.setOnApplyWindowInsetsListener(view, new androidx.core.view.OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat windowInsets) {
+                int topInset = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
+                v.setPadding(0, topInset, 0, 0);
+                return windowInsets;
+            }
+        });
+
+        rvCentros = view.findViewById(R.id.rvCentros);
+        searchView = view.findViewById(R.id.searchViewCentros);
+
+        dbHelper = new DataBaseHelper(requireContext());
+
+        cargarDatosDesdeBD();
+
+        rvCentros.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        adapter = new CentroAdapter(listaCentros, new CentroAdapter.OnStarClickListener() {
+            @Override
+            public void onStarClick(Centro centro, int position) {
+                guardarFavorito(centro);
+                ordenarLista();
+            }
+        }, new CentroAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Centro centro) {
+                ((com.example.unigo_das.activities.MainActivity) requireActivity())
+                        .irRutaEnMapa(centro.getNombre(), centro.getLatitud(), centro.getLongitud());
+            }
+        });
+        rvCentros.setAdapter(adapter);
+
+        btnFiltroTodas = view.findViewById(R.id.btnFiltroTodas);
+        btnFiltroEHU = view.findViewById(R.id.btnFiltroEHU);
+        btnFiltroDeusto = view.findViewById(R.id.btnFiltroDeusto);
+        btnFiltroMondragon = view.findViewById(R.id.btnFiltroMondragon);
+
+        actualizarBotonActivo(btnFiltroTodas);
+
+        btnFiltroTodas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filtroUniversidadActual = "Todas";
+                aplicarFiltrosCombinados();
+                actualizarBotonActivo(btnFiltroTodas);
+            }
+        });
+
+        btnFiltroEHU.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // CORRECCIÓN: El string debe coincidir exactamente con la base de datos ("UPV/EHU")
+                filtroUniversidadActual = "UPV/EHU";
+                aplicarFiltrosCombinados();
+                actualizarBotonActivo(btnFiltroEHU);
+            }
+        });
+
+        btnFiltroDeusto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filtroUniversidadActual = "Deusto";
+                aplicarFiltrosCombinados();
+                actualizarBotonActivo(btnFiltroDeusto);
+            }
+        });
+
+        btnFiltroMondragon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                filtroUniversidadActual = "Mondragon";
+                aplicarFiltrosCombinados();
+                actualizarBotonActivo(btnFiltroMondragon);
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) { return false; }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                busquedaActual = newText;
+                aplicarFiltrosCombinados();
+                return false;
+            }
+        });
+
+        return view;
+    }
+
+    private void cargarDatosDesdeBD() {
+        listaOriginalCompletita = dbHelper.obtenerTodosLosCentros();
+
+        int idUsuarioActual = 1;
+        List<String> favs = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
+
+        for (Centro c : listaOriginalCompletita) {
+            if (favs.contains(c.getId())) {
+                c.setStarred(true);
+            }
+        }
+
+        listaCentros = new ArrayList<>(listaOriginalCompletita);
+        ordenarLista();
+    }
+
+    private void aplicarFiltrosCombinados() {
+        List<Centro> listaFiltrada = new ArrayList<>();
+
+        for (Centro c : listaOriginalCompletita) {
+            boolean pasaFiltroUni = filtroUniversidadActual.equals("Todas") || c.getUniversidad().equals(filtroUniversidadActual);
+
+            // CORRECCIÓN: Añadida la comprobación "c.getUniversidad()" al buscador de texto
+            boolean pasaFiltroTexto = c.getNombre().toLowerCase().contains(busquedaActual.toLowerCase()) ||
+                    (c.getDescripcion() != null && c.getDescripcion().toLowerCase().contains(busquedaActual.toLowerCase())) ||
+                    c.getUniversidad().toLowerCase().contains(busquedaActual.toLowerCase());
+
+            if (pasaFiltroUni && pasaFiltroTexto) {
+                listaFiltrada.add(c);
+            }
+        }
+
+        listaCentros.clear();
+        listaCentros.addAll(listaFiltrada);
+        ordenarLista();
+
+        if (adapter != null) {
+            adapter.actualizarListaCompleta(listaCentros);
+        }
+    }
+
+    private void guardarFavorito(Centro centro) {
+        int idUsuarioActual = 1;
+
+        if (centro.isStarred()) {
+            dbHelper.anadirFavorito(idUsuarioActual, centro.getId());
+        } else {
+            dbHelper.borrarFavorito(idUsuarioActual, centro.getId());
+        }
+    }
+
+    private void ordenarLista() {
+        java.util.Collections.sort(listaCentros, new java.util.Comparator<Centro>() {
+            @Override
+            public int compare(Centro c1, Centro c2) {
+                if (c1.isStarred() && !c2.isStarred()) return -1;
+                if (!c1.isStarred() && c2.isStarred()) return 1;
+                return c1.getNombre().compareTo(c2.getNombre());
+            }
+        });
+
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    private void actualizarBotonActivo(android.widget.Button btnActivo) {
+        int colorGris = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bilbao_grey_dark);
+        btnFiltroTodas.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGris));
+        btnFiltroEHU.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGris));
+        btnFiltroDeusto.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGris));
+        btnFiltroMondragon.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGris));
+
+        int colorRojo = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bilbao_red);
+        btnActivo.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorRojo));
+    }
+}
+</file>
+
+<file path="fragments/SettingsFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
+import androidx.preference.SwitchPreferenceCompat;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.activities.LoginActivity;
+
+public class SettingsFragment extends PreferenceFragmentCompat implements LanguageDialogFragment.LanguageChangeListener {
+
+    private SharedPreferences customPrefs;
+    private SwitchPreferenceCompat darkModePref;
+
+    @Override
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.preferences, rootKey);
+
+        customPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        boolean isGuest = customPrefs.getBoolean("isGuest", true);
+
+        setupProfileHeader();
+        setupAccountSection(isGuest);
+        setupGeneralConfig();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        syncDarkModeSwitch();
+    }
+
+    private void syncDarkModeSwitch() {
+        if (darkModePref != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            boolean isDark = prefs.getBoolean("modo_oscuro_activado", false);
+            darkModePref.setChecked(isDark);
+        }
+    }
+
+    private void setupProfileHeader() {
+        Preference profileHeader = findPreference("pref_profile_header");
+        if (profileHeader != null) {
+            profileHeader.setOnPreferenceClickListener(preference -> {
+                ProfileDialogFragment dialog = new ProfileDialogFragment();
+                dialog.setListener(() -> {
+                    // Lógica para eliminar foto
+                });
+                dialog.show(getParentFragmentManager(), "ProfileDialog");
+                return true;
+            });
+        }
+    }
+
+    private void setupAccountSection(boolean isGuest) {
+        Preference myAccount = findPreference("pref_my_account");
+        Preference logout = findPreference("pref_logout");
+        Preference login = findPreference("pref_login");
+
+        if (isGuest) {
+            if (myAccount != null) myAccount.setVisible(false);
+            if (logout != null) logout.setVisible(false);
+            if (login != null) {
+                login.setVisible(true);
+                login.setOnPreferenceClickListener(p -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    startActivity(intent);
+                    if (getActivity() != null) {
+                        getActivity().finish();
+                    }
+                    return true;
+                });
+            }
+        } else {
+            if (myAccount != null) {
+                myAccount.setVisible(true);
+                myAccount.setSummary(customPrefs.getString("user_email", "usuario@example.com"));
+                myAccount.setOnPreferenceClickListener(p -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new AccountDetailFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+            if (logout != null) {
+                logout.setVisible(true);
+                logout.setOnPreferenceClickListener(p -> {
+                    customPrefs.edit().putBoolean("isGuest", true).apply();
+                    requireActivity().recreate();
+                    return true;
+                });
+            }
+            if (login != null) login.setVisible(false);
+        }
+    }
+
+    private void setupGeneralConfig() {
+        Preference languagePref = findPreference("pref_language");
+        if (languagePref != null) {
+            languagePref.setOnPreferenceClickListener(preference -> {
+                LanguageDialogFragment dialog = new LanguageDialogFragment();
+                dialog.show(getChildFragmentManager(), "LanguageDialog");
+                return true;
+            });
+        }
+
+        darkModePref = findPreference("modo_oscuro_activado");
+        if (darkModePref != null) {
+            syncDarkModeSwitch();
+            darkModePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean checked = (boolean) newValue;
+                AppCompatDelegate.setDefaultNightMode(checked ? 
+                        AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+                return true;
+            });
+        }
+    }
+
+    @Override
+    public void onLanguageChanged() {
+        if (isAdded() && getActivity() != null) {
+            // Forzamos la recreación de la actividad para aplicar los cambios de idioma a toda la UI
+            getActivity().recreate();
+        }
+    }
+}
+</file>
+
+<file path="fragments/WeatherFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.unigo_das.R;
+import com.example.unigo_das.db.DataBaseHelper;
+import com.example.unigo_das.item.Centro;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.common.model.DownloadConditions;
+import com.google.mlkit.nl.translate.TranslateLanguage;
+import com.google.mlkit.nl.translate.Translation;
+import com.google.mlkit.nl.translate.Translator;
+import com.google.mlkit.nl.translate.TranslatorOptions;
+
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.xml.sax.InputSource;
+import java.io.StringReader;
+import java.util.List;
+import java.util.Locale;
+
+public class WeatherFragment extends Fragment {
+
+    private ImageView ivIconoClimaPrincipal;
+    private TextView tvTemperaturaPrincipal;
+    private TextView tvPronosticoBilbao;
+    private TextView tvUbicacionPrincipal;
+    private TextView tvDescripcionClima;
+    private WebView wvRadarLluvia;
+    private FusedLocationProviderClient fusedLocationClient;
+
+    private com.android.volley.RequestQueue requestQueue;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_weather, container, false);
+
+        ivIconoClimaPrincipal = view.findViewById(R.id.ivIconoClimaPrincipal);
+        tvTemperaturaPrincipal = view.findViewById(R.id.tvTemperaturaPrincipal);
+        tvPronosticoBilbao = view.findViewById(R.id.tvPronosticoBilbao);
+        tvUbicacionPrincipal = view.findViewById(R.id.tvUbicacionPrincipal);
+        tvDescripcionClima = view.findViewById(R.id.tvDescripcionClima);
+        wvRadarLluvia = view.findViewById(R.id.wvRadarLluvia);
+
+        requestQueue = Volley.newRequestQueue(requireContext());
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        wvRadarLluvia.setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override
+            public void getOutline(android.view.View view, android.graphics.Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 40f);
+            }
+        });
+        wvRadarLluvia.setClipToOutline(true);
+
+        wvRadarLluvia.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            }
+        });
+
+        cargarRadarRainViewer();
+        obtenerUbicacionYClima();
+        obtenerPronosticoOpenData();
+
+        return view;
+    }
+
+    private void obtenerUbicacionYClima() {
+        if (!isAdded() || getContext() == null) return;
+        
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            actualizarClimaConNombre(43.26, -2.94, "Bilbao");
+            return;
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (!isAdded() || getContext() == null) return;
+                if (location != null) {
+                    String nombreCiudad = obtenerNombreCiudad(location.getLatitude(), location.getLongitude());
+                    actualizarClimaConNombre(location.getLatitude(), location.getLongitude(), nombreCiudad);
+                } else {
+                    actualizarClimaConNombre(43.26, -2.94, "Bilbao");
+                }
+            }
+        });
+    }
+
+    private String obtenerNombreCiudad(double lat, double lon) {
+        if (!isAdded() || getContext() == null) return "Tu ubicación";
+        
+        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                String city = addresses.get(0).getLocality();
+                return (city != null) ? city : "Tu ubicación";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Tu ubicación";
+    }
+
+    private void actualizarClimaConNombre(double lat, double lon, String nombre) {
+        if (tvUbicacionPrincipal != null) {
+            tvUbicacionPrincipal.setText(nombre);
+        }
+        obtenerClimaPorCoordenadas(lat, lon, ivIconoClimaPrincipal, tvTemperaturaPrincipal);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getView() != null && isAdded()) cargarClimaFavoritos(getView());
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden && getView() != null && isAdded()) {
+            cargarClimaFavoritos(getView());
+        }
+    }
+
+    private void cargarRadarRainViewer() {
+        WebSettings settings = wvRadarLluvia.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setSupportZoom(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+
+        wvRadarLluvia.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest request) {
+                String urlDestino = request.getUrl().toString();
+                return !urlDestino.contains("rainviewer.com/map.html");
+            }
+        });
+        wvRadarLluvia.loadUrl("https://www.rainviewer.com/map.html?loc=43.26,-2.93,8&oFa=0&oC=1&oU=0&oCS=1&oF=0&oAP=1&c=1&o=83&lm=0&layer=radar&sm=1&sn=1");
+    }
+
+    private void obtenerPronosticoOpenData() {
+        String urlXmlOpenData = "https://opendata.euskadi.eus/contenidos/prevision_tiempo/met_forecast_zone/opendata/met_forecast_zone.xml";
+
+        StringRequest peticion = new StringRequest(Request.Method.GET, urlXmlOpenData,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (isAdded()) procesarXmlOpenData(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error conectando con Euskalmet.");
+                    }
+                }
+        );
+        requestQueue.add(peticion);
+    }
+
+    private void procesarXmlOpenData(String xml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(xml));
+            Document doc = builder.parse(is);
+
+            NodeList areas = doc.getElementsByTagName("areaForecast");
+            for (int i = 0; i < areas.getLength(); i++) {
+                Element area = (Element) areas.item(i);
+                if (area.getAttribute("areaId").equals("8")) {
+                    NodeList periods = area.getElementsByTagName("periodData");
+                    for (int j = 0; j < periods.getLength(); j++) {
+                        Element period = (Element) periods.item(j);
+                        if (period.getAttribute("periodDay").equals("today")) {
+                            NodeList descriptions = period.getElementsByTagName("forecastDescription");
+                            if (descriptions.getLength() > 0) {
+                                Element descElement = (Element) descriptions.item(0);
+                                String idioma = java.util.Locale.getDefault().getLanguage();
+
+                                if (idioma.equals("es") || idioma.equals("eu")) {
+                                    String textoNativo = descElement.getElementsByTagName(idioma).item(0).getTextContent().trim();
+                                    if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoNativo);
+                                } else {
+                                    String textoEspanol = descElement.getElementsByTagName("es").item(0).getTextContent().trim();
+                                    traducirConIA(textoEspanol, idioma);
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error analizando datos.");
+        }
+    }
+
+    private void traducirConIA(String textoEspanol, String idiomaDestino) {
+        if (!isAdded()) return;
+        String mlKitLang = TranslateLanguage.fromLanguageTag(idiomaDestino);
+        if (mlKitLang == null) {
+            if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
+            return;
+        }
+        if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Traduciendo pronóstico...");
+        
+        TranslatorOptions options = new TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.SPANISH)
+                .setTargetLanguage(mlKitLang)
+                .build();
+        final Translator traductor = Translation.getClient(options);
+        DownloadConditions conditions = new DownloadConditions.Builder().build();
+
+        traductor.downloadModelIfNeeded(conditions)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        traductor.translate(textoEspanol)
+                                .addOnSuccessListener(new OnSuccessListener<String>() {
+                                    @Override
+                                    public void onSuccess(String textoTraducido) {
+                                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoTraducido);
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
+                    }
+                });
+    }
+
+    private void obtenerClimaPorCoordenadas(double latitud, double longitud, final ImageView ivIcono, final TextView tvTemp) {
+        String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitud + "&longitude=" + longitud + "&current_weather=true";
+        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, urlOpenMeteo, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (!isAdded()) return;
+                        try {
+                            JSONObject current = response.getJSONObject("current_weather");
+                            double temperatura = current.getDouble("temperature");
+                            int codigoClima = current.getInt("weathercode");
+                            if (tvTemp != null) tvTemp.setText(temperatura + " ºC");
+
+                            if (ivIcono != null) {
+                                asignarIconoYTexto(codigoClima, ivIcono);
+                            }
+                        } catch (Exception e) {
+                            if (tvTemp != null) tvTemp.setText("Error");
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                    }
+                }
+        );
+        requestQueue.add(peticion);
+    }
+
+    private void asignarIconoYTexto(int code, ImageView iv) {
+        String desc = "Desconocido";
+        int resId = R.drawable.ic_clima_nubes;
+
+        if (code == 0) desc = "Cielo despejado";
+        else if (code == 1) desc = "Mayormente despejado";
+        else if (code == 2) desc = "Parcialmente nublado";
+        else if (code == 3) desc = "Totalmente nublado";
+        else if (code == 45 || code == 48) desc = "Niebla densa";
+        else if (code == 51 || code == 53 || code == 55) desc = "Llovizna";
+        else if (code == 56 || code == 57) desc = "Llovizna helada";
+        else if (code == 61) desc = "Lluvia ligera";
+        else if (code == 63) desc = "Lluvia moderada";
+        else if (code == 65) desc = "Lluvia fuerte";
+        else if (code == 66 || code == 67) desc = "Lluvia helada";
+        else if (code == 71) desc = "Nieve ligera";
+        else if (code == 73) desc = "Nieve moderada";
+        else if (code == 75) desc = "Nevada fuerte";
+        else if (code == 77) desc = "Granizo suave";
+        else if (code == 80) desc = "Chubascos ligeros";
+        else if (code == 81) desc = "Chubascos moderados";
+        else if (code == 82) desc = "Chubascos violentos";
+        else if (code == 85 || code == 86) desc = "Chubascos de nieve";
+        else if (code == 95) desc = "Tormenta eléctrica";
+        else if (code == 96 || code == 99) desc = "Tormenta con granizo";
+
+        if (code == 0) {
+            resId = R.drawable.ic_clima_sol;
+        } else if (code >= 1 && code <= 3) {
+            resId = R.drawable.ic_clima_nubes;
+        } else if (code >= 45 && code <= 48) {
+            resId = R.drawable.ic_clima_niebla;
+        } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
+            resId = R.drawable.ic_clima_lluvia;
+        } else if ((code >= 71 && code <= 77) || code == 85 || code == 86) {
+            resId = R.drawable.ic_clima_nieve;
+        } else if (code >= 95 && code <= 99) {
+            resId = R.drawable.ic_clima_tormenta;
+        }
+
+        iv.setImageResource(resId);
+
+        if (iv == ivIconoClimaPrincipal) {
+            if (tvDescripcionClima != null) tvDescripcionClima.setText(desc);
+            iv.setColorFilter(android.graphics.Color.parseColor("#D32F2F"));
+        } else {
+            iv.setColorFilter(null);
+        }
+    }
+
+    private void cargarClimaFavoritos(View view) {
+        if (!isAdded()) return;
+        android.widget.GridLayout contenedor = view.findViewById(R.id.glFavoritosContainer);
+        if (contenedor == null) return;
+        contenedor.removeAllViews();
+
+        DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
+        int idUsuarioActual = 1;
+
+        List<String> favoritos = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
+
+        if (favoritos.isEmpty()) {
+            TextView tvVacio = new TextView(requireContext());
+            tvVacio.setText("Aún no has guardado ningún campus en favoritos.");
+            tvVacio.setPadding(16, 16, 16, 16);
+            contenedor.addView(tvVacio);
+            return;
+        }
+
+        for (String idCampus : favoritos) {
+            Centro centro = dbHelper.obtenerCentroPorId(idCampus);
+
+            if (centro != null) {
+                View tarjeta = getLayoutInflater().inflate(R.layout.item_clima_favorito, contenedor, false);
+                TextView tvNombre = tarjeta.findViewById(R.id.tvNombreCampus);
+                TextView tvTemp = tarjeta.findViewById(R.id.tvTempCampus);
+                TextView tvUni = tarjeta.findViewById(R.id.tvUniCampus);
+
+                tvNombre.setText(centro.getNombre());
+                tvUni.setText(centro.getUniversidad());
+
+                if (centro.getUniversidad().equals("UPV/EHU")) {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+                } else if (centro.getUniversidad().equals("Mondragon")) {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#557755"));
+                } else {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#1976D2"));
+                }
+
+                obtenerClimaConCola(centro.getLatitud(), centro.getLongitud(), tvTemp);
+                contenedor.addView(tarjeta);
+            }
+        }
+    }
+
+    private void obtenerClimaConCola(double lat, double lon, final TextView tvTemp) {
+        String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    if (isAdded() && tvTemp != null) {
+                        try {
+                            double t = response.getJSONObject("current_weather").getDouble("temperature");
+                            tvTemp.setText(t + " ºC");
+                        } catch (Exception e) { tvTemp.setText("Error"); }
+                    }
+                },
+                error -> {
+                    if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                }
+        );
+        requestQueue.add(request);
+    }
+}
+</file>
+
+<file path="item/Centro.java">
+package com.example.unigo_das.item;
+
+public class Centro {
+    private String id;
+    private String nombre;
+    private String universidad;
+    private String descripcion;
+    private String ubicacion; // RECUPERADO
+    private boolean isStarred;
+    private boolean isExpanded;
+    private double latitud;
+    private double longitud;
+
+    public Centro(String id, String nombre, String universidad, String descripcion, String ubicacion, double latitud, double longitud) {
+        this.id = id;
+        this.nombre = nombre;
+        this.universidad = universidad;
+        this.descripcion = descripcion;
+        this.ubicacion = ubicacion;
+        this.latitud = latitud;
+        this.longitud = longitud;
+
+        this.isStarred = false;
+        this.isExpanded = false;
+    }
+
+    public String getId() { return id; }
+    public String getNombre() { return nombre; }
+    public String getUniversidad() { return universidad; }
+    public String getDescripcion() { return descripcion; }
+    public String getUbicacion() { return ubicacion; } // NUEVO GETTER
+
+    public boolean isStarred() { return isStarred; }
+    public void setStarred(boolean starred) { this.isStarred = starred; }
+
+    public boolean isExpanded() { return isExpanded; }
+    public void setExpanded(boolean expanded) { this.isExpanded = expanded; }
+
+    public double getLatitud() { return latitud; }
+    public double getLongitud() { return longitud; }
+
+    @Override
+    public String toString() {
+        return nombre + " (" + universidad + ")";
+    }
+}
+</file>
+
+<file path="item/Parada.java">
+package com.example.unigo_das.item;
+
+public class Parada {
+    private String id;
+    private String nombre;
+    private String tipo;
+    private double latitud;
+    private double longitud;
+
+    public Parada(String id, String nombre, String tipo, double latitud, double longitud) {
+        this.id = id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.latitud = latitud;
+        this.longitud = longitud;
+    }
+
+    public String getId() { return id; }
+    public String getNombre() { return nombre; }
+    public String getTipo() { return tipo; }
+    public double getLatitud() { return latitud; }
+    public double getLongitud() { return longitud; }
+}
+</file>
+
+<file path="network/NetworkWorker.java">
+package com.example.unigo_das.network;
+
+import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.work.Data;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+import org.json.simple.JSONObject;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+public class NetworkWorker extends Worker {
+
+    public NetworkWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+        super(context, workerParams);
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        String script = getInputData().getString("script");
+        String responseStr = "";
+        HttpURLConnection conn = null;
+
+        try {
+            if (script == null) return Result.failure();
+
+            URL url = new URL("http://35.233.9.137/" + script);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(10000);
+            conn.setReadTimeout(10000);
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+
+            JSONObject jsonParam = new JSONObject();
+            Map<String, Object> allData = getInputData().getKeyValueMap();
+            for (Map.Entry<String, Object> entry : allData.entrySet()) {
+                if (!entry.getKey().equals("script") && entry.getValue() != null) {
+                    jsonParam.put(entry.getKey(), entry.getValue());
+                }
+            }
+
+            try (OutputStream os = conn.getOutputStream()) {
+                os.write(jsonParam.toJSONString().getBytes(StandardCharsets.UTF_8));
+            }
+
+            int code = conn.getResponseCode();
+            InputStream is = (code >= 200 && code < 300) ? conn.getInputStream() : conn.getErrorStream();
+
+            if (is != null) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line.trim());
+                }
+                responseStr = sb.toString();
+            }
+
+        } catch (Exception e) {
+            responseStr = "{\"error\": \"Error de conexión\"}";
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+
+        Data output = new Data.Builder()
+                .putString("response", responseStr)
+                .build();
+
+        return Result.success(output);
+    }
+}
+</file>
+
+<file path="UnigoApplication.java">
+package com.example.unigo_das;
+
+import android.app.Application;
+import android.content.SharedPreferences;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.preference.PreferenceManager;
+
+public class UnigoApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        
+        // Aplicar el tema guardado al iniciar la aplicación de forma inmediata
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isDarkMode = prefs.getBoolean("modo_oscuro_activado", false);
+        
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+    }
+}
+</file>
+
+</files>

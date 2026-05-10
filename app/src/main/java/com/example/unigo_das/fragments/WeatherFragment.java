@@ -81,6 +81,23 @@ public class WeatherFragment extends Fragment {
 
         requestQueue = Volley.newRequestQueue(requireContext());
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+// Sustituye las referencias de cvMapaUV por cvMapaAire
+        androidx.cardview.widget.CardView cvMapaAire = view.findViewById(R.id.cvMapaAire);
+        androidx.cardview.widget.CardView cvMapaPolen = view.findViewById(R.id.cvMapaPolen);
+
+        cvMapaAire.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirPantallaMapaCalor("AIRE");
+            }
+        });
+
+        cvMapaPolen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirPantallaMapaCalor("POLEN");
+            }
+        });
 
         wvRadarLluvia.setOutlineProvider(new android.view.ViewOutlineProvider() {
             @Override
@@ -105,9 +122,15 @@ public class WeatherFragment extends Fragment {
         return view;
     }
 
+    private void abrirPantallaMapaCalor(String tipoMapa) {
+        android.content.Intent intent = new android.content.Intent(requireContext(), com.example.unigo_das.activities.HeatmapActivity.class);
+        intent.putExtra("TIPO_MAPA", tipoMapa);
+        startActivity(intent);
+    }
+
     private void obtenerUbicacionYClima() {
         if (!isAdded() || getContext() == null) return;
-        
+
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             actualizarClimaConNombre(43.26, -2.94, "Bilbao");
             return;
@@ -129,7 +152,7 @@ public class WeatherFragment extends Fragment {
 
     private String obtenerNombreCiudad(double lat, double lon) {
         if (!isAdded() || getContext() == null) return "Tu ubicación";
-        
+
         Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
@@ -148,6 +171,161 @@ public class WeatherFragment extends Fragment {
             tvUbicacionPrincipal.setText(nombre);
         }
         obtenerClimaPorCoordenadas(lat, lon, ivIconoClimaPrincipal, tvTemperaturaPrincipal);
+
+        // NUEVAS LLAMADAS PARA LAS TARJETAS
+        obtenerCalidadAire(lat, lon);
+        obtenerNivelPolen(lat, lon);
+    }
+
+    private void obtenerCalidadAire(double lat, double lon) {
+        String url = "https://airquality.googleapis.com/v1/currentConditions:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY;
+
+        try {
+            JSONObject body = new JSONObject();
+            JSONObject location = new JSONObject();
+            location.put("latitude", lat);
+            location.put("longitude", lon);
+            body.put("location", location);
+            body.put("languageCode", "en"); // Siempre en inglés para la API
+
+            JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.POST, url, body,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            if (!isAdded() || getView() == null) return;
+                            try {
+                                String categoriaIngles = response.getJSONArray("indexes")
+                                        .getJSONObject(0)
+                                        .getString("category");
+
+                                // CORRECCIÓN: Solo pasamos 1 parámetro
+                                String categoriaTraducida = traducirCalidadAire(categoriaIngles);
+
+                                TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
+                                if (tvIndiceAire != null) {
+                                    tvIndiceAire.setText(categoriaTraducida);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                TextView tv = getView().findViewById(R.id.tvIndiceAire);
+                                if (tv != null) tv.setText(getString(R.string.error_api));
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            if (isAdded() && getView() != null) {
+                                TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
+                                if (tvIndiceAire != null) tvIndiceAire.setText(getString(R.string.no_data_short));
+                            }
+                        }
+                    }
+            );
+            requestQueue.add(peticion);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void obtenerNivelPolen(double lat, double lon) {
+        String url = "https://pollen.googleapis.com/v1/forecast:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY +
+                "&location.latitude=" + lat +
+                "&location.longitude=" + lon +
+                "&days=1&languageCode=en";
+
+        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (!isAdded() || getView() == null) return;
+                        try {
+                            // 1. Comprobamos si existe "dailyInfo" y si tiene contenido
+                            if (!response.has("dailyInfo") || response.getJSONArray("dailyInfo").length() == 0) {
+                                actualizarTextoPolen(getString(R.string.no_data_long));
+                                return;
+                            }
+
+                            JSONObject daily = response.getJSONArray("dailyInfo").getJSONObject(0);
+                            String nivelMaximo = "None"; // Por defecto si no hay nada
+
+                            // 2. Comprobamos si hay información de tipos de polen
+                            if (daily.has("pollenTypeInfo")) {
+                                org.json.JSONArray types = daily.getJSONArray("pollenTypeInfo");
+                                int maxVal = -1;
+
+                                for (int i = 0; i < types.length(); i++) {
+                                    JSONObject item = types.getJSONObject(i);
+                                    if (item.has("indexInfo")) {
+                                        JSONObject indexInfo = item.getJSONObject("indexInfo");
+                                        int val = indexInfo.optInt("value", 0);
+                                        if (val >= maxVal) {
+                                            maxVal = val;
+                                            nivelMaximo = indexInfo.optString("category", "None");
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 3. Traducimos y aplicamos
+                            actualizarTextoPolen(traducirPolen(nivelMaximo));
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            actualizarTextoPolen(getString(R.string.no_data_short));
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded()) {
+                            actualizarTextoPolen(getString(R.string.no_data_short));
+                        }
+                    }
+                }
+        );
+        requestQueue.add(peticion);
+    }
+
+    // Metodo auxiliar para evitar repetir código de búsqueda de View
+    private void actualizarTextoPolen(String texto) {
+        if (getView() != null) {
+            TextView tv = getView().findViewById(R.id.tvIndicePolen);
+            if (tv != null) tv.setText(texto);
+        }
+    }
+
+    private String traducirCalidadAire(String categoriaEn) {
+        if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
+
+        // Pasamos a minúsculas y quitamos espacios para comparar bien
+        String cat = categoriaEn.toLowerCase().trim();
+
+        if (cat.contains("excellent")) return getString(R.string.air_excellent);
+        if (cat.contains("good")) return getString(R.string.air_good);
+        if (cat.contains("moderate")) return getString(R.string.air_moderate);
+        if (cat.contains("poor") && !cat.contains("very")) return getString(R.string.air_poor);
+        if (cat.contains("very poor")) return getString(R.string.air_very_poor);
+        if (cat.contains("severe")) return getString(R.string.air_severe);
+
+        return getString(R.string.air_unknown);
+    }
+
+    private String traducirPolen(String categoriaEn) {
+        if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
+
+        String cat = categoriaEn.toLowerCase().trim();
+
+        if (cat.contains("none")) return getString(R.string.pollen_none);
+        if (cat.contains("very low")) return getString(R.string.pollen_very_low);
+        if (cat.contains("low") && !cat.contains("very")) return getString(R.string.pollen_low);
+        if (cat.contains("moderate")) return getString(R.string.pollen_moderate);
+        if (cat.contains("high") && !cat.contains("very")) return getString(R.string.pollen_high);
+        if (cat.contains("very high")) return getString(R.string.pollen_very_high);
+        if (cat.contains("severe")) return getString(R.string.pollen_severe);
+
+        return getString(R.string.pollen_unknown);
     }
 
     @Override
@@ -251,7 +429,7 @@ public class WeatherFragment extends Fragment {
             return;
         }
         if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Traduciendo pronóstico...");
-        
+
         TranslatorOptions options = new TranslatorOptions.Builder()
                 .setSourceLanguage(TranslateLanguage.SPANISH)
                 .setTargetLanguage(mlKitLang)
@@ -409,16 +587,22 @@ public class WeatherFragment extends Fragment {
     private void obtenerClimaConCola(double lat, double lon, final TextView tvTemp) {
         String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                response -> {
-                    if (isAdded() && tvTemp != null) {
-                        try {
-                            double t = response.getJSONObject("current_weather").getDouble("temperature");
-                            tvTemp.setText(t + " ºC");
-                        } catch (Exception e) { tvTemp.setText("Error"); }
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (isAdded() && tvTemp != null) {
+                            try {
+                                double t = response.getJSONObject("current_weather").getDouble("temperature");
+                                tvTemp.setText(t + " ºC");
+                            } catch (Exception e) { tvTemp.setText("Error"); }
+                        }
                     }
                 },
-                error -> {
-                    if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                    }
                 }
         );
         requestQueue.add(request);

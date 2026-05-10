@@ -82,12 +82,12 @@
             android:padding="16dp"
             android:visibility="gone">
 
-            <TextView
-                android:id="@+id/tvTransporteInfo"
+            <ImageView
+                android:id="@+id/ivMapaCentro"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_dark"
-                android:textSize="14sp" />
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                android:contentDescription="Mapa del centro" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

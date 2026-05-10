@@ -96,4 +96,25 @@
     <string name="register_do_button">Registrarme</string>
     <string name="register_back_to_login">¿Ya tienes cuenta? Inicia sesión</string>
 
+    <string name="air_excellent">Excelente</string>
+    <string name="air_good">Buena</string>
+    <string name="air_moderate">Moderada</string>
+    <string name="air_poor">Mala</string>
+    <string name="air_very_poor">Muy Mala</string>
+    <string name="air_severe">Severa</string>
+    <string name="air_unknown">Desconocida</string>
+
+    <string name="pollen_none">Ninguno</string>
+    <string name="pollen_very_low">Muy Bajo</string>
+    <string name="pollen_low">Bajo</string>
+    <string name="pollen_moderate">Moderado</string>
+    <string name="pollen_high">Alto</string>
+    <string name="pollen_very_high">Muy Alto</string>
+    <string name="pollen_severe">Severo</string>
+    <string name="pollen_unknown">Desconocido</string>
+
+    <string name="no_data_short">N/D</string>
+    <string name="no_data_long">Sin datos</string>
+    <string name="error_api">Error</string>
+
 </resources>

@@ -85,4 +85,25 @@
     <string name="register_do_button">Erregistratu</string>
     <string name="register_back_to_login">Dagoeneko kontua duzu? Hasi saioa</string>
 
+    <string name="air_excellent">Bikaina</string>
+    <string name="air_good">Ona</string>
+    <string name="air_moderate">Ertaina</string>
+    <string name="air_poor">Txarra</string>
+    <string name="air_very_poor">Oso Txarra</string>
+    <string name="air_severe">Larria</string>
+    <string name="air_unknown">Ezezaguna</string>
+
+    <string name="pollen_none">Bat ere ez</string>
+    <string name="pollen_very_low">Oso Baxua</string>
+    <string name="pollen_low">Baxua</string>
+    <string name="pollen_moderate">Ertaina</string>
+    <string name="pollen_high">Altua</string>
+    <string name="pollen_very_high">Oso Altua</string>
+    <string name="pollen_severe">Larria</string>
+    <string name="pollen_unknown">Ezezaguna</string>
+
+    <string name="no_data_short">Eskura ezin</string>
+    <string name="no_data_long">Daturik ez</string>
+    <string name="error_api">Errorea</string>
+
 </resources>

@@ -216,4 +216,27 @@ public class DataBaseHelper extends SQLiteOpenHelper {
             bd.close();
         }
     }
+
+    public List<Parada> obtenerParadasPorTipo(String tipo) {
+        List<Parada> lista = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // Hacemos la consulta filtrando por la columna tipo_transporte
+        Cursor cursor = db.rawQuery("SELECT * FROM Paradas WHERE tipo_transporte = ?", new String[]{tipo});
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                String id = cursor.getString(cursor.getColumnIndexOrThrow("id_parada"));
+                String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
+                String t = cursor.getString(cursor.getColumnIndexOrThrow("tipo_transporte"));
+                double lat = cursor.getDouble(cursor.getColumnIndexOrThrow("latitud"));
+                double lon = cursor.getDouble(cursor.getColumnIndexOrThrow("longitud"));
+
+                lista.add(new Parada(id, nombre, t, lat, lon));
+            } while (cursor.moveToNext());
+            cursor.close();
+        }
+        db.close();
+        return lista;
+    }
 }

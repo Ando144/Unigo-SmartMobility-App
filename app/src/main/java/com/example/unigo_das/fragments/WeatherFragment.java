@@ -81,7 +81,7 @@ public class WeatherFragment extends Fragment {
 
         requestQueue = Volley.newRequestQueue(requireContext());
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-// Sustituye las referencias de cvMapaUV por cvMapaAire
+
         androidx.cardview.widget.CardView cvMapaAire = view.findViewById(R.id.cvMapaAire);
         androidx.cardview.widget.CardView cvMapaPolen = view.findViewById(R.id.cvMapaPolen);
 
@@ -172,7 +172,6 @@ public class WeatherFragment extends Fragment {
         }
         obtenerClimaPorCoordenadas(lat, lon, ivIconoClimaPrincipal, tvTemperaturaPrincipal);
 
-        // NUEVAS LLAMADAS PARA LAS TARJETAS
         obtenerCalidadAire(lat, lon);
         obtenerNivelPolen(lat, lon);
     }
@@ -186,7 +185,7 @@ public class WeatherFragment extends Fragment {
             location.put("latitude", lat);
             location.put("longitude", lon);
             body.put("location", location);
-            body.put("languageCode", "en"); // Siempre en inglés para la API
+            body.put("languageCode", "en");
 
             JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.POST, url, body,
                     new Response.Listener<JSONObject>() {
@@ -198,7 +197,6 @@ public class WeatherFragment extends Fragment {
                                         .getJSONObject(0)
                                         .getString("category");
 
-                                // CORRECCIÓN: Solo pasamos 1 parámetro
                                 String categoriaTraducida = traducirCalidadAire(categoriaIngles);
 
                                 TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
@@ -240,16 +238,14 @@ public class WeatherFragment extends Fragment {
                     public void onResponse(JSONObject response) {
                         if (!isAdded() || getView() == null) return;
                         try {
-                            // 1. Comprobamos si existe "dailyInfo" y si tiene contenido
                             if (!response.has("dailyInfo") || response.getJSONArray("dailyInfo").length() == 0) {
                                 actualizarTextoPolen(getString(R.string.no_data_long));
                                 return;
                             }
 
                             JSONObject daily = response.getJSONArray("dailyInfo").getJSONObject(0);
-                            String nivelMaximo = "None"; // Por defecto si no hay nada
+                            String nivelMaximo = "None";
 
-                            // 2. Comprobamos si hay información de tipos de polen
                             if (daily.has("pollenTypeInfo")) {
                                 org.json.JSONArray types = daily.getJSONArray("pollenTypeInfo");
                                 int maxVal = -1;
@@ -267,7 +263,6 @@ public class WeatherFragment extends Fragment {
                                 }
                             }
 
-                            // 3. Traducimos y aplicamos
                             actualizarTextoPolen(traducirPolen(nivelMaximo));
 
                         } catch (Exception e) {
@@ -288,7 +283,6 @@ public class WeatherFragment extends Fragment {
         requestQueue.add(peticion);
     }
 
-    // Metodo auxiliar para evitar repetir código de búsqueda de View
     private void actualizarTextoPolen(String texto) {
         if (getView() != null) {
             TextView tv = getView().findViewById(R.id.tvIndicePolen);
@@ -299,7 +293,6 @@ public class WeatherFragment extends Fragment {
     private String traducirCalidadAire(String categoriaEn) {
         if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
 
-        // Pasamos a minúsculas y quitamos espacios para comparar bien
         String cat = categoriaEn.toLowerCase().trim();
 
         if (cat.contains("excellent")) return getString(R.string.air_excellent);
@@ -458,37 +451,6 @@ public class WeatherFragment extends Fragment {
                 });
     }
 
-    private void obtenerClimaPorCoordenadas(double latitud, double longitud, final ImageView ivIcono, final TextView tvTemp) {
-        String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitud + "&longitude=" + longitud + "&current_weather=true";
-        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, urlOpenMeteo, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        if (!isAdded()) return;
-                        try {
-                            JSONObject current = response.getJSONObject("current_weather");
-                            double temperatura = current.getDouble("temperature");
-                            int codigoClima = current.getInt("weathercode");
-                            if (tvTemp != null) tvTemp.setText(temperatura + " ºC");
-
-                            if (ivIcono != null) {
-                                asignarIconoYTexto(codigoClima, ivIcono);
-                            }
-                        } catch (Exception e) {
-                            if (tvTemp != null) tvTemp.setText("Error");
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
-                    }
-                }
-        );
-        requestQueue.add(peticion);
-    }
-
     private void asignarIconoYTexto(int code, ImageView iv) {
         String desc = "Desconocido";
         int resId = R.drawable.ic_clima_nubes;
@@ -571,17 +533,123 @@ public class WeatherFragment extends Fragment {
                 tvUni.setText(centro.getUniversidad());
 
                 if (centro.getUniversidad().equals("UPV/EHU")) {
-                    tvUni.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#1A1A1A"));
                 } else if (centro.getUniversidad().equals("Mondragon")) {
-                    tvUni.setTextColor(android.graphics.Color.parseColor("#557755"));
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#008a96"));
                 } else {
                     tvUni.setTextColor(android.graphics.Color.parseColor("#1976D2"));
                 }
 
                 obtenerClimaConCola(centro.getLatitud(), centro.getLongitud(), tvTemp);
+
+                android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams();
+                params.columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1.0f);
+                params.width = 0;
+                params.setMargins(10, 10, 10, 20);
+
+                tarjeta.setLayoutParams(params);
+
                 contenedor.addView(tarjeta);
             }
         }
+    }
+
+    private void obtenerClimaPorCoordenadas(double latitud, double longitud, final ImageView ivIcono, final TextView tvTemp) {
+        // Cambiamos a 'daily=uv_index_max' que es 100% estable
+        String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitud +
+                "&longitude=" + longitud +
+                "&current_weather=true" +
+                "&daily=uv_index_max,sunrise,sunset" +
+                "&timezone=auto";
+
+        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, urlOpenMeteo, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (!isAdded() || getView() == null) return;
+                        try {
+                            // 1. Clima Principal
+                            if (response.has("current_weather")) {
+                                JSONObject currentWeather = response.getJSONObject("current_weather");
+                                double temperatura = currentWeather.optDouble("temperature", 0.0);
+                                int codigoClima = currentWeather.optInt("weathercode", 0);
+                                if (tvTemp != null) tvTemp.setText(temperatura + " ºC");
+                                if (ivIcono != null) asignarIconoYTexto(codigoClima, ivIcono);
+                            }
+
+                            // 2. Datos Diarios (UV y Luz)
+                            if (response.has("daily")) {
+                                JSONObject dailyParams = response.getJSONObject("daily");
+
+                                // Índice UV Máximo del día
+                                if (dailyParams.has("uv_index_max")) {
+                                    double uvIndex = dailyParams.getJSONArray("uv_index_max").optDouble(0, 0.0);
+                                    actualizarTarjetaUV(uvIndex);
+                                }
+
+                                // Horas de Luz
+                                if (dailyParams.has("sunrise") && dailyParams.has("sunset")) {
+                                    String amanecerIso = dailyParams.getJSONArray("sunrise").optString(0, "");
+                                    String anochecerIso = dailyParams.getJSONArray("sunset").optString(0, "");
+
+                                    // Extraemos solo la hora si el formato "YYYY-MM-DDTHH:MM" es correcto
+                                    if (amanecerIso.length() >= 16 && anochecerIso.length() >= 16) {
+                                        String amanecer = amanecerIso.substring(11, 16);
+                                        String anochecer = anochecerIso.substring(11, 16);
+
+                                        TextView tvAmanecer = getView().findViewById(R.id.tvAmanecer);
+                                        TextView tvAnochecer = getView().findViewById(R.id.tvAnochecer);
+
+                                        if (tvAmanecer != null) tvAmanecer.setText("🌅 " + amanecer);
+                                        if (tvAnochecer != null) tvAnochecer.setText("🌙 " + anochecer);
+                                    }
+                                }
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                    }
+                }
+        );
+        requestQueue.add(peticion);
+    }
+
+    private void actualizarTarjetaUV(double uvIndex) {
+        if (getView() == null) return;
+
+        TextView tvValorUV = getView().findViewById(R.id.tvValorUV);
+        TextView tvDescUV = getView().findViewById(R.id.tvDescUV);
+
+        if (tvValorUV == null || tvDescUV == null) return;
+
+        tvValorUV.setText(String.valueOf(Math.round(uvIndex)));
+
+        String idioma = java.util.Locale.getDefault().getLanguage();
+        String descripcion;
+
+        if (uvIndex < 3) {
+            descripcion = idioma.equals("eu") ? "Baxua" : (idioma.equals("en") ? "Low" : "Bajo");
+        } else if (uvIndex < 6) {
+            descripcion = idioma.equals("eu") ? "Ertaina" : (idioma.equals("en") ? "Moderate" : "Moderado");
+        } else if (uvIndex < 8) {
+            descripcion = idioma.equals("eu") ? "Altua" : (idioma.equals("en") ? "High" : "Alto");
+            tvValorUV.setTextColor(android.graphics.Color.parseColor("#F57C00"));
+        } else if (uvIndex < 11) {
+            descripcion = idioma.equals("eu") ? "Oso Altua" : (idioma.equals("en") ? "Very High" : "Muy Alto");
+            tvValorUV.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+        } else {
+            descripcion = idioma.equals("eu") ? "Muturrekoa" : (idioma.equals("en") ? "Extreme" : "Extremo");
+            tvValorUV.setTextColor(android.graphics.Color.parseColor("#7B1FA2"));
+        }
+
+        tvDescUV.setText(descripcion);
     }
 
     private void obtenerClimaConCola(double lat, double lon, final TextView tvTemp) {

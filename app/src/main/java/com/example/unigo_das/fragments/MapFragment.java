@@ -14,6 +14,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,7 +68,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -104,10 +107,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private View cardInfoRutas;
     private LinearLayout llListaInstrucciones;
 
-    // --- NUEVO: Botón flotante para paradas ---
     private FloatingActionButton fabCapasTransporte;
     private List<Marker> marcadoresParadasActivos = new ArrayList<>();
-    private int capaSeleccionadaIndex = 0; // 0 = Ocultar
+    private int capaSeleccionadaIndex = 0;
 
     private List<Centro> listaTodosLosCentros;
     private BuscadorMapaAdapter searchAdapter;
@@ -119,10 +121,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LatLng destinoActual = null;
     private String tituloDestinoActual = null;
 
-    // Filtros de transporte público
+    // Filtros de transporte público separados
     private long timestampSalidaPersonalizado = 0;
-    private boolean usarAutobus = true;
-    private boolean usarMetroTren = true;
+    private boolean usarBus = true;
+    private boolean usarMetro = true;
+    private boolean usarTranvia = true;
+    private boolean usarTren = true;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -158,7 +162,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Enlazamos las vistas
         cardBuscadorFalso = view.findViewById(R.id.card_buscador_falso);
         pantallaBusquedaCompleta = view.findViewById(R.id.pantalla_busqueda_completa);
         headerBusqueda = view.findViewById(R.id.header_busqueda);
@@ -191,7 +194,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-        // --- FAB de Capas de Paradas ---
         fabCapasTransporte = view.findViewById(R.id.fab_capas_transporte);
         if (fabCapasTransporte != null) {
             fabCapasTransporte.setOnClickListener(new View.OnClickListener() {
@@ -202,7 +204,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             });
         }
 
-        // Selector de transporte
         RadioGroup rgModoTransporte = view.findViewById(R.id.rg_modo_transporte);
         if (rgModoTransporte != null) {
             rgModoTransporte.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -231,7 +232,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             public void onClick(View v) {
                 pantallaBusquedaCompleta.setVisibility(View.VISIBLE);
                 searchViewReal.requestFocus();
-
                 InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null) {
                     imm.showSoftInput(searchViewReal.findFocus(), InputMethodManager.SHOW_IMPLICIT);
@@ -266,6 +266,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 Centro centroSeleccionado = searchAdapter.getItem(position);
                 if (centroSeleccionado != null) {
                     cerrarPantallaBusqueda();
+
+                    // --- NUEVO: REINICIO DE FILTROS AL BUSCAR NUEVO DESTINO ---
+                    // Siempre que se busca un nuevo destino, volvemos a las opciones por defecto
+                    usarBus = true;
+                    usarMetro = true;
+                    usarTranvia = true;
+                    usarTren = true;
+                    timestampSalidaPersonalizado = 0;
+                    // -----------------------------------------------------------
+
                     dibujarLineaHastaDestino(centroSeleccionado.getNombre(), centroSeleccionado.getLatitud(), centroSeleccionado.getLongitud(), currentTransportMode);
                 }
             }
@@ -342,11 +352,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void dibujarLineaHastaDestino(String titulo, double latDestino, double lngDestino, String modoTransporte) {
         if (campusMap == null) return;
 
-        // Ocultamos el botón de paradas libres cuando estamos ruteando
         if (fabCapasTransporte != null) {
             fabCapasTransporte.setVisibility(View.GONE);
         }
-        limpiarMarcadoresParadasLibres(); // Limpiamos cualquier estación suelta que estuviera dibujada
+        limpiarMarcadoresParadasLibres();
 
         if ("transit".equals(modoTransporte) && btnFiltrosTransporte != null) {
             btnFiltrosTransporte.setVisibility(View.VISIBLE);
@@ -360,7 +369,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         destinoActual = new LatLng(latDestino, lngDestino);
         tituloDestinoActual = titulo;
-        LatLng destino = new LatLng(latDestino, lngDestino);
+        final LatLng destino = new LatLng(latDestino, lngDestino);
         campusMap.clear();
 
         cardInfoRutas.setVisibility(View.GONE);
@@ -394,7 +403,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void obtenerRutaRealGoogle(final LatLng origen, final LatLng destino, final String modoTransporte) {
         String apiKey = BuildConfig.DIRECTIONS_API_KEY;
-        String idiomaActual = java.util.Locale.getDefault().getLanguage();
+        String idiomaActual = Locale.getDefault().getLanguage();
 
         Uri.Builder builderUrl = Uri.parse("https://maps.googleapis.com/maps/api/directions/json").buildUpon();
         builderUrl.appendQueryParameter("origin", origen.latitude + "," + origen.longitude);
@@ -402,6 +411,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         builderUrl.appendQueryParameter("mode", modoTransporte);
         builderUrl.appendQueryParameter("key", apiKey);
         builderUrl.appendQueryParameter("language", idiomaActual);
+
+        // Solicitar rutas alternativas para poder aplicar los filtros estrictamente
+        builderUrl.appendQueryParameter("alternatives", "true");
 
         if ("transit".equals(modoTransporte)) {
             if (timestampSalidaPersonalizado > 0) {
@@ -411,12 +423,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
 
             List<String> modosPermitidos = new ArrayList<>();
-            if (usarAutobus) modosPermitidos.add("bus");
-            if (usarMetroTren) {
-                modosPermitidos.add("subway");
-                modosPermitidos.add("train");
-                modosPermitidos.add("tram");
-            }
+            if (usarBus) modosPermitidos.add("bus");
+            if (usarMetro) modosPermitidos.add("subway");
+            if (usarTranvia) modosPermitidos.add("tram");
+            if (usarTren) modosPermitidos.add("train");
+
             if (!modosPermitidos.isEmpty() && modosPermitidos.size() < 4) {
                 builderUrl.appendQueryParameter("transit_mode", android.text.TextUtils.join("|", modosPermitidos));
             }
@@ -447,84 +458,211 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                         JSONObject jsonResponse = new JSONObject(response.toString());
                         if ("OK".equals(jsonResponse.getString("status"))) {
-                            JSONObject route = jsonResponse.getJSONArray("routes").getJSONObject(0);
-                            final List<SegmentoRuta> listaSegmentos = new ArrayList<>();
-                            final List<LatLng> puntos = new ArrayList<>();
+                            JSONArray routesArray = jsonResponse.getJSONArray("routes");
 
-                            if ("transit".equals(modoTransporte)) {
-                                JSONArray steps = route.getJSONArray("legs").getJSONObject(0).getJSONArray("steps");
-                                for (int i = 0; i < steps.length(); i++) {
-                                    JSONObject step = steps.getJSONObject(i);
-                                    List<LatLng> decodificados = decodificarPolyline(step.getJSONObject("polyline").getString("points"));
-                                    puntos.addAll(decodificados);
+                            boolean rutaValidaEncontrada = false;
+                            final List<SegmentoRuta> listaSegmentosFinal = new ArrayList<>();
+                            final List<LatLng> puntosFinal = new ArrayList<>();
+                            String precioTotalFinal = "Precio variable";
 
-                                    SegmentoRuta segmento = new SegmentoRuta();
-                                    segmento.puntos = decodificados;
-                                    segmento.esCaminando = "WALKING".equals(step.getString("travel_mode"));
-                                    segmento.duracion = step.getJSONObject("duration").getString("text");
-                                    segmento.puntoInicio = new LatLng(step.getJSONObject("start_location").getDouble("lat"), step.getJSONObject("start_location").getDouble("lng"));
+                            for (int r = 0; r < routesArray.length(); r++) {
+                                JSONObject route = routesArray.getJSONObject(r);
 
-                                    if (!segmento.esCaminando && step.has("transit_details")) {
-                                        JSONObject td = step.getJSONObject("transit_details");
-                                        segmento.paradaOrigen = td.getJSONObject("departure_stop").getString("name");
-                                        segmento.paradaDestino = td.getJSONObject("arrival_stop").getString("name");
-                                        segmento.direccion = td.optString("headsign", "Destino final");
-                                        segmento.numParadas = td.optString("num_stops", "0");
-                                        if (td.has("departure_time")) segmento.horaSalida = td.getJSONObject("departure_time").getString("text");
-                                        if (td.has("arrival_time")) segmento.horaLlegada = td.getJSONObject("arrival_time").getString("text");
+                                List<SegmentoRuta> listaSegmentosTemp = new ArrayList<>();
+                                List<LatLng> puntosTemp = new ArrayList<>();
+                                boolean rutaCumpleFiltrosEstrictos = true;
 
-                                        JSONObject lineData = td.getJSONObject("line");
-                                        segmento.color = lineData.has("color") ? Color.parseColor(lineData.getString("color")) : Color.RED;
-                                        String vName = (lineData.has("vehicle") && lineData.getJSONObject("vehicle").has("name")) ? lineData.getJSONObject("vehicle").getString("name") : "";
-                                        segmento.tituloInstruccion = vName + " " + (lineData.has("short_name") ? lineData.getString("short_name") : lineData.optString("name", ""));
-                                    } else {
-                                        segmento.color = Color.GRAY;
-                                        segmento.tituloInstruccion = "Andando";
-                                    }
-                                    listaSegmentos.add(segmento);
+                                String precioTotalTemp = "Precio variable";
+                                if (route.has("fare")) {
+                                    precioTotalTemp = route.getJSONObject("fare").getString("text") + " (Billete ocasional)";
                                 }
-                            } else {
-                                List<LatLng> decodificados = decodificarPolyline(route.getJSONObject("overview_polyline").getString("points"));
-                                puntos.addAll(decodificados);
-                                SegmentoRuta sr = new SegmentoRuta();
-                                sr.puntos = decodificados;
-                                sr.esCaminando = false;
-                                sr.color = "bicycling".equals(modoTransporte) ? Color.GREEN : Color.BLUE;
-                                sr.duracion = route.getJSONArray("legs").getJSONObject(0).getJSONObject("duration").getString("text");
-                                listaSegmentos.add(sr);
+
+                                if ("transit".equals(modoTransporte)) {
+                                    JSONArray steps = route.getJSONArray("legs").getJSONObject(0).getJSONArray("steps");
+                                    for (int i = 0; i < steps.length(); i++) {
+                                        JSONObject step = steps.getJSONObject(i);
+                                        List<LatLng> decodificados = decodificarPolyline(step.getJSONObject("polyline").getString("points"));
+                                        puntosTemp.addAll(decodificados);
+
+                                        SegmentoRuta segmento = new SegmentoRuta();
+                                        segmento.puntos = decodificados;
+                                        segmento.esCaminando = "WALKING".equals(step.getString("travel_mode"));
+                                        segmento.duracion = step.getJSONObject("duration").getString("text");
+                                        segmento.puntoInicio = new LatLng(step.getJSONObject("start_location").getDouble("lat"), step.getJSONObject("start_location").getDouble("lng"));
+
+                                        int metrosTramo = step.getJSONObject("distance").getInt("value");
+                                        double kmTramo = metrosTramo / 1000.0;
+
+                                        if (!segmento.esCaminando && step.has("transit_details")) {
+                                            JSONObject td = step.getJSONObject("transit_details");
+                                            segmento.paradaOrigen = td.getJSONObject("departure_stop").getString("name");
+                                            segmento.paradaDestino = td.getJSONObject("arrival_stop").getString("name");
+                                            segmento.direccion = td.optString("headsign", "Destino final");
+                                            segmento.numParadas = td.optString("num_stops", "0");
+                                            if (td.has("departure_time")) segmento.horaSalida = td.getJSONObject("departure_time").getString("text");
+                                            if (td.has("arrival_time")) segmento.horaLlegada = td.getJSONObject("arrival_time").getString("text");
+
+                                            JSONObject lineData = td.getJSONObject("line");
+                                            segmento.color = lineData.has("color") ? Color.parseColor(lineData.getString("color")) : Color.RED;
+
+                                            String agencia = "";
+                                            if (lineData.has("agencies")) {
+                                                agencia = lineData.getJSONArray("agencies").getJSONObject(0).getString("name");
+                                            }
+
+                                            String vName = (lineData.has("vehicle") && lineData.getJSONObject("vehicle").has("name")) ? lineData.getJSONObject("vehicle").getString("name") : "";
+                                            String nombreLinea = lineData.has("short_name") ? lineData.getString("short_name") : lineData.optString("name", "");
+
+                                            if (!agencia.isEmpty()) {
+                                                segmento.tituloInstruccion = vName + " " + nombreLinea + " (" + agencia + ")";
+                                            } else {
+                                                segmento.tituloInstruccion = vName + " " + nombreLinea;
+                                            }
+
+                                            String vType = lineData.has("vehicle") && lineData.getJSONObject("vehicle").has("type") ? lineData.getJSONObject("vehicle").getString("type") : "";
+
+                                            // EL PORTERO: Comprobar si Google incluyó un medio no deseado
+                                            if (vType.contains("BUS") && !usarBus) rutaCumpleFiltrosEstrictos = false;
+                                            else if (vType.contains("SUBWAY") && !usarMetro) rutaCumpleFiltrosEstrictos = false;
+                                            else if (vType.contains("TRAM") && !usarTranvia) rutaCumpleFiltrosEstrictos = false;
+                                            else if ((vType.contains("TRAIN") || vType.contains("RAIL")) && !usarTren) rutaCumpleFiltrosEstrictos = false;
+
+                                            if (vType.contains("BUS")) {
+                                                segmento.infoCO2 = (int)(kmTramo * 80) + "g CO2";
+                                                segmento.colorCO2 = Color.parseColor("#1976D2");
+                                            } else {
+                                                segmento.infoCO2 = (int)(kmTramo * 40) + "g CO2";
+                                                segmento.colorCO2 = Color.parseColor("#00897B");
+                                            }
+                                        } else {
+                                            segmento.color = Color.GRAY;
+                                            segmento.tituloInstruccion = "Andando";
+                                            segmento.infoCO2 = "0g CO2";
+                                            segmento.colorCO2 = Color.parseColor("#2E7D32");
+                                        }
+                                        listaSegmentosTemp.add(segmento);
+                                    }
+                                } else {
+                                    List<LatLng> decodificados = decodificarPolyline(route.getJSONObject("overview_polyline").getString("points"));
+                                    puntosTemp.addAll(decodificados);
+                                    SegmentoRuta sr = new SegmentoRuta();
+                                    sr.puntos = decodificados;
+                                    sr.esCaminando = false;
+                                    sr.color = "bicycling".equals(modoTransporte) ? Color.GREEN : Color.BLUE;
+                                    sr.duracion = route.getJSONArray("legs").getJSONObject(0).getJSONObject("duration").getString("text");
+                                    sr.infoCO2 = "0g CO2";
+                                    sr.colorCO2 = Color.parseColor("#2E7D32");
+                                    listaSegmentosTemp.add(sr);
+                                }
+
+                                if (rutaCumpleFiltrosEstrictos) {
+                                    rutaValidaEncontrada = true;
+                                    listaSegmentosFinal.addAll(listaSegmentosTemp);
+                                    puntosFinal.addAll(puntosTemp);
+                                    precioTotalFinal = precioTotalTemp;
+                                    break;
+                                }
                             }
+
+                            final boolean esRutaTotalmenteValida = rutaValidaEncontrada;
+                            final String precioDefinitivo = precioTotalFinal;
 
                             mainHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     if (campusMap != null && isAdded()) {
+
+                                        if (!esRutaTotalmenteValida) {
+                                            AlertDialog.Builder errorBuilder = new AlertDialog.Builder(requireContext());
+                                            errorBuilder.setTitle("Sin rutas exclusivas");
+                                            errorBuilder.setMessage("No existe ninguna ruta viable utilizando exclusivamente los transportes seleccionados.\n\nPrueba a activar más medios de transporte.");
+
+                                            // --- NUEVO: Botón directo para arreglar los filtros ---
+                                            errorBuilder.setPositiveButton("Cambiar filtros", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    mostrarFiltrosTransporte();
+                                                }
+                                            });
+                                            errorBuilder.setNegativeButton("Cancelar", null);
+                                            // --------------------------------------------------------
+
+                                            errorBuilder.show();
+
+                                            campusMap.clear();
+                                            cardInfoRutas.setVisibility(View.GONE);
+                                            return;
+                                        }
+
                                         llListaInstrucciones.removeAllViews();
-                                        for (SegmentoRuta seg : listaSegmentos) {
+                                        for (SegmentoRuta seg : listaSegmentosFinal) {
                                             PolylineOptions opt = new PolylineOptions().addAll(seg.puntos).width(12f).color(seg.color).geodesic(true);
                                             TextView tv = new TextView(requireContext());
                                             tv.setTextSize(14f); tv.setPadding(0, 16, 0, 16); tv.setTextColor(Color.DKGRAY);
 
                                             if (seg.esCaminando && "transit".equals(modoTransporte)) {
                                                 opt.pattern(Arrays.asList(new Dot(), new Gap(15f)));
-                                                tv.setText("🚶 Caminar (" + seg.duracion + ")");
+                                                String base = "Caminar (" + seg.duracion + ") • ";
+                                                SpannableStringBuilder ssb = new SpannableStringBuilder(base + seg.infoCO2);
+                                                ssb.setSpan(new ForegroundColorSpan(seg.colorCO2), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                                ssb.setSpan(new StyleSpan(Typeface.BOLD), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                                tv.setText(ssb);
+
                                             } else if (!seg.esCaminando && "transit".equals(modoTransporte)) {
                                                 campusMap.addMarker(new MarkerOptions().position(seg.puntoInicio).title(seg.tituloInstruccion).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                                                String info = "🚆 " + seg.tituloInstruccion + " (" + seg.duracion + ")\n";
-                                                if (seg.horaSalida != null) info += "🕒 " + seg.horaSalida + " - " + seg.horaLlegada + "\n";
-                                                info += "↳ Dirección: " + seg.direccion + "\n↳ Desde: " + seg.paradaOrigen + "\n↳ Hasta: " + seg.paradaDestino + " (" + seg.numParadas + " paradas)";
-                                                tv.setText(info); tv.setTextColor(seg.color); tv.setTypeface(null, Typeface.BOLD);
+
+                                                String base = seg.tituloInstruccion + " (" + seg.duracion + ") • ";
+                                                SpannableStringBuilder ssb = new SpannableStringBuilder(base + seg.infoCO2);
+                                                ssb.setSpan(new ForegroundColorSpan(seg.colorCO2), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                                                String infoExtra = "\n";
+                                                if (seg.horaSalida != null) infoExtra += seg.horaSalida + " - " + seg.horaLlegada + "\n";
+                                                infoExtra += "↳ Dirección: " + seg.direccion + "\n↳ Desde: " + seg.paradaOrigen + "\n↳ Hasta: " + seg.paradaDestino + " (" + seg.numParadas + " paradas)";
+                                                ssb.append(infoExtra);
+
+                                                tv.setText(ssb);
+                                                tv.setTextColor(seg.color);
+                                                tv.setTypeface(null, Typeface.BOLD);
+
                                             } else {
-                                                tv.setText(("bicycling".equals(modoTransporte) ? "🚲 Bici " : "🚶 Caminar ") + "(" + seg.duracion + ")");
+                                                String base = ("bicycling".equals(modoTransporte) ? "Bici " : "Caminar ") + "(" + seg.duracion + ") • ";
+                                                SpannableStringBuilder ssb = new SpannableStringBuilder(base + seg.infoCO2);
+                                                ssb.setSpan(new ForegroundColorSpan(seg.colorCO2), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                                ssb.setSpan(new StyleSpan(Typeface.BOLD), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                                tv.setText(ssb);
                                             }
                                             llListaInstrucciones.addView(tv);
                                             campusMap.addPolyline(opt);
                                         }
-                                        if (!listaSegmentos.isEmpty()) {
+
+                                        if (!listaSegmentosFinal.isEmpty()) {
+                                            if ("transit".equals(modoTransporte)) {
+                                                TextView tvPrecio = new TextView(requireContext());
+                                                tvPrecio.setText("Coste estimado: " + precioDefinitivo);
+                                                tvPrecio.setTextSize(16f);
+                                                tvPrecio.setPadding(0, 30, 0, 8);
+                                                tvPrecio.setTextColor(Color.parseColor("#3F51B5"));
+                                                tvPrecio.setTypeface(null, Typeface.BOLD);
+
+                                                TextView tvAvisoBarik = new TextView(requireContext());
+                                                tvAvisoBarik.setText("*El precio será considerablemente menor usando tarjeta Barik o abonos.");
+                                                tvAvisoBarik.setTextSize(12f);
+                                                tvAvisoBarik.setTextColor(Color.GRAY);
+                                                tvAvisoBarik.setPadding(0, 0, 0, 16);
+
+                                                View separador = new View(requireContext());
+                                                separador.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+                                                separador.setBackgroundColor(Color.LTGRAY);
+
+                                                llListaInstrucciones.addView(separador);
+                                                llListaInstrucciones.addView(tvPrecio);
+                                                llListaInstrucciones.addView(tvAvisoBarik);
+                                            }
                                             cardInfoRutas.setVisibility(View.VISIBLE);
                                         }
-                                        if (!puntos.isEmpty()) {
+                                        if (!puntosFinal.isEmpty()) {
                                             LatLngBounds.Builder b = new LatLngBounds.Builder();
-                                            for (LatLng p : puntos) {
+                                            for (LatLng p : puntosFinal) {
                                                 b.include(p);
                                             }
                                             campusMap.animateCamera(CameraUpdateFactory.newLatLngBounds(b.build(), 100));
@@ -572,7 +710,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         tituloDestinoActual = null;
         timestampSalidaPersonalizado = 0;
 
-        // Volver a mostrar el botón de paradas libres y redibujar si había alguna seleccionada
         if (fabCapasTransporte != null) {
             fabCapasTransporte.setVisibility(View.VISIBLE);
         }
@@ -581,9 +718,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    // =======================================================================
-    // CAPAS DE PARADAS DE TRANSPORTE (SIN RUTA ACTIVA)
-    // =======================================================================
     private void mostrarMenuCapasParadas() {
         String[] opciones = {"Ocultar paradas", "Bicicleta", "Bilbobus", "Euskotren", "Metro", "Renfe", "Tranvía"};
 
@@ -602,12 +736,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void redibujarCapaParadas(int index) {
         limpiarMarcadoresParadasLibres();
-        if (index == 0) return; // Ocultar
+        if (index == 0) return;
 
         String[] tiposDB = {"", "Bicicleta", "Bilbobus", "Euskotren", "Metro", "Renfe", "Tranvía"};
         String tipoSeleccionado = tiposDB[index];
 
-        // Asignar color al pinche según el transporte
         float colorPinche = BitmapDescriptorFactory.HUE_RED;
         switch (tipoSeleccionado) {
             case "Bicicleta": colorPinche = BitmapDescriptorFactory.HUE_GREEN; break;
@@ -633,7 +766,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 marcadoresParadasActivos.add(m);
                 builder.include(pos);
             }
-            // Movemos la cámara para englobar todas las paradas dibujadas
             campusMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
         }
     }
@@ -645,9 +777,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         marcadoresParadasActivos.clear();
     }
 
-    // =======================================================================
-    // FILTROS DE RUTA (DATEPICKER Y TIMEPICKER)
-    // =======================================================================
     private void mostrarFiltrosTransporte() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Opciones de Transporte Público");
@@ -746,25 +875,38 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         layout.addView(tvMedios);
 
         final CheckBox cbBus = new CheckBox(requireContext());
-        cbBus.setText("Autobús");
-        cbBus.setChecked(usarAutobus);
+        cbBus.setText("Autobús (Bilbobus/Bizkaibus)");
+        cbBus.setChecked(usarBus);
         layout.addView(cbBus);
 
         final CheckBox cbMetro = new CheckBox(requireContext());
-        cbMetro.setText("Metro / Tren / Tranvía");
-        cbMetro.setChecked(usarMetroTren);
+        cbMetro.setText("Metro Bilbao");
+        cbMetro.setChecked(usarMetro);
         layout.addView(cbMetro);
+
+        final CheckBox cbTranvia = new CheckBox(requireContext());
+        cbTranvia.setText("Tranvía");
+        cbTranvia.setChecked(usarTranvia);
+        layout.addView(cbTranvia);
+
+        final CheckBox cbTren = new CheckBox(requireContext());
+        cbTren.setText("Tren (Euskotren/Renfe)");
+        cbTren.setChecked(usarTren);
+        layout.addView(cbTren);
 
         builder.setView(layout);
         builder.setPositiveButton("Aplicar y Buscar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                usarAutobus = cbBus.isChecked();
-                usarMetroTren = cbMetro.isChecked();
-                if (!usarAutobus && !usarMetroTren) {
-                    usarAutobus = true;
-                    usarMetroTren = true;
+                usarBus = cbBus.isChecked();
+                usarMetro = cbMetro.isChecked();
+                usarTranvia = cbTranvia.isChecked();
+                usarTren = cbTren.isChecked();
+
+                if (!usarBus && !usarMetro && !usarTranvia && !usarTren) {
+                    usarBus = true; usarMetro = true; usarTranvia = true; usarTren = true;
                 }
+
                 if (!btnFecha.getText().toString().equals("Hoy") || !btnHora.getText().toString().equals("Ahora")) {
                     timestampSalidaPersonalizado = cSel.getTimeInMillis() / 1000L;
                 } else {
@@ -780,8 +922,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 timestampSalidaPersonalizado = 0;
-                usarAutobus = true;
-                usarMetroTren = true;
+                usarBus = true; usarMetro = true; usarTranvia = true; usarTren = true;
                 if (destinoActual != null && "transit".equals(currentTransportMode)) {
                     dibujarLineaHastaDestino(tituloDestinoActual, destinoActual.latitude, destinoActual.longitude, currentTransportMode);
                 }
@@ -894,5 +1035,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         String numParadas;
         String horaSalida;
         String horaLlegada;
+        String infoCO2;
+        int colorCO2;
     }
 }

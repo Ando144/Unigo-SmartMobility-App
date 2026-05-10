@@ -27,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private WindowInsetsControllerCompat insetsController;
     private static final String KEY_SELECTED_TAB = "selected_tab_id";
 
+    private Bundle mapArgs = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,21 +55,11 @@ public class MainActivity extends AppCompatActivity {
 
         // 2. Manejar el estado inicial o la recreación
         if (savedInstanceState == null) {
-            // Caso 1: Inicio limpio (ir al mapa por defecto)
             bottomNav.setSelectedItemId(R.id.nav_map);
-            // navegarA ya es llamado por el listener de setSelectedItemId
         } else {
-            // Caso 2: Recreación (por cambio de idioma, tema, etc.)
-            // Recuperamos el ID de la pestaña que guardamos en onSaveInstanceState
             int selectedId = savedInstanceState.getInt(KEY_SELECTED_TAB, R.id.nav_map);
-            
-            // Forzamos la selección visual en la barra
+            // Esto dispara el listener que llama a navegarA() automáticamente
             bottomNav.setSelectedItemId(selectedId);
-            
-            // Refrescamos el fragmento manualmente para asegurar que 
-            // se carguen los recursos del idioma actual (strings.xml)
-            syncStatusBar(selectedId);
-            navegarA(selectedId);
         }
     }
 
@@ -76,38 +68,67 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         if (bottomNav != null) {
-            // Guardamos el ID de la pestaña actual para recuperarlo tras la recreación
             outState.putInt(KEY_SELECTED_TAB, bottomNav.getSelectedItemId());
         }
     }
 
     private void navegarA(int itemId) {
-        Fragment fragment = null;
+        FragmentTransaction transaction = fm.beginTransaction();
         String tag = "";
+        Fragment targetFragment = null;
 
-        if (itemId == R.id.nav_map) {
-            fragment = new MapFragment();
-            tag = "map";
-        } else if (itemId == R.id.nav_school) {
-            fragment = new SchoolFragment();
-            tag = "school";
-        } else if (itemId == R.id.nav_weather) {
-            fragment = new WeatherFragment();
-            tag = "weather";
-        } else if (itemId == R.id.nav_settings) {
-            fragment = new SettingsFragment();
-            tag = "settings";
+        // Identificamos el tag según la opción seleccionada
+        if (itemId == R.id.nav_map) tag = "map";
+        else if (itemId == R.id.nav_school) tag = "school";
+        else if (itemId == R.id.nav_weather) tag = "weather";
+        else if (itemId == R.id.nav_settings) tag = "settings";
+
+        // Buscamos si el fragmento ya existe en la memoria
+        targetFragment = fm.findFragmentByTag(tag);
+
+        // Ocultamos todos los fragmentos activos
+        for (Fragment frag : fm.getFragments()) {
+            if (frag.isVisible()) {
+                transaction.hide(frag);
+            }
         }
 
-        if (fragment != null) {
-            syncStatusBar(itemId);
-            // Al usar REPLACE, el FragmentManager destruye el fragmento anterior (si existe)
-            // y crea uno nuevo, lo que garantiza que el método onCreateView use los recursos
-            // del nuevo idioma configurado.
-            fm.beginTransaction()
-                    .replace(R.id.fragment_container, fragment, tag)
-                    .commit();
+        // Si NO existe, lo instanciamos y lo AGREGAMOS (add en vez de replace)
+        if (targetFragment == null) {
+            if (itemId == R.id.nav_map) {
+                targetFragment = new MapFragment();
+                // Si es la primera vez que creamos el mapa y hay una ruta pendiente:
+                if (mapArgs != null) {
+                    targetFragment.setArguments(mapArgs);
+                    mapArgs = null;
+                }
+            } else if (itemId == R.id.nav_school) {
+                targetFragment = new SchoolFragment();
+            } else if (itemId == R.id.nav_weather) {
+                targetFragment = new WeatherFragment();
+            } else if (itemId == R.id.nav_settings) {
+                targetFragment = new SettingsFragment();
+            }
+            transaction.add(R.id.fragment_container, targetFragment, tag);
         }
+        // Si YA EXISTE, simplemente lo MOSTRAMOS
+        else {
+            transaction.show(targetFragment);
+
+            // Si volvemos al mapa existente y hay una petición de ruta pendiente:
+            if (itemId == R.id.nav_map && mapArgs != null) {
+                ((MapFragment) targetFragment).dibujarLineaHastaDestino(
+                        mapArgs.getString("destino_nombre"),
+                        mapArgs.getDouble("destino_lat"),
+                        mapArgs.getDouble("destino_lng"),
+                        "walking" // Por defecto en walking
+                );
+                mapArgs = null; // Limpiamos tras consumir
+            }
+        }
+
+        syncStatusBar(itemId);
+        transaction.commit();
     }
 
     private void syncStatusBar(int itemId) {
@@ -122,7 +143,25 @@ public class MainActivity extends AppCompatActivity {
 
     public void irRutaEnMapa(String nombreCentro, double latDestino, double lngDestino) {
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setSelectedItemId(R.id.nav_map);
+
+        // 1. Guardamos la petición de ruta
+        mapArgs = new Bundle();
+        mapArgs.putString("destino_nombre", nombreCentro);
+        mapArgs.putDouble("destino_lat", latDestino);
+        mapArgs.putDouble("destino_lng", lngDestino);
+
+        // 2. Si ya estamos en la pestaña del mapa, lo dibujamos directamente
+        if (bottomNav.getSelectedItemId() == R.id.nav_map) {
+            MapFragment mapFragment = (MapFragment) fm.findFragmentByTag("map");
+            if (mapFragment != null) {
+                mapFragment.dibujarLineaHastaDestino(nombreCentro, latDestino, lngDestino, "walking");
+                mapArgs = null; // Lo limpiamos para que no lo repita
+            }
+        } else {
+            // 3. Si estamos en otra pestaña, forzamos el cambio al mapa.
+            // Esto dispara el Listener -> navegarA() -> Muestra el mapa y detecta el mapArgs
+            bottomNav.setSelectedItemId(R.id.nav_map);
+        }
     }
 
     private void inicializarCampus() {
@@ -194,4 +233,5 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
 }

@@ -160,6 +160,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         cargarDatosBuscador();
     }
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        // "hidden" es false cuando el fragmento vuelve a ser visible en pantalla
+        if (!hidden && isAdded() && campusMap != null) {
+            cargarAjustesMapa();
+        }
+    }
 
     @Nullable
     @Override
@@ -210,7 +218,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         btnMinimizarRuta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                alternarEstadoTarjeta();
+                if (scrollInstrucciones.getVisibility() == View.VISIBLE) {
+                    scrollInstrucciones.setVisibility(View.GONE);
+                    // Apunta hacia abajo cuando está cerrado
+                    btnMinimizarRuta.animate().rotation(0).setDuration(300).start();
+                } else {
+                    scrollInstrucciones.setVisibility(View.VISIBLE);
+                    // Apunta hacia arriba cuando está expandido
+                    btnMinimizarRuta.animate().rotation(180).setDuration(300).start();
+                }
             }
         });
 
@@ -298,7 +314,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                     // REINICIO DE FILTROS AL BUSCAR
                     usarBus = true; usarMetro = true; usarTranvia = true; usarTren = true;
-                    isCocheElectrico = false;
+                    // No reiniciamos isCocheElectrico porque ahora es una preferencia persistente
                     timestampSalidaPersonalizado = 0;
 
                     dibujarLineaHastaDestino(centroSeleccionado.getNombre(), centroSeleccionado.getLatitud(), centroSeleccionado.getLongitud(), currentTransportMode);
@@ -323,6 +339,45 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 return windowInsets;
             }
         });
+    }
+
+    // --- NUEVO MÉTODO PARA APLICAR LAS PREFERENCIAS ---
+    private void cargarAjustesMapa() {
+        if (getContext() == null) return;
+        android.content.SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext());
+
+        // 1. Aplicar Estilo de Mapa
+        String tipoMapaStr = prefs.getString("pref_tipo_mapa", "1"); // 1 es Normal
+        int tipoMapa;
+        try {
+            tipoMapa = Integer.parseInt(tipoMapaStr);
+        } catch (NumberFormatException e) {
+            tipoMapa = GoogleMap.MAP_TYPE_NORMAL;
+        }
+        if (campusMap != null) {
+            campusMap.setMapType(tipoMapa);
+        }
+
+        // 2. Coche Eléctrico persistente
+        this.isCocheElectrico = prefs.getBoolean("pref_coche_electrico", false);
+
+        // 3. Transporte Favorito
+        String transporteFav = prefs.getString("pref_transporte_favorito", "publico");
+        RadioGroup rgModoTransporte = getView() != null ? getView().findViewById(R.id.rg_modo_transporte) : null;
+
+        switch (transporteFav) {
+            case "publico":
+                currentTransportMode = "transit";
+                if (rgModoTransporte != null) rgModoTransporte.check(R.id.rb_transporte_publico);
+                break;
+            case "bici":
+                currentTransportMode = "bicycling";
+                if (rgModoTransporte != null) rgModoTransporte.check(R.id.rb_bici);
+                break;
+            case "pie":
+                currentTransportMode = "walking";
+                break;
+        }
     }
 
     private int obtenerColorTextoParaTarjeta() {
@@ -384,6 +439,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             destinoPendiente = new LatLng(getArguments().getDouble("destino_lat"), getArguments().getDouble("destino_lng"));
         }
         comprobarPermisosDeUbicacion();
+
+        // APLICAMOS LAS PREFERENCIAS UNA VEZ QUE EL MAPA ESTÁ LISTO
+        cargarAjustesMapa();
     }
 
     private void comprobarPermisosDeUbicacion() {
@@ -408,8 +466,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private void activarUbicacionEnMapa() {
         if (campusMap != null) {
             campusMap.setMyLocationEnabled(true);
-            campusMap.getUiSettings().setMyLocationButtonEnabled(true);
-        }
+            campusMap.getUiSettings().setMyLocationButtonEnabled(false);        }
     }
 
     public void dibujarLineaHastaDestino(String titulo, double latDestino, double lngDestino, String modoTransporte) {
@@ -831,16 +888,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void mostrarMenuCapasParadas() {
         final String[] opciones = {"Ocultar paradas", "Bilbaobizi", "Bilbobus", "Bizkaibus", "Euskotren", "Metro", "Renfe", "Tranvía"};
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Mostrar paradas en el mapa");
+
+        // Cambio a MaterialAlertDialogBuilder
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
+
+        builder.setTitle("Red de Transporte");
+        builder.setIcon(R.drawable.ic_menu_map); // Icono opcional para darle vida
+
         builder.setSingleChoiceItems(opciones, capaSeleccionadaIndex, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 capaSeleccionadaIndex = which;
                 redibujarCapaParadas(which);
-                dialog.dismiss();
+
+                // Pequeño delay opcional para que el usuario vea qué ha pulsado antes de que se cierre
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        dialog.dismiss();
+                    }
+                }, 50);
             }
         });
+
+        builder.setNegativeButton("Cerrar", null); // Añadimos un botón de cerrar por si el usuario se arrepiente
         builder.show();
     }
 
@@ -922,10 +994,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void mostrarFiltrosTransporte() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Opciones de Transporte Público");
+        // Eliminamos el segundo parámetro del estilo
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
+
+        builder.setTitle("Filtros de Ruta");
+        builder.setIcon(R.drawable.ic_transporte);
+
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
+        // Más padding para que "respire" mejor
         layout.setPadding(60, 40, 60, 20);
 
         TextView tvTiempo = new TextView(requireContext());
@@ -937,10 +1015,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         LinearLayout layoutFechaHora = new LinearLayout(requireContext());
         layoutFechaHora.setOrientation(LinearLayout.HORIZONTAL);
         layoutFechaHora.setWeightSum(2f);
-        final Button btnFecha = new Button(requireContext());
+        layoutFechaHora.setPadding(0, 16, 0, 16);
+
+        // Usamos MaterialButton estilo "Tonal" para que queden más bonitos y redondeados
+        final com.google.android.material.button.MaterialButton btnFecha = new com.google.android.material.button.MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
         LinearLayout.LayoutParams pF = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         pF.setMarginEnd(8); btnFecha.setLayoutParams(pF);
-        final Button btnHora = new Button(requireContext());
+
+        final com.google.android.material.button.MaterialButton btnHora = new com.google.android.material.button.MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
         LinearLayout.LayoutParams pH = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         pH.setMarginStart(8); btnHora.setLayoutParams(pH);
 
@@ -984,8 +1066,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         TextView tvMedios = new TextView(requireContext());
         tvMedios.setText("\nMedios preferidos:");
         tvMedios.setTypeface(null, Typeface.BOLD);
+        tvMedios.setTextColor(obtenerColorTextoSecundario());
         layout.addView(tvMedios);
 
+        // Checkboxes con color de acento
         final CheckBox cbBus = new CheckBox(requireContext()); cbBus.setText("Autobús"); cbBus.setChecked(usarBus);
         layout.addView(cbBus);
         final CheckBox cbMetro = new CheckBox(requireContext()); cbMetro.setText("Metro"); cbMetro.setChecked(usarMetro);

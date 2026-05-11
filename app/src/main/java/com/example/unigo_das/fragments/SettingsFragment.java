@@ -26,6 +26,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.os.LocaleListCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -61,20 +63,132 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     private SwitchPreferenceCompat darkModePref;
     private ActivityResultLauncher<Intent> galeriaLauncher;
 
+    private final androidx.activity.result.ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), new androidx.activity.result.ActivityResultCallback<Boolean>() {
+                @Override
+                public void onActivityResult(Boolean isGranted) {
+                    if (isGranted) {
+                        androidx.preference.SwitchPreferenceCompat switchNotif = findPreference("pref_notificaciones_clima");
+                        if (switchNotif != null && switchNotif.isChecked()) {
+                            android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
+                            String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
+                            int h = Integer.parseInt(horaActual.split(":")[0]);
+                            int m = Integer.parseInt(horaActual.split(":")[1]);
+                            programarAlarmaDiaria(requireContext(), h, m);
+                        }
+                    } else {
+                        androidx.preference.SwitchPreferenceCompat switchNotif = findPreference("pref_notificaciones_clima");
+                        if (switchNotif != null) {
+                            switchNotif.setChecked(false);
+                        }
+                    }
+                }
+            });
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // 1. Añadimos el listener de Insets en onViewCreated para arreglar la superposición visual
+        ViewCompat.setOnApplyWindowInsetsListener(view, new androidx.core.view.OnApplyWindowInsetsListener() {
+            @NonNull
+            @Override
+            public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat windowInsets) {
+                androidx.core.graphics.Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+                // Le damos el padding top al contenedor para que las preferencias bajen
+                v.setPadding(0, insets.top, 0, 0);
+
+                return windowInsets;
+            }
+        });
+    }
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences, rootKey);
+
+        final androidx.preference.Preference horaPref = findPreference("pref_hora_notificacion");
+        final androidx.preference.SwitchPreferenceCompat switchNotif = findPreference("pref_notificaciones_clima");
+
+        if (horaPref != null && switchNotif != null) {
+            final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
+            horaPref.setSummary(prefs.getString("pref_hora_notificacion", "07:30"));
+
+            horaPref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(androidx.preference.Preference preference) {
+                    String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
+                    int h = Integer.parseInt(horaActual.split(":")[0]);
+                    int m = Integer.parseInt(horaActual.split(":")[1]);
+
+                    android.app.TimePickerDialog timePicker = new android.app.TimePickerDialog(requireContext(),
+                            new android.app.TimePickerDialog.OnTimeSetListener() {
+                                @Override
+                                public void onTimeSet(android.widget.TimePicker view, int hourOfDay, int minute) {
+                                    String horaFormateada = String.format(java.util.Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
+                                    prefs.edit().putString("pref_hora_notificacion", horaFormateada).apply();
+                                    horaPref.setSummary(horaFormateada);
+
+                                    if (switchNotif.isChecked()) {
+                                        programarAlarmaDiaria(requireContext(), hourOfDay, minute);
+                                    }
+                                }
+                            }, h, m, true);
+                    timePicker.show();
+                    return true;
+                }
+            });
+
+            switchNotif.setOnPreferenceChangeListener(new androidx.preference.Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(androidx.preference.Preference preference, Object newValue) {
+                    boolean activado = (Boolean) newValue;
+                    if (activado) {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                            if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+                                return true;
+                            }
+                        }
+
+                        String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
+                        int h = Integer.parseInt(horaActual.split(":")[0]);
+                        int m = Integer.parseInt(horaActual.split(":")[1]);
+                        programarAlarmaDiaria(requireContext(), h, m);
+                    } else {
+                        cancelarAlarma(requireContext());
+                    }
+                    return true;
+                }
+            });
+        }
+
+        androidx.preference.Preference openDataPref = findPreference("pref_open_data");
+        if (openDataPref != null) {
+            openDataPref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(androidx.preference.Preference preference) {
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Fuentes de Datos")
+                            .setMessage("Esta aplicación utiliza datos abiertos proporcionados por:\n\n• Euskalmet\n• Open Data Euskadi\n• Bizkaibus\n• Euskotren y Metro Bilbao\n• GeoBilbao\n\nAgradecemos su labor en la apertura de datos para el Reto UNIGO.")
+                            .setPositiveButton("Aceptar", null)
+                            .show();
+                    return true;
+                }
+            });
+        }
 
         customPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         boolean isGuest = customPrefs.getBoolean("isGuest", true);
 
         galeriaLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
+                new ActivityResultCallback<androidx.activity.result.ActivityResult>() {
                     @Override
-                    public void onActivityResult(ActivityResult result) {
-                        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                            Uri imageUri = result.getData().getData();
+                    public void onActivityResult(androidx.activity.result.ActivityResult result) {
+                        if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+                            android.net.Uri imageUri = result.getData().getData();
                             if (imageUri != null) {
                                 mostrarConfirmacionFoto(imageUri);
                             }
@@ -86,6 +200,49 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         setupProfileHeader();
         setupAccountSection(isGuest);
         setupGeneralConfig();
+    }
+
+    private void programarAlarmaDiaria(Context context, int hora, int minuto) {
+        java.util.Calendar calendario = java.util.Calendar.getInstance();
+        calendario.set(java.util.Calendar.HOUR_OF_DAY, hora);
+        calendario.set(java.util.Calendar.MINUTE, minuto);
+        calendario.set(java.util.Calendar.SECOND, 0);
+        calendario.set(java.util.Calendar.MILLISECOND, 0);
+
+        if (calendario.getTimeInMillis() <= System.currentTimeMillis()) {
+            calendario.add(java.util.Calendar.DAY_OF_YEAR, 1);
+        }
+
+        android.app.AlarmManager gestor = (android.app.AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        android.content.Intent intentBC = new android.content.Intent(context, com.example.unigo_das.receivers.NotificacionClimaReceiver.class);
+
+        int flags = android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            flags |= android.app.PendingIntent.FLAG_IMMUTABLE;
+        }
+        android.app.PendingIntent ibc = android.app.PendingIntent.getBroadcast(context, 1, intentBC, flags);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            gestor.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, calendario.getTimeInMillis(), ibc);
+        } else {
+            gestor.setRepeating(android.app.AlarmManager.RTC_WAKEUP, calendario.getTimeInMillis(), android.app.AlarmManager.INTERVAL_DAY, ibc);
+        }
+
+        String horaAviso = String.format(java.util.Locale.getDefault(), "%02d:%02d", hora, minuto);
+        android.widget.Toast.makeText(context, "Aviso programado para las " + horaAviso, android.widget.Toast.LENGTH_SHORT).show();
+    }
+
+    private void cancelarAlarma(Context context) {
+        android.app.AlarmManager gestor = (android.app.AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        android.content.Intent intentBC = new android.content.Intent(context, com.example.unigo_das.receivers.NotificacionClimaReceiver.class);
+
+        int flags = android.app.PendingIntent.FLAG_UPDATE_CURRENT;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            flags |= android.app.PendingIntent.FLAG_IMMUTABLE;
+        }
+        android.app.PendingIntent ibc = android.app.PendingIntent.getBroadcast(context, 1, intentBC, flags);
+
+        gestor.cancel(ibc);
     }
 
     @Override
@@ -121,11 +278,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                                 eliminarFotoPerfil();
                             }
                         });
-                        // AÑADIR ESTE LISTENER:
                         dialog.setImageSelectedListener(new ProfileDialogFragment.OnImageSelectedListener() {
                             @Override
                             public void onImageSelected(Intent intent) {
-                                // Lanzar la galería usando el launcher del fragmento
                                 galeriaLauncher.launch(intent);
                             }
                         });
@@ -147,42 +302,48 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             if (logout != null) logout.setVisible(false);
             if (login != null) {
                 login.setVisible(true);
-                login.setOnPreferenceClickListener(p -> {
-                    // Eliminamos el forzado a modo claro aquí, ya que LoginActivity ya tiene su propio tema en el Manifest.
-                    // Mantener el modo noche actual para que se aplique al volver.
-                    Intent intent = new Intent(getActivity(), LoginActivity.class);
-                    startActivity(intent);
-                    if (getActivity() != null) {
-                        getActivity().finish();
+                login.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(androidx.preference.Preference p) {
+                        Intent intent = new Intent(getActivity(), LoginActivity.class);
+                        startActivity(intent);
+                        if (getActivity() != null) {
+                            getActivity().finish();
+                        }
+                        return true;
                     }
-                    return true;
                 });
             }
         } else {
             if (myAccount != null) {
                 myAccount.setVisible(true);
                 myAccount.setSummary(customPrefs.getString("user_email", "usuario@example.com"));
-                myAccount.setOnPreferenceClickListener(p -> {
-                    getParentFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, new AccountDetailFragment())
-                            .addToBackStack(null)
-                            .commit();
-                    return true;
+                myAccount.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(androidx.preference.Preference p) {
+                        getParentFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, new AccountDetailFragment())
+                                .addToBackStack(null)
+                                .commit();
+                        return true;
+                    }
                 });
             }
             if (logout != null) {
                 logout.setVisible(true);
-                logout.setOnPreferenceClickListener(p -> {
-                    // Limpiar datos de usuario pero mantener su preferencia guardada
-                    customPrefs.edit()
-                            .putBoolean("isGuest", true)
-                            .putString("user_email", null)
-                            .remove("user_id")
-                            .apply();
+                logout.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(androidx.preference.Preference p) {
+                        customPrefs.edit()
+                                .putBoolean("isGuest", true)
+                                .putString("user_email", null)
+                                .remove("user_id")
+                                .apply();
 
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    requireActivity().recreate();
-                    return true;
+                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                        requireActivity().recreate();
+                        return true;
+                    }
                 });
             }
             if (login != null) login.setVisible(false);
@@ -192,45 +353,47 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     private void setupGeneralConfig() {
         Preference languagePref = findPreference("pref_language");
         if (languagePref != null) {
-            languagePref.setOnPreferenceClickListener(preference -> {
-                LanguageDialogFragment dialog = new LanguageDialogFragment();
-                dialog.show(getChildFragmentManager(), "LanguageDialog");
-                return true;
+            languagePref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(androidx.preference.Preference preference) {
+                    LanguageDialogFragment dialog = new LanguageDialogFragment();
+                    dialog.show(getChildFragmentManager(), "LanguageDialog");
+                    return true;
+                }
             });
         }
 
         darkModePref = findPreference("modo_oscuro_activado");
         if (darkModePref != null) {
             syncDarkModeSwitch();
-            darkModePref.setOnPreferenceChangeListener((preference, newValue) -> {
-                boolean checked = (boolean) newValue;
+            darkModePref.setOnPreferenceChangeListener(new androidx.preference.Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(androidx.preference.Preference preference, Object newValue) {
+                    boolean checked = (boolean) newValue;
 
-                // Guardar en preferencias generales
-                SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-                defaultPrefs.edit().putBoolean("modo_oscuro_activado", checked).apply();
+                    SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                    defaultPrefs.edit().putBoolean("modo_oscuro_activado", checked).apply();
 
-                // Guardar preferencia personal del usuario
-                SharedPreferences unigoPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-                boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
+                    SharedPreferences unigoPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+                    boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
 
-                if (!isGuest) {
-                    String userEmail = unigoPrefs.getString("user_email", "");
-                    if (!userEmail.isEmpty()) {
-                        // Guardar preferencia específica para este usuario
-                        unigoPrefs.edit().putBoolean("dark_mode_" + userEmail, checked).apply();
+                    if (!isGuest) {
+                        String userEmail = unigoPrefs.getString("user_email", "");
+                        if (!userEmail.isEmpty()) {
+                            unigoPrefs.edit().putBoolean("dark_mode_" + userEmail, checked).apply();
+                        }
                     }
-                }
 
-                AppCompatDelegate.setDefaultNightMode(checked ?
-                        AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-                return true;
+                    AppCompatDelegate.setDefaultNightMode(checked ?
+                            AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+                    return true;
+                }
             });
         }
     }
 
     @Override
     public void onLanguageChanged() {
-        // Guardar preferencia de idioma para este usuario
         SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         String userEmail = prefs.getString("user_email", "");
         if (!userEmail.isEmpty()) {
@@ -239,7 +402,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             prefs.edit().putString("language_" + userEmail, currentLang).apply();
         }
 
-        // Recrear la activity solo si el fragmento sigue añadido
         if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
             getActivity().recreate();
         }
@@ -247,20 +409,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
     private void mostrarConfirmacionFoto(final Uri imageUri) {
         try {
-            // Cargar la imagen seleccionada
             InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
             final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
             if (bitmap != null) {
-                // Crear un diálogo de confirmación con vista previa
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                 builder.setTitle("Confirmar foto de perfil");
 
-                // Crear un ImageView para la vista previa
                 ImageView imageView = new ImageView(requireContext());
                 imageView.setImageBitmap(bitmap);
 
-                // Redimensionar para vista previa
                 int size = (int) (200 * getResources().getDisplayMetrics().density);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(size, size);
                 params.gravity = Gravity.CENTER;
@@ -268,7 +426,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                 imageView.setLayoutParams(params);
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-                // Añadir borde circular
                 imageView.setClipToOutline(true);
                 imageView.setOutlineProvider(new ViewOutlineProvider() {
                     @Override
@@ -297,27 +454,23 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
     }
 
-    private void guardarFotoPerfil(Bitmap bitmap) {
-        String userEmail = customPrefs.getString("user_email", "");
+    private void guardarFotoPerfil(final Bitmap bitmap) {
+        final String userEmail = customPrefs.getString("user_email", "");
         if (!userEmail.isEmpty()) {
-            // Mostrar progreso
             final ProgressDialog progressDialog = new ProgressDialog(requireContext());
             progressDialog.setMessage("Subiendo foto...");
             progressDialog.setCancelable(false);
             progressDialog.show();
 
-            // Subir en hilo secundario
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        // Convertir bitmap a archivo temporal
                         File tempFile = new File(requireContext().getCacheDir(), "temp_profile.jpg");
                         FileOutputStream fos = new FileOutputStream(tempFile);
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
                         fos.close();
 
-                        // Preparar la petición multipart
                         String boundary = "*****" + System.currentTimeMillis() + "*****";
                         String url = "http://35.233.9.137/subir_foto.php";
 
@@ -328,12 +481,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
                         DataOutputStream dos = new DataOutputStream(connection.getOutputStream());
 
-                        // Añadir campo email
                         dos.writeBytes("--" + boundary + "\r\n");
                         dos.writeBytes("Content-Disposition: form-data; name=\"email\"\r\n\r\n");
                         dos.writeBytes(userEmail + "\r\n");
 
-                        // Añadir imagen
                         dos.writeBytes("--" + boundary + "\r\n");
                         dos.writeBytes("Content-Disposition: form-data; name=\"foto\";filename=\"profile.jpg\"\r\n");
                         dos.writeBytes("Content-Type: image/jpeg\r\n\r\n");
@@ -351,7 +502,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                         dos.flush();
                         dos.close();
 
-                        // Leer respuesta
                         BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                         StringBuilder response = new StringBuilder();
                         String line;
@@ -361,7 +511,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
                         final String respuestaJson = response.toString();
 
-                        // Volver al hilo principal
                         requireActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -400,7 +549,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     private void eliminarFotoPerfil() {
         String userEmail = customPrefs.getString("user_email", "");
         if (!userEmail.isEmpty()) {
-            // Enviar petición al servidor
             Data inputData = new Data.Builder()
                     .putString("script", "eliminar_foto.php")
                     .putString("email", userEmail)
@@ -412,7 +560,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
             WorkManager.getInstance(requireContext()).enqueue(request);
 
-            // Eliminar localmente
             customPrefs.edit().remove("profile_photo_url_" + userEmail).apply();
             requireActivity().recreate();
         }

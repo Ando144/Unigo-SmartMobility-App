@@ -88,17 +88,32 @@ public class RegisterActivity extends AppCompatActivity {
             JSONObject json = (JSONObject) parser.parse(jsonResponse);
 
             if (json.containsKey("success") && (Boolean) json.get("success")) {
+                String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
+
                 Toast.makeText(this, "¡Usuario registrado!", Toast.LENGTH_SHORT).show();
-                marcarEstadoUsuario();
+
+                // Guardar email y estado
+                marcarEstadoUsuario(email);
+
+                // Los nuevos usuarios empiezan con modo claro por defecto
+                // (puedes cambiar esto si quieres)
+
                 irAMainActivity();
             } else {
                 String error = (String) json.get("error");
                 Toast.makeText(this, "Error: " + (error != null ? error : "Fallo"), Toast.LENGTH_LONG).show();
             }
         } catch (ParseException e) {
-            // Si el servidor escupe un error de PHP (HTML), lo verás aquí
             Toast.makeText(this, "ERROR SERVIDOR: " + jsonResponse, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void marcarEstadoUsuario(String email) {
+        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("isGuest", false);
+        editor.putString("user_email", email);
+        editor.apply();
     }
 
     private void irAMainActivity() {

@@ -15,7 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Unigodas"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="true">
 
         <!-- Servicio para persistencia de idioma en versiones anteriores a Android 13 -->
         <service
@@ -33,17 +33,23 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
+
         <activity
             android:name=".activities.LoginActivity"
+            android:theme="@style/Theme.Unigodas.AlwaysLight"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".activities.MainActivity" />
-        <activity android:name=".activities.RegisterActivity" />
+
+        <activity
+            android:name=".activities.RegisterActivity"
+            android:theme="@style/Theme.Unigodas.AlwaysLight" />
+
         <activity
             android:name=".activities.HeatmapActivity"
             android:theme="@style/TemaVentanaFlotante"

@@ -19,6 +19,7 @@ import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -324,6 +325,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    private int obtenerColorTextoParaTarjeta() {
+        // Para la tarjeta de rutas, necesitamos texto oscuro en modo claro y texto claro en modo oscuro
+        int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        boolean isDarkMode = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+
+        if (isDarkMode) {
+            return Color.parseColor("#EEEEEE"); // Texto claro para fondo oscuro
+        } else {
+            return Color.parseColor("#1A1A1A"); // Texto oscuro para fondo claro
+        }
+    }
+
+    private int obtenerColorTextoSecundario() {
+        int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        boolean isDarkMode = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+
+        if (isDarkMode) {
+            return Color.parseColor("#B0B0B0"); // Texto secundario claro para fondo oscuro
+        } else {
+            return Color.parseColor("#666666"); // Texto secundario oscuro para fondo claro
+        }
+    }
+
+    private int obtenerColorSurface() {
+        TypedValue typedValue = new TypedValue();
+        requireContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorSurface, typedValue, true);
+        return typedValue.data;
+    }
+
     private void cerrarPantallaBusqueda() {
         pantallaBusquedaCompleta.setVisibility(View.GONE);
         searchViewReal.setQuery("", false);
@@ -545,6 +575,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                                             JSONObject lineData = td.getJSONObject("line");
                                             segmento.color = lineData.has("color") ? Color.parseColor(lineData.getString("color")) : Color.RED;
+                                            if (!isDarkModeOnDevice()) {
+                                                if (esColorDemasiadoClaro(segmento.color)) {
+                                                    segmento.color = ContextCompat.getColor(requireContext(), R.color.bilbao_grey_dark);
+                                                }
+                                            }
 
                                             String agencia = "";
                                             if (lineData.has("agencies")) {
@@ -658,7 +693,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         for (SegmentoRuta seg : listaSegmentosFinal) {
                                             PolylineOptions opt = new PolylineOptions().addAll(seg.puntos).width(12f).color(seg.color).geodesic(true);
                                             TextView tv = new TextView(requireContext());
-                                            tv.setTextSize(14f); tv.setPadding(0, 16, 0, 16); tv.setTextColor(Color.DKGRAY);
+                                            tv.setTextSize(14f); tv.setPadding(0, 16, 0, 16); tv.setTextColor(obtenerColorTextoParaTarjeta());
 
                                             if (seg.esCaminando && "transit".equals(modoTransporte)) {
                                                 opt.pattern(Arrays.asList(new Dot(), new Gap(15f)));
@@ -896,7 +931,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         TextView tvTiempo = new TextView(requireContext());
         tvTiempo.setText("Salida (Máx. 14 días):");
         tvTiempo.setTypeface(null, Typeface.BOLD);
-        tvTiempo.setTextColor(Color.DKGRAY);
+        tvTiempo.setTextColor(obtenerColorTextoSecundario());
         layout.addView(tvTiempo);
 
         LinearLayout layoutFechaHora = new LinearLayout(requireContext());
@@ -1040,5 +1075,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         List<LatLng> puntos; int color; boolean esCaminando; String tituloInstruccion; LatLng puntoInicio;
         String duracion; String paradaOrigen; String paradaDestino; String direccion; String numParadas;
         String horaSalida; String horaLlegada; String infoCO2; int colorCO2;
+    }
+
+    /**
+     * Detecta si el dispositivo está en modo oscuro
+     */
+    private boolean isDarkModeOnDevice() {
+        int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    /**
+     * Detecta si un color es demasiado claro (poco contraste con fondo blanco)
+     * Retorna true si el color tiene alta luminosidad
+     */
+    private boolean esColorDemasiadoClaro(int color) {
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+
+        // Calcular luminosidad relativa (fórmula W3C simplificada)
+        double luminosidad = (0.299 * red + 0.587 * green + 0.114 * blue) / 255.0;
+
+        // Si la luminosidad es mayor a 0.75, el color es muy claro (cercano al blanco)
+        // Ajusta este umbral según necesites: 0.7 = más estricto, 0.8 = más permisivo
+        return luminosidad > 0.75;
     }
 }

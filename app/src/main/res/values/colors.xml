@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Paleta Ayuntamiento de Bilbao -->
-    <color name="bilbao_red">#FFCC0000</color> <!-- FF = 100% opaco -->
+    <color name="bilbao_red">#FFCC0000</color>
     <color name="bilbao_red_dark">#FF990000</color>
     <color name="bilbao_grey_dark">#FF333333</color>
     <color name="bilbao_grey_light">#E0E0E0</color>
@@ -11,4 +11,24 @@
     <color name="text_dark">#1A1A1A</color>
     <color name="text_medium">#666666</color>
     <color name="white">#FFFFFF</color>
+
+    <!-- Colores Modo Oscuro Base -->
+    <color name="bg_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="text_light">#EEEEEE</color>
+    <color name="text_secondary_light">#B0B0B0</color>
+
+    <!-- Colores de Ruta (Modo Claro) -->
+    <color name="route_header_bg">#333333</color>
+    <color name="route_header_text">#FFFFFF</color>
+    <color name="route_text_primary">#1A1A1A</color>
+    <color name="route_text_secondary">#757575</color>
+    <color name="route_price_text">#3F51B5</color>
+
+    <!-- Fallback para transporte si el color de la marca es ilegible en fondo claro -->
+    <color name="route_transit_fallback">#CC0000</color>
+
+    <!-- Colores CO2 (Claro) -->
+    <color name="co2_walking_color">#2E7D32</color>
+    <color name="co2_transit_color">#1976D2</color>
 </resources>

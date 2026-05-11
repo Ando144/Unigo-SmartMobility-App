@@ -1,16 +1,21 @@
 package com.example.unigo_das.activities;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.PreferenceManager;
 
 import com.example.unigo_das.R;
 import com.example.unigo_das.db.DataBaseHelper;
@@ -31,10 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Aplicar el modo oscuro antes de super.onCreate y de inflar el layout
+        aplicarModoOscuro();
+        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Forzar actualización de textos en BD según el idioma actual
         inicializarCampus();
         inicializarParadasTransporte();
 
@@ -44,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         fm = getSupportFragmentManager();
 
-        // 1. Establecer el listener PRIMERO
         bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -53,13 +59,39 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 2. Manejar el estado inicial o la recreación
         if (savedInstanceState == null) {
             bottomNav.setSelectedItemId(R.id.nav_map);
         } else {
             int selectedId = savedInstanceState.getInt(KEY_SELECTED_TAB, R.id.nav_map);
-            // Esto dispara el listener que llama a navegarA() automáticamente
             bottomNav.setSelectedItemId(selectedId);
+        }
+    }
+
+    private void aplicarModoOscuro() {
+        SharedPreferences unigoPrefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
+        boolean isDarkMode;
+
+        if (!isGuest) {
+            String userEmail = unigoPrefs.getString("user_email", "");
+            if (!userEmail.isEmpty()) {
+                // Obtener preferencia personal del usuario
+                isDarkMode = unigoPrefs.getBoolean("dark_mode_" + userEmail, false);
+                // Sincronizar con preferencia general
+                defaultPrefs.edit().putBoolean("modo_oscuro_activado", isDarkMode).apply();
+            } else {
+                isDarkMode = defaultPrefs.getBoolean("modo_oscuro_activado", false);
+            }
+        } else {
+            isDarkMode = defaultPrefs.getBoolean("modo_oscuro_activado", false);
+        }
+
+        int targetMode = isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
+
+        if (AppCompatDelegate.getDefaultNightMode() != targetMode) {
+            AppCompatDelegate.setDefaultNightMode(targetMode);
         }
     }
 
@@ -77,27 +109,22 @@ public class MainActivity extends AppCompatActivity {
         String tag = "";
         Fragment targetFragment = null;
 
-        // Identificamos el tag según la opción seleccionada
         if (itemId == R.id.nav_map) tag = "map";
         else if (itemId == R.id.nav_school) tag = "school";
         else if (itemId == R.id.nav_weather) tag = "weather";
         else if (itemId == R.id.nav_settings) tag = "settings";
 
-        // Buscamos si el fragmento ya existe en la memoria
         targetFragment = fm.findFragmentByTag(tag);
 
-        // Ocultamos todos los fragmentos activos
         for (Fragment frag : fm.getFragments()) {
             if (frag.isVisible()) {
                 transaction.hide(frag);
             }
         }
 
-        // Si NO existe, lo instanciamos y lo AGREGAMOS (add en vez de replace)
         if (targetFragment == null) {
             if (itemId == R.id.nav_map) {
                 targetFragment = new MapFragment();
-                // Si es la primera vez que creamos el mapa y hay una ruta pendiente:
                 if (mapArgs != null) {
                     targetFragment.setArguments(mapArgs);
                     mapArgs = null;
@@ -111,19 +138,16 @@ public class MainActivity extends AppCompatActivity {
             }
             transaction.add(R.id.fragment_container, targetFragment, tag);
         }
-        // Si YA EXISTE, simplemente lo MOSTRAMOS
         else {
             transaction.show(targetFragment);
-
-            // Si volvemos al mapa existente y hay una petición de ruta pendiente:
             if (itemId == R.id.nav_map && mapArgs != null) {
                 ((MapFragment) targetFragment).dibujarLineaHastaDestino(
                         mapArgs.getString("destino_nombre"),
                         mapArgs.getDouble("destino_lat"),
                         mapArgs.getDouble("destino_lng"),
-                        "walking" // Por defecto en walking
+                        "walking"
                 );
-                mapArgs = null; // Limpiamos tras consumir
+                mapArgs = null;
             }
         }
 
@@ -136,30 +160,34 @@ public class MainActivity extends AppCompatActivity {
             getWindow().setStatusBarColor(Color.TRANSPARENT);
             if (insetsController != null) insetsController.setAppearanceLightStatusBars(true);
         } else {
-            getWindow().setStatusBarColor(Color.parseColor("#333333"));
-            if (insetsController != null) insetsController.setAppearanceLightStatusBars(false);
+            TypedValue typedValue = new TypedValue();
+            getTheme().resolveAttribute(android.R.attr.colorBackground, typedValue, true);
+            int color = typedValue.data;
+            
+            getWindow().setStatusBarColor(color);
+            
+            if (insetsController != null) {
+                boolean isDark = (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK) 
+                                 == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+                insetsController.setAppearanceLightStatusBars(!isDark);
+            }
         }
     }
 
     public void irRutaEnMapa(String nombreCentro, double latDestino, double lngDestino) {
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-
-        // 1. Guardamos la petición de ruta
         mapArgs = new Bundle();
         mapArgs.putString("destino_nombre", nombreCentro);
         mapArgs.putDouble("destino_lat", latDestino);
         mapArgs.putDouble("destino_lng", lngDestino);
 
-        // 2. Si ya estamos en la pestaña del mapa, lo dibujamos directamente
         if (bottomNav.getSelectedItemId() == R.id.nav_map) {
             MapFragment mapFragment = (MapFragment) fm.findFragmentByTag("map");
             if (mapFragment != null) {
                 mapFragment.dibujarLineaHastaDestino(nombreCentro, latDestino, lngDestino, "walking");
-                mapArgs = null; // Lo limpiamos para que no lo repita
+                mapArgs = null;
             }
         } else {
-            // 3. Si estamos en otra pestaña, forzamos el cambio al mapa.
-            // Esto dispara el Listener -> navegarA() -> Muestra el mapa y detecta el mapArgs
             bottomNav.setSelectedItemId(R.id.nav_map);
         }
     }

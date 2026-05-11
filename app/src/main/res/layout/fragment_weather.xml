@@ -6,7 +6,7 @@
     android:fillViewport="true"
     android:paddingTop="40dp"
     android:clipToPadding="false"
-    android:background="#F5F7FA">
+    android:background="?android:attr/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
             android:layout_margin="16dp"
             app:cardCornerRadius="24dp"
             app:cardElevation="4dp"
-            app:cardBackgroundColor="@android:color/white">
+            app:cardBackgroundColor="?attr/colorSurface">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -35,7 +35,7 @@
                     android:text="Detectando ubicación..."
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    android:textColor="#1A1A1A"
+                    android:textColor="?attr/colorOnSurface"
                     android:letterSpacing="0.02" />
 
                 <ImageView
@@ -45,21 +45,23 @@
                     android:layout_marginTop="16dp"
                     android:padding="8dp"
                     android:src="@drawable/ic_clima_nubes"
-                    app:tint="#D32F2F" /> <TextView
-                android:id="@+id/tvDescripcionClima"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cargando..."
-                android:textSize="15sp"
-                android:textAllCaps="true"
-                android:letterSpacing="0.1"
-                android:textColor="#D32F2F"
-                android:textStyle="bold" />
+                    app:tint="@color/bilbao_red" />
+
+                <TextView
+                    android:id="@+id/tvDescripcionClima"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cargando..."
+                    android:textSize="15sp"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.1"
+                    android:textColor="@color/bilbao_red"
+                    android:textStyle="bold" />
 
                 <View
                     android:layout_width="40dp"
                     android:layout_height="2dp"
-                    android:background="#EEEEEE"
+                    android:background="?attr/colorSurfaceVariant"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp" />
 
@@ -70,7 +72,7 @@
                     android:text="-- ºC"
                     android:textSize="56sp"
                     android:textStyle="bold"
-                    android:textColor="#1A1A1A"
+                    android:textColor="?attr/colorOnSurface"
                     android:includeFontPadding="false" />
 
             </LinearLayout>
@@ -98,7 +100,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="?attr/colorSurface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -112,7 +114,7 @@
                         android:text="CALIDAD AIRE"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:textColor="#888888" />
+                        android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
                         android:id="@+id/tvIndiceAire"
@@ -121,7 +123,7 @@
                         android:text="---"
                         android:textSize="24sp"
                         android:textStyle="bold"
-                        android:textColor="#1A1A1A"
+                        android:textColor="?attr/colorOnSurface"
                         android:layout_marginTop="4dp"/>
 
                     <TextView
@@ -129,7 +131,7 @@
                         android:layout_height="wrap_content"
                         android:text="Ver mapa "
                         android:textSize="14sp"
-                        android:textColor="#1976D2"
+                        android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
@@ -146,7 +148,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="?attr/colorSurface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -160,7 +162,7 @@
                         android:text="POLEN"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:textColor="#888888" />
+                        android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
                         android:id="@+id/tvIndicePolen"
@@ -169,7 +171,7 @@
                         android:text="---"
                         android:textSize="24sp"
                         android:textStyle="bold"
-                        android:textColor="#1A1A1A"
+                        android:textColor="?attr/colorOnSurface"
                         android:layout_marginTop="4dp"/>
 
                     <TextView
@@ -177,12 +179,13 @@
                         android:layout_height="wrap_content"
                         android:text="Ver mapa"
                         android:textSize="14sp"
-                        android:textColor="#1976D2"
+                        android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -201,7 +204,7 @@
                 android:layout_marginEnd="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="?attr/colorSurface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -215,7 +218,7 @@
                         android:text="ÍNDICE UV"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:textColor="#888888" />
+                        android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
                         android:id="@+id/tvValorUV"
@@ -224,7 +227,7 @@
                         android:text="--"
                         android:textSize="24sp"
                         android:textStyle="bold"
-                        android:textColor="#1A1A1A"
+                        android:textColor="?attr/colorOnSurface"
                         android:layout_marginTop="4dp"/>
 
                     <TextView
@@ -233,7 +236,7 @@
                         android:layout_height="wrap_content"
                         android:text="Cargando..."
                         android:textSize="14sp"
-                        android:textColor="#555555"
+                        android:textColor="?android:attr/textColorSecondary"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -245,7 +248,7 @@
                 android:layout_marginStart="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="2dp"
-                app:cardBackgroundColor="@android:color/white">
+                app:cardBackgroundColor="?attr/colorSurface">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -260,7 +263,7 @@
                         android:text="HORAS DE LUZ"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        android:textColor="#888888" />
+                        android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
                         android:id="@+id/tvAmanecer"
@@ -269,7 +272,7 @@
                         android:text="🌅 --:--"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#1A1A1A"
+                        android:textColor="?attr/colorOnSurface"
                         android:layout_marginTop="8dp"/>
 
                     <TextView
@@ -279,11 +282,12 @@
                         android:text="🌙 --:--"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="#1A1A1A"
+                        android:textColor="?attr/colorOnSurface"
                         android:layout_marginTop="4dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
         </LinearLayout>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -292,7 +296,8 @@
             android:textStyle="bold"
             android:paddingHorizontal="16dp"
             android:paddingTop="16dp"
-            android:paddingBottom="8dp" />
+            android:paddingBottom="8dp"
+            android:textColor="?attr/colorOnSurface" />
 
         <GridLayout
             android:id="@+id/glFavoritosContainer"
@@ -310,7 +315,7 @@
             android:layout_marginBottom="8dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="#FFF5F5">
+            app:cardBackgroundColor="?attr/colorSurfaceVariant">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -323,7 +328,7 @@
                     android:text="Pronóstico Euskalmet"
                     android:textStyle="bold"
                     android:textSize="14sp"
-                    android:textColor="#D32F2F" />
+                    android:textColor="@color/bilbao_red" />
                 <TextView
                     android:id="@+id/tvPronosticoBilbao"
                     android:layout_width="match_parent"
@@ -332,7 +337,7 @@
                     android:text="Cargando información oficial..."
                     android:textSize="14sp"
                     android:lineHeight="20sp"
-                    android:textColor="#444444" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -343,7 +348,8 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:padding="16dp"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:textColor="?attr/colorOnSurface" />
 
         <WebView
             android:id="@+id/wvRadarLluvia"

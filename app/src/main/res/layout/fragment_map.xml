@@ -20,6 +20,7 @@
         android:layout_margin="16dp"
         app:cardCornerRadius="8dp"
         app:cardElevation="2dp"
+        app:cardBackgroundColor="?attr/colorSurface"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -56,6 +57,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- 3. TARJETA DE INFORMACIÓN DE RUTAS (Oculta al inicio, flota sobre el selector) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_info_rutas"
         android:layout_width="0dp"
@@ -65,6 +67,7 @@
         android:visibility="gone"
         app:cardCornerRadius="16dp"
         app:cardElevation="6dp"
+        app:cardBackgroundColor="?attr/colorSurface"
         app:layout_constrainedHeight="true"
         app:layout_constraintHeight_max="300dp"
         app:layout_constraintBottom_toTopOf="@+id/card_transporte"
@@ -75,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="#FAFAFA"
+            android:background="?attr/colorSurface"
             android:animateLayoutChanges="true">
 
             <RelativeLayout
@@ -84,9 +87,7 @@
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:background="?attr/colorPrimaryContainer">
 
                 <ImageView
                     android:id="@+id/btn_filtros_transporte"
@@ -97,7 +98,7 @@
                     android:layout_centerVertical="true"
                     android:src="@android:drawable/ic_menu_preferences"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="#757575"
+                    app:tint="?attr/colorOnPrimaryContainer"
                     android:visibility="gone"/>
 
                 <TextView
@@ -105,7 +106,7 @@
                     android:layout_height="wrap_content"
                     android:text="Ruta actual"
                     android:textStyle="bold"
-                    android:textColor="#333333"
+                    android:textColor="?attr/colorOnPrimaryContainer"
                     android:layout_centerInParent="true"/>
 
                 <ImageView
@@ -118,7 +119,7 @@
                     android:layout_marginEnd="8dp"
                     android:src="@android:drawable/arrow_down_float"
                     android:background="@android:color/transparent"
-                    app:tint="#757575"/>
+                    app:tint="?attr/colorOnPrimaryContainer"/>
 
                 <ImageView
                     android:id="@+id/btn_quitar_ruta"
@@ -129,13 +130,13 @@
                     android:layout_centerVertical="true"
                     android:src="@android:drawable/ic_menu_close_clear_cancel"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="#757575"/>
+                    app:tint="?attr/colorOnPrimaryContainer"/>
             </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#EEEEEE"/>
+                android:background="?attr/colorSurfaceVariant"/>
 
             <androidx.core.widget.NestedScrollView
                 android:id="@+id/scroll_instrucciones"
@@ -153,6 +154,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- 4. SELECTOR DE TRANSPORTE -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_transporte"
         android:layout_width="wrap_content"
@@ -160,6 +162,7 @@
         android:layout_margin="24dp"
         app:cardCornerRadius="25dp"
         app:cardElevation="4dp"
+        app:cardBackgroundColor="?attr/colorSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -177,24 +180,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="A pie" />
+                android:text="A pie"
+                android:textColor="?attr/colorOnSurface"/>
 
             <RadioButton
                 android:id="@+id/rb_bici"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Bici" />
+                android:text="Bici"
+                android:textColor="?attr/colorOnSurface"/>
 
             <RadioButton
                 android:id="@+id/rb_transporte_publico"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Público" />
+                android:text="Público"
+                android:textColor="?attr/colorOnSurface"/>
         </RadioGroup>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- BOTÓN DE CAPAS DE TRANSPORTE -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_capas_transporte"
         android:layout_width="wrap_content"
@@ -208,12 +215,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/card_buscador_falso" />
 
+    <!-- 5. LA PANTALLA COMPLETA DE BÚSQUEDA -->
     <LinearLayout
         android:id="@+id/pantalla_busqueda_completa"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="#FFFFFF"
+        android:background="?android:attr/colorBackground"
         android:visibility="gone"
         android:elevation="10dp"
         android:clickable="true"
@@ -226,7 +234,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="8dp"
-            android:background="#FFFFFF">
+            android:background="?attr/colorSurface">
 
             <ImageView
                 android:id="@+id/btn_cerrar_busqueda"
@@ -234,7 +242,7 @@
                 android:layout_height="40dp"
                 android:padding="8dp"
                 android:src="@android:drawable/ic_menu_revert"
-                app:tint="#333333"
+                app:tint="?attr/colorOnSurface"
                 android:background="?attr/selectableItemBackgroundBorderless"/>
 
             <androidx.appcompat.widget.SearchView
@@ -250,13 +258,13 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#EEEEEE"/>
+            android:background="?attr/colorSurfaceVariant"/>
 
         <ListView
             android:id="@+id/lv_search_results"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="#EEEEEE"
+            android:divider="?attr/colorSurfaceVariant"
             android:dividerHeight="1dp"/>
     </LinearLayout>
 

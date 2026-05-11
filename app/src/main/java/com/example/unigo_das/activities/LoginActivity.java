@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.preference.PreferenceManager;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
@@ -101,12 +103,23 @@ public class LoginActivity extends AppCompatActivity {
         try {
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject) parser.parse(jsonResponse);
-            
+
             if (json.containsKey("success") && (Boolean) json.get("success")) {
                 String nombre = (String) json.get("nombre");
+                String email = etEmail.getText().toString().trim(); // O si viene en el JSON: json.get("email")
+
                 Toast.makeText(this, "Bienvenido " + nombre, Toast.LENGTH_SHORT).show();
-                
-                marcarEstadoUsuario(false);
+
+                // Guardar email del usuario
+                SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+                prefs.edit()
+                        .putString("user_email", email)
+                        .putBoolean("isGuest", false)
+                        .apply();
+
+                // Aplicar el tema personal del usuario ANTES de ir a MainActivity
+                aplicarTemaUsuario(email);
+
                 irAMainActivity();
             } else {
                 String error = (String) json.get("error");
@@ -115,6 +128,23 @@ public class LoginActivity extends AppCompatActivity {
         } catch (ParseException e) {
             Toast.makeText(this, "Error al procesar respuesta del servidor", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Nuevo método para aplicar tema de usuario
+    private void aplicarTemaUsuario(String email) {
+        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Obtener preferencia guardada para este usuario
+        boolean isDarkMode = prefs.getBoolean("dark_mode_" + email,
+                defaultPrefs.getBoolean("modo_oscuro_activado", false));
+
+        // También actualizamos la preferencia general para mantener sincronización
+        defaultPrefs.edit().putBoolean("modo_oscuro_activado", isDarkMode).apply();
+
+        AppCompatDelegate.setDefaultNightMode(
+                isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+        );
     }
 
     private void procesarError(String errorResponse) {

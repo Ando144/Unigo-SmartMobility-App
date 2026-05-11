@@ -57,7 +57,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                 dialog.show(getParentFragmentManager(), "ProfileDialog");
                 return true;
             });
-        }
+            }
     }
 
     private void setupAccountSection(boolean isGuest) {
@@ -71,8 +71,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             if (login != null) {
                 login.setVisible(true);
                 login.setOnPreferenceClickListener(p -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    
+                    // Eliminamos el forzado a modo claro aquí, ya que LoginActivity ya tiene su propio tema en el Manifest.
+                    // Mantener el modo noche actual para que se aplique al volver.
                     Intent intent = new Intent(getActivity(), LoginActivity.class);
                     startActivity(intent);
                     if (getActivity() != null) {
@@ -96,7 +96,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             if (logout != null) {
                 logout.setVisible(true);
                 logout.setOnPreferenceClickListener(p -> {
-                    customPrefs.edit().putBoolean("isGuest", true).apply();
+                    // Limpiar datos de usuario pero mantener su preferencia guardada
+                    customPrefs.edit()
+                            .putBoolean("isGuest", true)
+                            .putString("user_email", null) // Limpiar email
+                            .apply();
+
+                    // Volver al modo claro por defecto al cerrar sesión
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
                     requireActivity().recreate();
                     return true;
                 });
@@ -120,7 +128,24 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             syncDarkModeSwitch();
             darkModePref.setOnPreferenceChangeListener((preference, newValue) -> {
                 boolean checked = (boolean) newValue;
-                AppCompatDelegate.setDefaultNightMode(checked ? 
+
+                // Guardar en preferencias generales
+                SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                defaultPrefs.edit().putBoolean("modo_oscuro_activado", checked).apply();
+
+                // Guardar preferencia personal del usuario
+                SharedPreferences unigoPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+                boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
+
+                if (!isGuest) {
+                    String userEmail = unigoPrefs.getString("user_email", "");
+                    if (!userEmail.isEmpty()) {
+                        // Guardar preferencia específica para este usuario
+                        unigoPrefs.edit().putBoolean("dark_mode_" + userEmail, checked).apply();
+                    }
+                }
+
+                AppCompatDelegate.setDefaultNightMode(checked ?
                         AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
                 return true;
             });

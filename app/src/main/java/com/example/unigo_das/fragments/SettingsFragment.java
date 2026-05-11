@@ -10,6 +10,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.view.Gravity;
 import android.view.View;
@@ -39,6 +41,7 @@ import androidx.work.WorkManager;
 import com.example.unigo_das.R;
 import com.example.unigo_das.activities.LoginActivity;
 import com.example.unigo_das.network.NetworkWorker;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -186,7 +189,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
                     com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
                             new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
-                    builder.setTitle("Transporte favorito");
+                    builder.setTitle(R.string.transporte_favorito);
 
                     builder.setSingleChoiceItems(nombresTransporte, seleccionado, new android.content.DialogInterface.OnClickListener() {
                         @Override
@@ -202,7 +205,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                             }, 150);
                         }
                     });
-                    builder.setNegativeButton("Cancelar", null);
+                    builder.setNegativeButton(R.string.cancelar3, null);
                     builder.show();
                     return true;
                 }
@@ -234,7 +237,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
                     com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
                             new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
-                    builder.setTitle("Estilo de mapa");
+                    builder.setTitle(R.string.estilo_de_mapa);
 
                     builder.setSingleChoiceItems(nombresMapa, seleccionado, new android.content.DialogInterface.OnClickListener() {
                         @Override
@@ -250,7 +253,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                             }, 150);
                         }
                     });
-                    builder.setNegativeButton("Cancelar", null);
+                    builder.setNegativeButton(R.string.cancelar4, null);
                     builder.show();
                     return true;
                 }
@@ -262,10 +265,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             openDataPref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(androidx.preference.Preference preference) {
-                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("Fuentes de Datos")
-                            .setMessage("Esta aplicación utiliza datos abiertos proporcionados por:\n\n• Euskalmet\n• Open Data Euskadi\n• Bizkaibus\n• Euskotren y Metro Bilbao\n• GeoBilbao\n\nAgradecemos su labor en la apertura de datos para el Reto UNIGO.")
-                            .setPositiveButton("Aceptar", null)
+                    new MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.fuentes_de_datos)
+                            .setMessage(R.string.esta_aplicaci_n_utiliza_datos_abiertos_proporcionados_por_euskalmet_open_meteo_open_data_euskadi_bizkaibus_euskotren_y_metro_bilbao_geobilbao_agradecemos_su_labor_en_la_apertura_de_datos_para_esta_aplicaci_n)
+                            .setPositiveButton(R.string.aceptar, null)
                             .show();
                     return true;
                 }
@@ -322,7 +325,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
 
         String horaAviso = String.format(java.util.Locale.getDefault(), "%02d:%02d", hora, minuto);
-        android.widget.Toast.makeText(context, "Aviso programado para las " + horaAviso, android.widget.Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, getString(R.string.aviso_programado_para_las) + horaAviso, Toast.LENGTH_SHORT).show();
     }
 
     private void cancelarAlarma(Context context) {
@@ -462,29 +465,33 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                     }
 
                     new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("Seleccionar Idioma")
+                            .setTitle(getString(R.string.seleccionar_idioma))
                             .setSingleChoiceItems(idiomas, seleccionado, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(final DialogInterface dialog, int which) {
                                     final String nuevoCodigo = codigos[which];
 
-                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(nuevoCodigo));
+                                    // 1. Cerramos el diálogo inmediatamente
+                                    dialog.dismiss();
 
+                                    // 2. Guardamos la preferencia personal del usuario
                                     String userEmail = customPrefs.getString("user_email", "");
                                     if (!userEmail.isEmpty()) {
                                         customPrefs.edit().putString("language_" + userEmail, nuevoCodigo).apply();
                                     }
 
+                                    // 3. Aplicamos el idioma con un pequeño retraso visual
                                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
                                         @Override
                                         public void run() {
-                                            dialog.dismiss();
-                                            onLanguageChanged();
+                                            // Esto reinicia la app y aplica los recursos automáticamente.
+                                            // IMPORTANTE: Ya NO llamamos a onLanguageChanged() ni a recreate()
+                                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(nuevoCodigo));
                                         }
                                     }, 150);
                                 }
                             })
-                            .setNegativeButton("Cancelar", null)
+                            .setNegativeButton(getString(R.string.cancelar), null)
                             .show();
                     return true;
                 }
@@ -539,17 +546,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
     @Override
     public void onLanguageChanged() {
-        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        String userEmail = prefs.getString("user_email", "");
-        if (!userEmail.isEmpty()) {
-            LocaleListCompat currentLocales = AppCompatDelegate.getApplicationLocales();
-            String currentLang = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
-            prefs.edit().putString("language_" + userEmail, currentLang).apply();
-        }
-
-        if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
-            getActivity().recreate();
-        }
+        //El reinicio lo gestiona ahora AppCompatDelegate automáticamente.
     }
 
     private void mostrarConfirmacionFoto(final Uri imageUri) {
@@ -559,7 +556,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
             if (bitmap != null) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                builder.setTitle("Confirmar foto de perfil");
+                builder.setTitle(R.string.confirmar_foto_de_perfil);
 
                 ImageView imageView = new ImageView(requireContext());
                 imageView.setImageBitmap(bitmap);
@@ -585,13 +582,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                 layout.addView(imageView);
 
                 builder.setView(layout);
-                builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.aceptar3, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         guardarFotoPerfil(bitmap);
                     }
                 });
-                builder.setNegativeButton("Cancelar", null);
+                builder.setNegativeButton(R.string.cancelar6, null);
                 builder.show();
             }
         } catch (Exception e) {
@@ -603,7 +600,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         final String userEmail = customPrefs.getString("user_email", "");
         if (!userEmail.isEmpty()) {
             final ProgressDialog progressDialog = new ProgressDialog(requireContext());
-            progressDialog.setMessage("Subiendo foto...");
+            progressDialog.setMessage(getString(R.string.subiendo_foto));
             progressDialog.setCancelable(false);
             progressDialog.show();
 
@@ -669,10 +666,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                                                 .putString("profile_photo_url_" + userEmail, fotoUrl)
                                                 .apply();
                                         requireActivity().recreate();
-                                        Toast.makeText(requireContext(), "Foto actualizada", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(requireContext(), R.string.foto_actualizada, Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
-                                    Toast.makeText(requireContext(), "Error al subir foto", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireContext(), R.string.error_al_subir_foto, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -682,7 +679,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                             @Override
                             public void run() {
                                 progressDialog.dismiss();
-                                Toast.makeText(requireContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), R.string.error_de_conexi_n, Toast.LENGTH_SHORT).show();
                             }
                         });
                     }

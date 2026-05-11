@@ -53,35 +53,35 @@
 
     <PreferenceCategory
         app:key="pref_category_mobility"
-        app:title="Rutas y Transporte">
+        app:title="@string/rutas_y_transporte">
 
         <Preference
             app:key="pref_transporte_favorito"
-            app:title="Transporte favorito"
-            app:summary="Medio de transporte por defecto"
+            app:title="@string/transporte_favorito2"
+            app:summary="@string/medio_de_transporte_por_defecto"
             app:iconSpaceReserved="false"/>
 
         <SwitchPreferenceCompat
             app:key="pref_coche_electrico"
-            app:title="Vehículo eléctrico"
-            app:summary="Priorizar rutas con puntos de recarga"
+            app:title="@string/veh_culo_el_ctrico"
+            app:summary="@string/priorizar_rutas_con_puntos_de_recarga"
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
         app:key="pref_category_notifications"
-        app:title="Alertas y Clima">
+        app:title="@string/alertas_y_clima">
 
         <SwitchPreferenceCompat
             app:key="pref_notificaciones_clima"
-            app:title="Notificaciones de salud y clima"
-            app:summary="Recibir avisos diarios sobre polen, lluvia y UV"
+            app:title="@string/notificaciones_de_salud_y_clima"
+            app:summary="@string/recibir_avisos_diarios_sobre_polen_lluvia_y_uv"
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
         <Preference
             app:key="pref_hora_notificacion"
-            app:title="Hora del aviso diario"
+            app:title="@string/hora_del_aviso_diario"
             app:summary="7:30 AM"
             app:dependency="pref_notificaciones_clima"
             app:iconSpaceReserved="false"/>
@@ -89,35 +89,35 @@
 
     <PreferenceCategory
         app:key="pref_category_map"
-        app:title="Visualización del Mapa">
+        app:title="@string/visualizaci_n_del_mapa">
 
         <Preference
             app:key="pref_tipo_mapa"
-            app:title="Estilo de mapa"
-            app:summary="Normal"
+            app:title="@string/estilo_de_mapa2"
+            app:summary="@string/normal"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
 
     <PreferenceCategory
         app:key="pref_category_info"
-        app:title="Información">
+        app:title="@string/informaci_n">
 
         <Preference
             app:key="pref_open_data"
-            app:title="Fuentes de Datos (Open Data)"
-            app:summary="Agradecimientos a las entidades colaboradoras"
+            app:title="@string/fuentes_de_datos_open_data"
+            app:summary="@string/agradecimientos_a_las_entidades_colaboradoras"
             app:iconSpaceReserved="false"/>
 
         <Preference
             app:key="pref_equipo"
-            app:title="Equipo de Desarrollo"
-            app:summary="Creado por Jon Ander Duque, Asier Faraig y Andoni Ortiz de Zarate"
+            app:title="@string/equipo_de_desarrollo"
+            app:summary="@string/creado_por_jon_ander_duque_asier_faraig_y_andoni_ortiz_de_zarate"
             app:selectable="false"
             app:iconSpaceReserved="false"/>
 
         <Preference
             app:key="pref_version"
-            app:title="Versión de la aplicación"
+            app:title="@string/versi_n_de_la_aplicaci_n"
             app:summary="1.0.0"
             app:selectable="false"
             app:iconSpaceReserved="false"/>

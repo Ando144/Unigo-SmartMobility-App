@@ -198,9 +198,9 @@ public class MainActivity extends AppCompatActivity {
     private void inicializarCampus() {
         DataBaseHelper dbHelper = new DataBaseHelper(this);
         dbHelper.insertarCentro("EHU_345", getString(R.string.centro_ehu_ingenieria_bilbao), "UPV/EHU", "Sede principal...", "San Mamés", 43.26233, -2.94840);
-        dbHelper.insertarCentro("EHU_363", getString(R.string.centro_ehu_ingenieria_bilbao), "UPV/EHU", "Centro especializado...", "San Mamés", 43.26332, -2.95035);
-        dbHelper.insertarCentro("EHU_364", getString(R.string.centro_ehu_ingenieria_bilbao), "UPV/EHU", "Instalaciones...", "San Mamés", 43.2638, -2.9511);
-        dbHelper.insertarCentro("EHU_350", getString(R.string.centro_ehu_ingenieria_bilbao), "UPV/EHU", "Escuela técnica...", "Portugalete", 43.32682, -3.02284);
+        dbHelper.insertarCentro("EHU_363", getString(R.string.centro_ehu_ingenieria_bilbao1), "UPV/EHU", "Centro especializado...", "San Mamés", 43.26332, -2.95035);
+        dbHelper.insertarCentro("EHU_364", getString(R.string.centro_ehu_ingenieria_bilbao2), "UPV/EHU", "Instalaciones...", "San Mamés", 43.2638, -2.9511);
+        dbHelper.insertarCentro("EHU_350", getString(R.string.centro_ehu_ingenieria_bilbao3), "UPV/EHU", "Escuela técnica...", "Portugalete", 43.32682, -3.02284);
         dbHelper.insertarCentro("EHU_320", getString(R.string.centro_ehu_bellas_artes), "UPV/EHU", "Facultad...", "Leioa", 43.33142, -2.97310);
         dbHelper.insertarCentro("EHU_310", getString(R.string.centro_ehu_ciencia_tecnologia), "UPV/EHU", "Centro de referencia...", "Leioa", 43.33082, -2.97000);
         dbHelper.insertarCentro("EHU_323", getString(R.string.centro_ehu_ciencias_sociales_comunicacion), "UPV/EHU", "Campus centrado...", "Leioa", 43.33102, -2.96741);

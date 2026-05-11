@@ -60,9 +60,9 @@ public class ProfileDialogFragment extends DialogFragment {
 
     private void mostrarConfirmacionEliminar() {
         new AlertDialog.Builder(requireActivity())
-                .setTitle("Eliminar foto")
-                .setMessage("¿Estás seguro de que quieres eliminar tu foto de perfil?")
-                .setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.eliminar_foto)
+                .setMessage(R.string.est_s_seguro_de_que_quieres_eliminar_tu_foto_de_perfil)
+                .setPositiveButton(R.string.eliminar, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (listener != null) {
@@ -70,7 +70,7 @@ public class ProfileDialogFragment extends DialogFragment {
                         }
                     }
                 })
-                .setNegativeButton("Cancelar", null)
+                .setNegativeButton(R.string.cancelar7, null)
                 .show();
     }
 

@@ -56,55 +56,55 @@ public class NotificacionClimaReceiver extends BroadcastReceiver {
                             int codigoClima = daily.getJSONArray("weathercode").optInt(0, 0);
 
                             // Empezamos a construir el mensaje
-                            String titulo = "Clima en Bilbao (" + Math.round(tempActual) + "ºC)";
+                            String titulo = context.getString(R.string.clima_en_bilbao) + Math.round(tempActual) + "ºC)";
                             StringBuilder mensaje = new StringBuilder();
 
                             // 1. Análisis de Temperatura
                             if (tempActual <= 10) {
-                                mensaje.append("Hace frío, ¡abrígate bien! ");
+                                mensaje.append(context.getString(R.string.hace_fr_o_abr_gate_bien));
                             } else if (tempActual >= 25) {
-                                mensaje.append("Día caluroso. ");
+                                mensaje.append(context.getString(R.string.d_a_caluroso));
                             }
 
                             // 2. Análisis del Código WMO (Eventos Especiales) y Lluvia
                             if (codigoClima == 0) {
-                                mensaje.append("Cielo despejado. ");
+                                mensaje.append(context.getString(R.string.cielo_despejado2));
                             } else if (codigoClima == 45 || codigoClima == 48) {
-                                mensaje.append("¡Ojo! Hay niebla, precaución si vas en coche o bici. ");
+                                mensaje.append(context.getString(R.string.ojo_hay_niebla_precauci_n_si_vas_en_coche_o_bici));
                             } else if (codigoClima >= 71 && codigoClima <= 77) {
-                                mensaje.append("¡Atención! Riesgo de nevadas. ");
+                                mensaje.append(context.getString(R.string.atenci_n_riesgo_de_nevadas));
                             } else if (codigoClima >= 95) {
-                                mensaje.append("Alerta por tormentas eléctricas. ");
+                                mensaje.append(context.getString(R.string.alerta_por_tormentas_el_ctricas));
                             } else if (lluviaTotal > 15.0) {
-                                mensaje.append("Lluvia fuerte hoy (").append(lluviaTotal).append("mm). Imprescindible paraguas. ");
+                                mensaje.append(context.getString(R.string.lluvia_fuerte_hoy)).append(lluviaTotal).append(context.getString(R.string.mm_imprescindible_paraguas));
                             } else if (lluviaTotal > 1.0) {
-                                mensaje.append("Se esperan algunos chubascos (").append(lluviaTotal).append("mm). ");
+                                mensaje.append(context.getString(R.string.se_esperan_algunos_chubascos)).append(lluviaTotal).append("mm). ");
                             } else {
-                                mensaje.append("No se esperan lluvias. ");
+                                mensaje.append(context.getString(R.string.no_se_esperan_lluvias));
                             }
 
                             // 3. Análisis de Viento
                             if (vientoMax > 40.0) {
-                                mensaje.append("Precaución: Rachas de viento de ").append(Math.round(vientoMax)).append(" km/h. ");
+                                mensaje.append(context.getString(R.string.precauci_n_rachas_de_viento_de)).append(Math.round(vientoMax)).append(" km/h. ");
                             }
 
                             // 4. Análisis de UV
                             if (uvMax >= 6) {
-                                mensaje.append("Protección solar necesaria (UV: ").append(Math.round(uvMax)).append(").");
+                                mensaje.append(context.getString(R.string.protecci_n_solar_necesaria_uv)).append(Math.round(uvMax)).append(").");
                             }
 
                             // Lanzamos la notificación generada
                             lanzarNotificacionFinal(context, titulo, mensaje.toString());
 
                         } catch (Exception e) {
-                            lanzarNotificacionFinal(context, "UniGo: Clima del Campus", "Abre la app para consultar la previsión detallada antes de salir.");
+                            lanzarNotificacionFinal(context, context.getString(R.string.unigo_clima_del_campus), context.getString(R.string.abre_la_app_para_consultar_la_previsi_n_detallada_antes_de_salir));
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        lanzarNotificacionFinal(context, "UniGo: Clima del Campus", "Conéctate a internet para ver el pronóstico de hoy.");
+                        lanzarNotificacionFinal(context, context.getString(R.string.unigo_clima_del_campus2), context.getString(R.string.con_ctate_a_internet_para_ver_el_pron_stico_de_hoy));
                     }
                 }
         );
@@ -117,8 +117,8 @@ public class NotificacionClimaReceiver extends BroadcastReceiver {
         String idCanal = "canal_clima";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel elCanal = new NotificationChannel(idCanal, "Alertas de Clima", NotificationManager.IMPORTANCE_HIGH);
-            elCanal.setDescription("Avisos diarios sobre el entorno");
+            NotificationChannel elCanal = new NotificationChannel(idCanal, context.getString(R.string.alertas_de_clima), NotificationManager.IMPORTANCE_HIGH);
+            elCanal.setDescription(context.getString(R.string.avisos_diarios_sobre_el_entorno));
             elManager.createNotificationChannel(elCanal);
         }
 

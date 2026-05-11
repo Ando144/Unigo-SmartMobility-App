@@ -32,7 +32,7 @@
                     android:id="@+id/tvUbicacionPrincipal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Detectando ubicación..."
+                    android:text="@string/detectando_ubicaci_n"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -51,7 +51,7 @@
                     android:id="@+id/tvDescripcionClima"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cargando..."
+                    android:text="@string/cargando"
                     android:textSize="15sp"
                     android:textAllCaps="true"
                     android:letterSpacing="0.1"
@@ -111,7 +111,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="CALIDAD AIRE"
+                        android:text="@string/calidad_aire"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorSecondary" />
@@ -129,7 +129,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ver mapa "
+                        android:text="@string/ver_mapa"
                         android:textSize="14sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -159,7 +159,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="POLEN"
+                        android:text="@string/polen2"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorSecondary" />
@@ -177,7 +177,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ver mapa"
+                        android:text="@string/ver_mapa2"
                         android:textSize="14sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -215,7 +215,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ÍNDICE UV MAXIMO"
+                        android:text="@string/ndice_uv_maximo"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorSecondary" />
@@ -234,7 +234,7 @@
                         android:id="@+id/tvDescUV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cargando..."
+                        android:text="@string/cargando2"
                         android:textSize="14sp"
                         android:textColor="?android:attr/textColorSecondary"
                         android:layout_marginTop="8dp"/>
@@ -260,7 +260,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="HORAS DE LUZ"
+                        android:text="@string/horas_de_luz"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorSecondary" />
@@ -291,7 +291,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Clima en tus Campus Favoritos"
+            android:text="@string/clima_en_tus_campus_favoritos"
             android:textSize="16sp"
             android:textStyle="bold"
             android:paddingHorizontal="16dp"
@@ -325,7 +325,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Pronóstico Euskalmet"
+                    android:text="@string/pron_stico_euskalmet"
                     android:textStyle="bold"
                     android:textSize="14sp"
                     android:textColor="@color/bilbao_red" />
@@ -334,7 +334,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Cargando información oficial..."
+                    android:text="@string/cargando_informaci_n_oficial"
                     android:textSize="14sp"
                     android:lineHeight="20sp"
                     android:textColor="?attr/colorOnSurfaceVariant" />
@@ -344,7 +344,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Radar de Precipitaciones en Vivo"
+            android:text="@string/radar_de_precipitaciones_en_vivo"
             android:textSize="16sp"
             android:textStyle="bold"
             android:padding="16dp"

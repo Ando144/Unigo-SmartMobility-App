@@ -89,14 +89,14 @@ public class WeatherFragment extends Fragment {
         cvMapaAire.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                abrirPantallaMapaCalor("AIRE");
+                abrirPantallaMapaCalor(getString(R.string.aire));
             }
         });
 
         cvMapaPolen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                abrirPantallaMapaCalor("POLEN");
+                abrirPantallaMapaCalor(getString(R.string.polen));
             }
         });
 
@@ -152,14 +152,14 @@ public class WeatherFragment extends Fragment {
     }
 
     private String obtenerNombreCiudad(double lat, double lon) {
-        if (!isAdded() || getContext() == null) return "Tu ubicación";
+        if (!isAdded() || getContext() == null) return getString(R.string.tu_ubicaci_n);
 
         Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
             if (addresses != null && !addresses.isEmpty()) {
                 String city = addresses.get(0).getLocality();
-                return (city != null) ? city : "Tu ubicación";
+                return (city != null) ? city : getString(R.string.tu_ubicaci_n2);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -453,30 +453,30 @@ public class WeatherFragment extends Fragment {
     }
 
     private void asignarIconoYTexto(int code, ImageView iv) {
-        String desc = "Desconocido";
+        String desc = getString(R.string.desconocido);
         int resId = R.drawable.ic_clima_nubes;
 
-        if (code == 0) desc = "Cielo despejado";
-        else if (code == 1) desc = "Mayormente despejado";
-        else if (code == 2) desc = "Parcialmente nublado";
-        else if (code == 3) desc = "Totalmente nublado";
-        else if (code == 45 || code == 48) desc = "Niebla densa";
-        else if (code == 51 || code == 53 || code == 55) desc = "Llovizna";
-        else if (code == 56 || code == 57) desc = "Llovizna helada";
-        else if (code == 61) desc = "Lluvia ligera";
-        else if (code == 63) desc = "Lluvia moderada";
-        else if (code == 65) desc = "Lluvia fuerte";
-        else if (code == 66 || code == 67) desc = "Lluvia helada";
-        else if (code == 71) desc = "Nieve ligera";
-        else if (code == 73) desc = "Nieve moderada";
-        else if (code == 75) desc = "Nevada fuerte";
-        else if (code == 77) desc = "Granizo suave";
-        else if (code == 80) desc = "Chubascos ligeros";
-        else if (code == 81) desc = "Chubascos moderados";
-        else if (code == 82) desc = "Chubascos violentos";
-        else if (code == 85 || code == 86) desc = "Chubascos de nieve";
-        else if (code == 95) desc = "Tormenta eléctrica";
-        else if (code == 96 || code == 99) desc = "Tormenta con granizo";
+        if (code == 0) desc = getString(R.string.cielo_despejado);
+        else if (code == 1) desc = getString(R.string.mayormente_despejado);
+        else if (code == 2) desc = getString(R.string.parcialmente_nublado);
+        else if (code == 3) desc = getString(R.string.totalmente_nublado);
+        else if (code == 45 || code == 48) desc = getString(R.string.niebla_densa);
+        else if (code == 51 || code == 53 || code == 55) desc = getString(R.string.llovizna);
+        else if (code == 56 || code == 57) desc = getString(R.string.llovizna_helada);
+        else if (code == 61) desc = getString(R.string.lluvia_ligera);
+        else if (code == 63) desc = getString(R.string.lluvia_moderada);
+        else if (code == 65) desc = getString(R.string.lluvia_fuerte);
+        else if (code == 66 || code == 67) desc = getString(R.string.lluvia_helada);
+        else if (code == 71) desc = getString(R.string.nieve_ligera);
+        else if (code == 73) desc = getString(R.string.nieve_moderada);
+        else if (code == 75) desc = getString(R.string.nevada_fuerte);
+        else if (code == 77) desc = getString(R.string.granizo_suave);
+        else if (code == 80) desc = getString(R.string.chubascos_ligeros);
+        else if (code == 81) desc = getString(R.string.chubascos_moderados);
+        else if (code == 82) desc = getString(R.string.chubascos_violentos);
+        else if (code == 85 || code == 86) desc = getString(R.string.chubascos_de_nieve);
+        else if (code == 95) desc = getString(R.string.tormenta_el_ctrica);
+        else if (code == 96 || code == 99) desc = getString(R.string.tormenta_con_granizo);
 
         if (code == 0) {
             resId = R.drawable.ic_clima_sol;
@@ -516,7 +516,7 @@ public class WeatherFragment extends Fragment {
 
         if (favoritos.isEmpty()) {
             TextView tvVacio = new TextView(requireContext());
-            tvVacio.setText("Aún no has guardado ningún campus en favoritos.");
+            tvVacio.setText(R.string.a_n_no_has_guardado_ning_n_campus_en_favoritos);
             tvVacio.setPadding(16, 16, 16, 16);
             contenedor.addView(tvVacio);
             return;
@@ -637,17 +637,17 @@ public class WeatherFragment extends Fragment {
         String descripcion;
 
         if (uvIndex < 3) {
-            descripcion = idioma.equals("eu") ? "Baxua" : (idioma.equals("en") ? "Low" : "Bajo");
+            descripcion = getString(R.string.bajo);
         } else if (uvIndex < 6) {
-            descripcion = idioma.equals("eu") ? "Ertaina" : (idioma.equals("en") ? "Moderate" : "Moderado");
+            descripcion = getString(R.string.moderado);
         } else if (uvIndex < 8) {
-            descripcion = idioma.equals("eu") ? "Altua" : (idioma.equals("en") ? "High" : "Alto");
+            descripcion = getString(R.string.alto);
             tvValorUV.setTextColor(android.graphics.Color.parseColor("#F57C00"));
         } else if (uvIndex < 11) {
-            descripcion = idioma.equals("eu") ? "Oso Altua" : (idioma.equals("en") ? "Very High" : "Muy Alto");
+            descripcion = getString(R.string.muy_alto);
             tvValorUV.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
         } else {
-            descripcion = idioma.equals("eu") ? "Muturrekoa" : (idioma.equals("en") ? "Extreme" : "Extremo");
+            descripcion = getString(R.string.extremo);
             tvValorUV.setTextColor(android.graphics.Color.parseColor("#7B1FA2"));
         }
 

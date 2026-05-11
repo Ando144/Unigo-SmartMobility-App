@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.unigo_das.R;
+import com.example.unigo_das.activities.MainActivity;
 import com.example.unigo_das.adapters.CentroAdapter;
 import com.example.unigo_das.db.DataBaseHelper;
 import com.example.unigo_das.item.Centro;
@@ -74,17 +75,17 @@ public class SchoolFragment extends Fragment {
             @Override
             public void onItemClick(Centro centro) {
                 new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle("Ruta al campus")
+                        .setTitle(R.string.ruta_al_campus)
                         .setIcon(R.drawable.ic_menu_school) // Añade el icono para hacerlo más visual
-                        .setMessage("¿Quieres abrir el mapa para ver cómo llegar a " + centro.getNombre() + "?")
-                        .setPositiveButton("Sí, trazar ruta", new DialogInterface.OnClickListener() {
+                        .setMessage(getString(R.string.quieres_abrir_el_mapa_para_ver_c_mo_llegar_a) + centro.getNombre() + "?")
+                        .setPositiveButton(R.string.s_trazar_ruta, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ((com.example.unigo_das.activities.MainActivity) requireActivity())
+                                ((MainActivity) requireActivity())
                                         .irRutaEnMapa(centro.getNombre(), centro.getLatitud(), centro.getLongitud());
                             }
                         })
-                        .setNegativeButton("Cancelar", null)
+                        .setNegativeButton(R.string.cancelar2, null)
                         .show();
             }
         });

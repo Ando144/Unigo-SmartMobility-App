@@ -55,19 +55,16 @@
         app:key="pref_category_mobility"
         app:title="Rutas y Transporte">
 
-        <ListPreference
+        <Preference
             app:key="pref_transporte_favorito"
             app:title="Transporte favorito"
             app:summary="Medio de transporte por defecto"
-            app:entries="@array/nombres_transporte"
-            app:entryValues="@array/valores_transporte"
-            app:defaultValue="publico"
             app:iconSpaceReserved="false"/>
 
         <SwitchPreferenceCompat
             app:key="pref_coche_electrico"
             app:title="Vehículo eléctrico"
-            app:summary=""
+            app:summary="Priorizar rutas con puntos de recarga"
             app:defaultValue="false"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
@@ -94,12 +91,10 @@
         app:key="pref_category_map"
         app:title="Visualización del Mapa">
 
-        <ListPreference
+        <Preference
             app:key="pref_tipo_mapa"
             app:title="Estilo de mapa"
-            app:entries="@array/nombres_tipo_mapa"
-            app:entryValues="@array/valores_tipo_mapa"
-            app:defaultValue="1"
+            app:summary="Normal"
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
 

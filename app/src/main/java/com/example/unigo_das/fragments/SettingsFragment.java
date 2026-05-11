@@ -89,16 +89,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Añadimos el listener de Insets en onViewCreated para arreglar la superposición visual
+        // Arreglar la superposición visual con el Insets listener
         ViewCompat.setOnApplyWindowInsetsListener(view, new androidx.core.view.OnApplyWindowInsetsListener() {
             @NonNull
             @Override
             public WindowInsetsCompat onApplyWindowInsets(@NonNull View v, @NonNull WindowInsetsCompat windowInsets) {
                 androidx.core.graphics.Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-
-                // Le damos el padding top al contenedor para que las preferencias bajen
                 v.setPadding(0, insets.top, 0, 0);
-
                 return windowInsets;
             }
         });
@@ -159,6 +156,102 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                     } else {
                         cancelarAlarma(requireContext());
                     }
+                    return true;
+                }
+            });
+        }
+
+        // -------------------------------------------------------------------
+        // DIÁLOGO ESTÉTICO: TRANSPORTE FAVORITO
+        // -------------------------------------------------------------------
+        final androidx.preference.Preference transportePref = findPreference("pref_transporte_favorito");
+        if (transportePref != null) {
+            final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
+            final String[] nombresTransporte = getResources().getStringArray(R.array.nombres_transporte);
+            final String[] valoresTransporte = getResources().getStringArray(R.array.valores_transporte);
+
+            String actual = prefs.getString("pref_transporte_favorito", "publico");
+            for (int i = 0; i < valoresTransporte.length; i++) {
+                if (valoresTransporte[i].equals(actual)) transportePref.setSummary(nombresTransporte[i]);
+            }
+
+            transportePref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(androidx.preference.Preference preference) {
+                    int seleccionado = 0;
+                    String guardado = prefs.getString("pref_transporte_favorito", "publico");
+                    for (int i = 0; i < valoresTransporte.length; i++) {
+                        if (valoresTransporte[i].equals(guardado)) seleccionado = i;
+                    }
+
+                    com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                            new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
+                    builder.setTitle("Transporte favorito");
+
+                    builder.setSingleChoiceItems(nombresTransporte, seleccionado, new android.content.DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(final android.content.DialogInterface dialog, int which) {
+                            prefs.edit().putString("pref_transporte_favorito", valoresTransporte[which]).apply();
+                            transportePref.setSummary(nombresTransporte[which]);
+
+                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dialog.dismiss();
+                                }
+                            }, 150);
+                        }
+                    });
+                    builder.setNegativeButton("Cancelar", null);
+                    builder.show();
+                    return true;
+                }
+            });
+        }
+
+        // -------------------------------------------------------------------
+        // DIÁLOGO ESTÉTICO: ESTILO DE MAPA
+        // -------------------------------------------------------------------
+        final androidx.preference.Preference mapaPref = findPreference("pref_tipo_mapa");
+        if (mapaPref != null) {
+            final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
+            final String[] nombresMapa = getResources().getStringArray(R.array.nombres_tipo_mapa);
+            final String[] valoresMapa = getResources().getStringArray(R.array.valores_tipo_mapa);
+
+            String actual = prefs.getString("pref_tipo_mapa", "1");
+            for (int i = 0; i < valoresMapa.length; i++) {
+                if (valoresMapa[i].equals(actual)) mapaPref.setSummary(nombresMapa[i]);
+            }
+
+            mapaPref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(androidx.preference.Preference preference) {
+                    int seleccionado = 0;
+                    String guardado = prefs.getString("pref_tipo_mapa", "1");
+                    for (int i = 0; i < valoresMapa.length; i++) {
+                        if (valoresMapa[i].equals(guardado)) seleccionado = i;
+                    }
+
+                    com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                            new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
+                    builder.setTitle("Estilo de mapa");
+
+                    builder.setSingleChoiceItems(nombresMapa, seleccionado, new android.content.DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(final android.content.DialogInterface dialog, int which) {
+                            prefs.edit().putString("pref_tipo_mapa", valoresMapa[which]).apply();
+                            mapaPref.setSummary(nombresMapa[which]);
+
+                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dialog.dismiss();
+                                }
+                            }, 150);
+                        }
+                    });
+                    builder.setNegativeButton("Cancelar", null);
+                    builder.show();
                     return true;
                 }
             });
@@ -351,13 +444,48 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     }
 
     private void setupGeneralConfig() {
-        Preference languagePref = findPreference("pref_language");
+        final Preference languagePref = findPreference("pref_language");
         if (languagePref != null) {
-            languagePref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
+            actualizarSummaryIdioma(languagePref);
+
+            languagePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
-                public boolean onPreferenceClick(androidx.preference.Preference preference) {
-                    LanguageDialogFragment dialog = new LanguageDialogFragment();
-                    dialog.show(getChildFragmentManager(), "LanguageDialog");
+                public boolean onPreferenceClick(Preference preference) {
+                    final String[] idiomas = {"Castellano", "Euskara", "English"};
+                    final String[] codigos = {"es", "eu", "en"};
+
+                    LocaleListCompat currentLocales = AppCompatDelegate.getApplicationLocales();
+                    String langActual = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
+                    int seleccionado = 0;
+                    for (int i = 0; i < codigos.length; i++) {
+                        if (codigos[i].equals(langActual)) seleccionado = i;
+                    }
+
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Seleccionar Idioma")
+                            .setSingleChoiceItems(idiomas, seleccionado, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(final DialogInterface dialog, int which) {
+                                    final String nuevoCodigo = codigos[which];
+
+                                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(nuevoCodigo));
+
+                                    String userEmail = customPrefs.getString("user_email", "");
+                                    if (!userEmail.isEmpty()) {
+                                        customPrefs.edit().putString("language_" + userEmail, nuevoCodigo).apply();
+                                    }
+
+                                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            dialog.dismiss();
+                                            onLanguageChanged();
+                                        }
+                                    }, 150);
+                                }
+                            })
+                            .setNegativeButton("Cancelar", null)
+                            .show();
                     return true;
                 }
             });
@@ -389,6 +517,23 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                     return true;
                 }
             });
+        }
+    }
+
+    // Método auxiliar para que el resumen refleje el idioma actual al entrar
+    private void actualizarSummaryIdioma(androidx.preference.Preference pref) {
+        androidx.core.os.LocaleListCompat currentLocales = androidx.appcompat.app.AppCompatDelegate.getApplicationLocales();
+        String lang = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
+        switch (lang) {
+            case "eu":
+                pref.setSummary("Euskara");
+                break;
+            case "en":
+                pref.setSummary("English");
+                break;
+            default:
+                pref.setSummary("Castellano");
+                break;
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.unigo_das.activities;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -36,9 +37,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Aplicar el modo oscuro antes de super.onCreate y de inflar el layout
+        // Aplicar el modo oscuro ANTES de super.onCreate
         aplicarModoOscuro();
-        
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -77,9 +78,7 @@ public class MainActivity extends AppCompatActivity {
         if (!isGuest) {
             String userEmail = unigoPrefs.getString("user_email", "");
             if (!userEmail.isEmpty()) {
-                // Obtener preferencia personal del usuario
                 isDarkMode = unigoPrefs.getBoolean("dark_mode_" + userEmail, false);
-                // Sincronizar con preferencia general
                 defaultPrefs.edit().putBoolean("modo_oscuro_activado", isDarkMode).apply();
             } else {
                 isDarkMode = defaultPrefs.getBoolean("modo_oscuro_activado", false);
@@ -261,5 +260,32 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        // Asegurar que el contexto use la configuración de idioma correcta
+        super.attachBaseContext(newBase);
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Esto asegura que los recursos se actualicen con la nueva configuración
+        getResources().updateConfiguration(newConfig, getResources().getDisplayMetrics());
+    }
+/*
+    private void applyOverrideConfiguration() {
+        // Obtener el idioma actual de la app
+        LocaleListCompat appLocales = AppCompatDelegate.getApplicationLocales();
+        if (!appLocales.isEmpty()) {
+            String langCode = appLocales.get(0).getLanguage();
+            Locale locale = new Locale(langCode);
+            Locale.setDefault(locale);
+
+            Configuration config = new Configuration(getResources().getConfiguration());
+            config.setLocale(locale);
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        }
+    }*/
 
 }

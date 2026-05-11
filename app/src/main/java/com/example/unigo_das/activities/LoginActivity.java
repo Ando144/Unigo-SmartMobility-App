@@ -7,9 +7,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
+import androidx.core.os.LocaleListCompat;
 import androidx.preference.PreferenceManager;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
@@ -40,6 +43,13 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         btnRegister = findViewById(R.id.btnRegister);
         btnGuest = findViewById(R.id.btnGuest);
+
+        TextView btnLangEs = findViewById(R.id.btnLangEs);
+        TextView btnLangEu = findViewById(R.id.btnLangEu);
+        TextView btnLangEn = findViewById(R.id.btnLangEn);
+        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn));
+        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn));
+        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu));
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,20 +116,35 @@ public class LoginActivity extends AppCompatActivity {
 
             if (json.containsKey("success") && (Boolean) json.get("success")) {
                 String nombre = (String) json.get("nombre");
-                String email = etEmail.getText().toString().trim(); // O si viene en el JSON: json.get("email")
+                String email = etEmail.getText().toString().trim();
+                String fotoUrl = json.containsKey("foto") ? (String) json.get("foto") : null;
 
                 Toast.makeText(this, "Bienvenido " + nombre, Toast.LENGTH_SHORT).show();
 
-                // Guardar email del usuario
                 SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-                prefs.edit()
-                        .putString("user_email", email)
-                        .putBoolean("isGuest", false)
-                        .apply();
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("user_email", email);
+                editor.putBoolean("isGuest", false);
 
-                // Aplicar el tema personal del usuario ANTES de ir a MainActivity
+                editor.remove("user_id");
+                if (json.containsKey("id")) {
+                    editor.putInt("user_id", ((Long) json.get("id")).intValue());
+                }
+
+                // Guardar URL de la foto si existe
+                if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                    editor.putString("profile_photo_url_" + email, fotoUrl);
+                } else {
+                    editor.remove("profile_photo_url_" + email);
+                }
+
+                String savedLang = prefs.getString("language_" + email, "es");
+                LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(savedLang);
+                AppCompatDelegate.setApplicationLocales(appLocales);
+
+                editor.apply();
+
                 aplicarTemaUsuario(email);
-
                 irAMainActivity();
             } else {
                 String error = (String) json.get("error");
@@ -130,7 +155,6 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    // Nuevo método para aplicar tema de usuario
     private void aplicarTemaUsuario(String email) {
         SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -173,5 +197,20 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("isGuest", esInvitado);
         editor.apply();
+    }
+
+    private void cambiarIdiomaLogin(String langCode, TextView activo, TextView... inactivos) {
+        LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
+        AppCompatDelegate.setApplicationLocales(appLocales);
+        marcarIdiomaActivo(activo, inactivos);
+    }
+
+    private void marcarIdiomaActivo(TextView activo, TextView... inactivos) {
+        activo.setBackgroundColor(ContextCompat.getColor(this, R.color.bilbao_red));
+        activo.setTextColor(ContextCompat.getColor(this, R.color.white));
+        for (TextView tv : inactivos) {
+            tv.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
+            tv.setTextColor(ContextCompat.getColor(this, R.color.white));
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.example.unigo_das.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -150,7 +151,8 @@ public class SchoolFragment extends Fragment {
     private void cargarDatosDesdeBD() {
         listaOriginalCompletita = dbHelper.obtenerTodosLosCentros();
 
-        int idUsuarioActual = 1;
+        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        int idUsuarioActual = prefs.getInt("user_id", 0);
         List<String> favs = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
 
         for (Centro c : listaOriginalCompletita) {
@@ -188,7 +190,8 @@ public class SchoolFragment extends Fragment {
     }
 
     private void guardarFavorito(Centro centro) {
-        int idUsuarioActual = 1;
+        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        int idUsuarioActual = prefs.getInt("user_id", 0);
 
         if (centro.isStarred()) {
             dbHelper.anadirFavorito(idUsuarioActual, centro.getId());

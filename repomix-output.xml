@@ -65,6 +65,9 @@ app/src/main/java/com/example/unigo_das/UnigoApplication.java
 app/src/main/res/anim/fade_in_fast.xml
 app/src/main/res/anim/fade_out_fast.xml
 app/src/main/res/color/bottom_nav_colors.xml
+app/src/main/res/drawable/bg_lang_item_base.xml
+app/src/main/res/drawable/bg_lang_item.xml
+app/src/main/res/drawable/bg_language_selector.xml
 app/src/main/res/drawable/ic_account_circle.xml
 app/src/main/res/drawable/ic_clima_lluvia.xml
 app/src/main/res/drawable/ic_clima_niebla.xml
@@ -116,33 +119,37 @@ app/src/test/java/com/example/unigo_das/ExampleUnitTest.java
 <files>
 This section contains the contents of the repository's files.
 
-<file path="app/src/main/res/layout/item_search_result.xml">
+<file path="app/src/main/res/drawable/bg_lang_item_base.xml">
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/text1"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="16dp"
-    android:textSize="16sp"
-    android:textColor="?attr/colorOnSurface"
-    android:background="?attr/selectableItemBackground" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+    <corners android:radius="25dp" />
+</shape>
 </file>
 
-<file path="app/src/main/res/values-night/colors.xml">
+<file path="app/src/main/res/drawable/bg_lang_item.xml">
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Colores de Ruta (Modo Oscuro) -->
-    <color name="route_header_bg">#1E1E1E</color>
-    <color name="route_header_text">#FFFFFF</color>
-    <color name="route_text_primary">#EEEEEE</color>
-    <color name="route_text_secondary">#B0B0B0</color>
-    <color name="route_price_text">#9FA8DA</color>
-    <color name="route_transit_fallback">#64B5F6</color>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#33FFFFFF">
+    <item android:id="@android:id/mask">
+        <shape android:shape="rectangle">
+            <corners android:radius="25dp" />
+            <solid android:color="#FFFFFF" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/bg_lang_item_base" />
+</ripple>
+</file>
 
-    <!-- Colores CO2 (Oscuro - Tonalidades más claras para legibilidad) -->
-    <color name="co2_walking_color">#81C784</color>
-    <color name="co2_transit_color">#64B5F6</color>
-</resources>
+<file path="app/src/main/res/drawable/bg_language_selector.xml">
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bilbao_grey_dark" />
+    <corners android:radius="25dp" />
+    <padding android:left="4dp" android:right="4dp" />
+</shape>
 </file>
 
 <file path="app/src/androidTest/java/com/example/unigo_das/ExampleInstrumentedTest.java">
@@ -303,13 +310,18 @@ public class AccountDetailFragment extends Fragment {
 package com.example.unigo_das.fragments;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.MediaStore;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+
 import com.example.unigo_das.R;
 
 public class ProfileDialogFragment extends DialogFragment {
@@ -318,10 +330,20 @@ public class ProfileDialogFragment extends DialogFragment {
         void onRemovePhoto();
     }
 
+    // Nuevo callback para pasar la URI de la imagen seleccionada
+    public interface OnImageSelectedListener {
+        void onImageSelected(Intent data);
+    }
+
     private ProfileAction listener;
+    private OnImageSelectedListener imageSelectedListener;
 
     public void setListener(ProfileAction listener) {
         this.listener = listener;
+    }
+
+    public void setImageSelectedListener(OnImageSelectedListener imageSelectedListener) {
+        this.imageSelectedListener = imageSelectedListener;
     }
 
     @NonNull
@@ -329,19 +351,46 @@ public class ProfileDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setTitle(R.string.profile_image_options)
-                .setItems(new CharSequence[]{getString(R.string.remove_photo), getString(R.string.change_photo)}, (dialog, which) -> {
-                    if (which == 0) {
-                        if (listener != null) listener.onRemovePhoto();
-                    } else {
-                        openGallery();
+                .setItems(new CharSequence[]{
+                        getString(R.string.remove_photo),
+                        getString(R.string.change_photo)
+                }, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == 0) {
+                            mostrarConfirmacionEliminar();
+                        } else {
+                            abrirGaleria();
+                        }
                     }
                 });
         return builder.create();
     }
 
-    private void openGallery() {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        getActivity().startActivityForResult(intent, 1001); // Simplified for this context
+    private void mostrarConfirmacionEliminar() {
+        new AlertDialog.Builder(requireActivity())
+                .setTitle("Eliminar foto")
+                .setMessage("¿Estás seguro de que quieres eliminar tu foto de perfil?")
+                .setPositiveButton("Eliminar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (listener != null) {
+                            listener.onRemovePhoto();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void abrirGaleria() {
+        // Usar el imageSelectedListener para comunicarse con SettingsFragment
+        if (imageSelectedListener != null) {
+            // Crear un launcher temporal (esto se manejará en SettingsFragment)
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            // Devolver el intent a SettingsFragment para que use su propio launcher
+            imageSelectedListener.onImageSelected(intent);
+        }
     }
 }
 </file>
@@ -351,7 +400,10 @@ package com.example.unigo_das.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -360,6 +412,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.example.unigo_das.R;
+
+import java.io.InputStream;
 
 public class ProfileHeaderPreference extends Preference {
 
@@ -371,14 +425,62 @@ public class ProfileHeaderPreference extends Preference {
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        
+
         ImageView profileImage = (ImageView) holder.findViewById(R.id.profile_image);
         if (profileImage != null) {
             SharedPreferences prefs = getContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
             boolean isGuest = prefs.getBoolean("isGuest", true);
-            
-            // Lógica: Si es invitado, silueta. Si no, podrías cargar la foto real.
-            profileImage.setImageResource(R.drawable.ic_account_circle);
+
+            if (isGuest) {
+                profileImage.setImageResource(R.drawable.ic_account_circle);
+            } else {
+                String userEmail = prefs.getString("user_email", "");
+                String fotoUrl = prefs.getString("profile_photo_url_" + userEmail, null);
+
+                if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                    // Cargar imagen desde URL usando una librería como Glide o Picasso
+                    // Si no tienes ninguna, puedes usar este método simple:
+                    cargarImagenDesdeUrl(profileImage, fotoUrl);
+                } else {
+                    profileImage.setImageResource(R.drawable.ic_account_circle);
+                }
+            }
+        }
+    }
+
+    private void cargarImagenDesdeUrl(ImageView imageView, String url) {
+        // Método simple sin librerías externas
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    java.net.URL urlObj = new java.net.URL(url);
+                    java.net.HttpURLConnection connection = (java.net.HttpURLConnection) urlObj.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    final Bitmap bitmap = BitmapFactory.decodeStream(input);
+
+                    // Volver al hilo principal
+                    ((android.app.Activity) getContext()).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            imageView.setImageBitmap(bitmap);
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private Bitmap decodificarBase64(String base64Str) {
+        try {
+            byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        } catch (Exception e) {
+            return null;
         }
     }
 }
@@ -3342,61 +3444,6 @@ public class UnigoApplication extends Application {
 </files>
 </file>
 
-<file path="app/src/main/java/com/example/unigo_das/UnigoApplication.java">
-package com.example.unigo_das;
-
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.preference.PreferenceManager;
-
-public class UnigoApplication extends Application {
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        // Aplicar el tema guardado al iniciar la aplicación
-        aplicarTemaGuardado();
-    }
-
-    public static void aplicarTemaGuardado() {
-        // Usamos las preferencias generales como fallback
-        SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        // Intentamos obtener el email del usuario actual
-        SharedPreferences unigoPrefs = getContext().getSharedPreferences("UnigoPrefs", MODE_PRIVATE);
-        String userEmail = unigoPrefs.getString("user_email", null);
-        boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
-
-        boolean isDarkMode;
-
-        if (!isGuest && userEmail != null && !userEmail.isEmpty()) {
-            // Usuario logueado: usar su preferencia personal
-            isDarkMode = unigoPrefs.getBoolean("dark_mode_" + userEmail, false);
-        } else {
-            // Invitado o sin email: usar preferencia general
-            isDarkMode = defaultPrefs.getBoolean("modo_oscuro_activado", false);
-        }
-
-        int targetMode = isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
-        AppCompatDelegate.setDefaultNightMode(targetMode);
-    }
-
-    private static Context getContext() {
-        // Necesitamos una forma de obtener el contexto
-        // Como es una clase Application, podemos usar una instancia estática
-        return instance;
-    }
-
-    private static UnigoApplication instance;
-
-    public UnigoApplication() {
-        instance = this;
-    }
-}
-</file>
-
 <file path="app/src/main/res/anim/fade_in_fast.xml">
 <?xml version="1.0" encoding="utf-8"?>
 <alpha xmlns:android="http://schemas.android.com/apk/res/android"
@@ -3413,14 +3460,6 @@ public class UnigoApplication extends Application {
     android:fromAlpha="1.0"
     android:toAlpha="0.0"
     android:duration="50" />
-</file>
-
-<file path="app/src/main/res/color/bottom_nav_colors.xml">
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_checked="true" android:color="@color/bilbao_red" />
-    <item android:state_checked="false" android:color="?android:attr/textColorSecondary" />
-</selector>
 </file>
 
 <file path="app/src/main/res/drawable/ic_account_circle.xml">
@@ -3858,6 +3897,18 @@ public class UnigoApplication extends Application {
 </LinearLayout>
 </file>
 
+<file path="app/src/main/res/layout/item_search_result.xml">
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:textSize="16sp"
+    android:textColor="?attr/colorOnSurface"
+    android:background="?attr/selectableItemBackground" />
+</file>
+
 <file path="app/src/main/res/layout/preference_profile_header.xml">
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -3879,44 +3930,20 @@ public class UnigoApplication extends Application {
 </LinearLayout>
 </file>
 
-<file path="app/src/main/res/values-night/themes.xml">
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme (Modo Oscuro). -->
-    <style name="Base.Theme.Unigodas" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Color principal: Rojo Bilbao -->
-        <item name="colorPrimary">@color/bilbao_red</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorPrimaryContainer">@color/bilbao_red_dark</item>
-        <item name="colorOnPrimaryContainer">@color/white</item>
+<file path="app/src/main/res/values-night/colors.xml">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores de Ruta (Modo Oscuro) -->
+    <color name="route_header_bg">#1E1E1E</color>
+    <color name="route_header_text">#FFFFFF</color>
+    <color name="route_text_primary">#EEEEEE</color>
+    <color name="route_text_secondary">#B0B0B0</color>
+    <color name="route_price_text">#9FA8DA</color>
+    <color name="route_transit_fallback">#64B5F6</color>
 
-        <!-- Color secundario -->
-        <item name="colorSecondary">@color/bilbao_grey_light</item>
-        <item name="colorOnSecondary">@color/bilbao_grey_dark</item>
-
-        <!-- Fondos y superficies (Modo Oscuro) -->
-        <item name="android:colorBackground">@color/bg_dark</item>
-        <item name="colorSurface">@color/surface_dark</item>
-        <item name="colorOnSurface">@color/text_light</item>
-        <item name="colorSurfaceVariant">@color/bilbao_grey_dark</item>
-        <item name="colorOnSurfaceVariant">@color/text_secondary_light</item>
-
-        <!-- Otros elementos -->
-        <item name="android:textColorPrimary">@color/text_light</item>
-        <item name="android:textColorSecondary">@color/text_secondary_light</item>
-
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
-    </style>
-
-    <!-- Diálogo flotante en modo oscuro -->
-    <style name="TemaVentanaFlotante" parent="Theme.MaterialComponents.DayNight.Dialog">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:backgroundDimAmount">0.5</item>
-    </style>
+    <!-- Colores CO2 (Oscuro - Tonalidades más claras para legibilidad) -->
+    <color name="co2_walking_color">#81C784</color>
+    <color name="co2_transit_color">#64B5F6</color>
 </resources>
 </file>
 
@@ -4041,326 +4068,16 @@ public class ExampleUnitTest {
 }
 </file>
 
-<file path="app/src/main/java/com/example/unigo_das/activities/LoginActivity.java">
-package com.example.unigo_das.activities;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.preference.PreferenceManager;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-
-import com.example.unigo_das.R;
-import com.example.unigo_das.network.NetworkWorker;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import java.util.UUID;
-
-public class LoginActivity extends AppCompatActivity {
-
-    private EditText etEmail, etPassword;
-    private Button btnLogin, btnRegister, btnGuest;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
-        etEmail = findViewById(R.id.etEmail);
-        etPassword = findViewById(R.id.etPassword);
-        btnLogin = findViewById(R.id.btnLogin);
-        btnRegister = findViewById(R.id.btnRegister);
-        btnGuest = findViewById(R.id.btnGuest);
-
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = etEmail.getText().toString().trim();
-                String pass = etPassword.getText().toString().trim();
-
-                if (!email.isEmpty() && !pass.isEmpty()) {
-                    ejecutarLogin(email, pass);
-                } else {
-                    Toast.makeText(LoginActivity.this, "Por favor, llena los campos", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        btnGuest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                marcarEstadoUsuario(true);
-                irAMainActivity();
-            }
-        });
-    }
-
-    private void ejecutarLogin(String email, String password) {
-        Data inputData = new Data.Builder()
-                .putString("script", "login.php")
-                .putString("email", email)
-                .putString("password", password)
-                .build();
-
-        OneTimeWorkRequest loginRequest = new OneTimeWorkRequest.Builder(NetworkWorker.class)
-                .setInputData(inputData)
-                .build();
-
-        WorkManager.getInstance(this).enqueue(loginRequest);
-
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(loginRequest.getId())
-                .observe(this, workInfo -> {
-                    if (workInfo != null && workInfo.getState().isFinished()) {
-                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                            String response = workInfo.getOutputData().getString("response");
-                            procesarRespuestaLogin(response);
-                        } else {
-                            String errorResponse = workInfo.getOutputData().getString("response");
-                            procesarError(errorResponse);
-                        }
-                    }
-                });
-    }
-
-    private void procesarRespuestaLogin(String jsonResponse) {
-        try {
-            JSONParser parser = new JSONParser();
-            JSONObject json = (JSONObject) parser.parse(jsonResponse);
-
-            if (json.containsKey("success") && (Boolean) json.get("success")) {
-                String nombre = (String) json.get("nombre");
-                String email = etEmail.getText().toString().trim(); // O si viene en el JSON: json.get("email")
-
-                Toast.makeText(this, "Bienvenido " + nombre, Toast.LENGTH_SHORT).show();
-
-                // Guardar email del usuario
-                SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-                prefs.edit()
-                        .putString("user_email", email)
-                        .putBoolean("isGuest", false)
-                        .apply();
-
-                // Aplicar el tema personal del usuario ANTES de ir a MainActivity
-                aplicarTemaUsuario(email);
-
-                irAMainActivity();
-            } else {
-                String error = (String) json.get("error");
-                Toast.makeText(this, "Error: " + error, Toast.LENGTH_SHORT).show();
-            }
-        } catch (ParseException e) {
-            Toast.makeText(this, "Error al procesar respuesta del servidor", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    // Nuevo método para aplicar tema de usuario
-    private void aplicarTemaUsuario(String email) {
-        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-        // Obtener preferencia guardada para este usuario
-        boolean isDarkMode = prefs.getBoolean("dark_mode_" + email,
-                defaultPrefs.getBoolean("modo_oscuro_activado", false));
-
-        // También actualizamos la preferencia general para mantener sincronización
-        defaultPrefs.edit().putBoolean("modo_oscuro_activado", isDarkMode).apply();
-
-        AppCompatDelegate.setDefaultNightMode(
-                isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
-        );
-    }
-
-    private void procesarError(String errorResponse) {
-        if (errorResponse != null) {
-            try {
-                JSONParser parser = new JSONParser();
-                JSONObject json = (JSONObject) parser.parse(errorResponse);
-                String error = (String) json.get("error");
-                Toast.makeText(this, error != null ? error : "Error en la conexión", Toast.LENGTH_SHORT).show();
-            } catch (ParseException e) {
-                Toast.makeText(this, "Error de red o credenciales incorrectas", Toast.LENGTH_SHORT).show();
-            }
-        } else {
-            Toast.makeText(this, "Error de conexión con el servidor", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void irAMainActivity() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    private void marcarEstadoUsuario(boolean esInvitado) {
-        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean("isGuest", esInvitado);
-        editor.apply();
-    }
-}
-</file>
-
-<file path="app/src/main/java/com/example/unigo_das/activities/RegisterActivity.java">
-package com.example.unigo_das.activities;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkInfo;
-import androidx.work.WorkManager;
-
-import com.example.unigo_das.R;
-import com.example.unigo_das.network.NetworkWorker;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-public class RegisterActivity extends AppCompatActivity {
-
-    private TextInputEditText etNombreReg, etEmailReg, etPasswordReg;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
-
-        etNombreReg = findViewById(R.id.etNombreReg);
-        etEmailReg = findViewById(R.id.etEmailReg);
-        etPasswordReg = findViewById(R.id.etPasswordReg);
-        MaterialButton btnDoRegister = findViewById(R.id.btnDoRegister);
-        MaterialButton btnBackToLogin = findViewById(R.id.btnBackToLogin);
-
-        btnDoRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String nombre = etNombreReg.getText() != null ? etNombreReg.getText().toString().trim() : "";
-                String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
-                String pass = etPasswordReg.getText() != null ? etPasswordReg.getText().toString().trim() : "";
-
-                if (!nombre.isEmpty() && !email.isEmpty() && !pass.isEmpty()) {
-                    ejecutarRegistro(nombre, email, pass);
-                } else {
-                    Toast.makeText(RegisterActivity.this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        btnBackToLogin.setOnClickListener(v -> finish());
-    }
-
-    private void ejecutarRegistro(String username, String email, String password) {
-        Data inputData = new Data.Builder()
-                .putString("script", "registro.php")
-                .putString("username", username)
-                .putString("email", email)
-                .putString("password", password)
-                .build();
-
-        OneTimeWorkRequest registerRequest = new OneTimeWorkRequest.Builder(NetworkWorker.class)
-                .setInputData(inputData)
-                .build();
-
-        WorkManager.getInstance(this).enqueue(registerRequest);
-
-        WorkManager.getInstance(this).getWorkInfoByIdLiveData(registerRequest.getId())
-                .observe(this, workInfo -> {
-                    if (workInfo != null && workInfo.getState().isFinished()) {
-                        String response = workInfo.getOutputData().getString("response");
-                        if (response != null && !response.isEmpty()) {
-                            procesarRespuestaServidor(response);
-                        } else {
-                            Toast.makeText(this, "Fallo crítico: Respuesta vacía del servidor (PHP Crash)", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-    }
-
-    private void procesarRespuestaServidor(String jsonResponse) {
-        try {
-            JSONParser parser = new JSONParser();
-            JSONObject json = (JSONObject) parser.parse(jsonResponse);
-
-            if (json.containsKey("success") && (Boolean) json.get("success")) {
-                String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
-
-                Toast.makeText(this, "¡Usuario registrado!", Toast.LENGTH_SHORT).show();
-
-                // Guardar email y estado
-                marcarEstadoUsuario(email);
-
-                // Los nuevos usuarios empiezan con modo claro por defecto
-                // (puedes cambiar esto si quieres)
-
-                irAMainActivity();
-            } else {
-                String error = (String) json.get("error");
-                Toast.makeText(this, "Error: " + (error != null ? error : "Fallo"), Toast.LENGTH_LONG).show();
-            }
-        } catch (ParseException e) {
-            Toast.makeText(this, "ERROR SERVIDOR: " + jsonResponse, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void marcarEstadoUsuario(String email) {
-        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean("isGuest", false);
-        editor.putString("user_email", email);
-        editor.apply();
-    }
-
-    private void irAMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
-    }
-
-    private void marcarEstadoUsuario() {
-        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean("isGuest", false);
-        editor.apply();
-    }
-}
-</file>
-
 <file path="app/src/main/java/com/example/unigo_das/fragments/LanguageDialogFragment.java">
 package com.example.unigo_das.fragments;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -4397,15 +4114,17 @@ public class LanguageDialogFragment extends DialogFragment {
                 getString(R.string.lang_eu),
                 getString(R.string.lang_en)
         };
-        
-        String[] languageCodes = {"es", "eu", "en"};
 
-        String currentLang = "es";
+        final String[] languageCodes = {"es", "eu", "en"};
+
+        final String currentLang;
         LocaleListCompat currentLocales = AppCompatDelegate.getApplicationLocales();
         if (!currentLocales.isEmpty()) {
             currentLang = currentLocales.get(0).getLanguage();
+        } else {
+            currentLang = "es";
         }
-        
+
         int checkedItem = 0;
         for (int i = 0; i < languageCodes.length; i++) {
             if (languageCodes[i].equals(currentLang)) {
@@ -4416,26 +4135,93 @@ public class LanguageDialogFragment extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
         builder.setTitle(R.string.select_language)
-                .setSingleChoiceItems(languages, checkedItem, (dialog, which) -> {
-                    String selectedLang = languageCodes[which];
-                    // Primero cerramos el diálogo
-                    dismiss();
-                    // Luego aplicamos el idioma. AppCompatDelegate recreará la actividad automáticamente.
-                    updateLanguage(selectedLang);
+                .setSingleChoiceItems(languages, checkedItem, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String selectedLang = languageCodes[which];
+                        dismiss();
+
+                        // Solo hacer algo si el idioma es diferente
+                        if (!selectedLang.equals(currentLang)) {
+                            updateLanguage(selectedLang);
+                        }
+                    }
                 });
 
         return builder.create();
     }
 
-    private void updateLanguage(String langCode) {
+    private void updateLanguage(final String langCode) {
         LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
         AppCompatDelegate.setApplicationLocales(appLocales);
 
-        if (listener != null) {
-            listener.onLanguageChanged();
+        // Guardar preferencia por usuario
+        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        String userEmail = prefs.getString("user_email", "");
+        if (!userEmail.isEmpty()) {
+            prefs.edit().putString("language_" + userEmail, langCode).apply();
         }
+
+        // Notificar el cambio después de un pequeño delay
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (isAdded() && listener != null) {
+                listener.onLanguageChanged();
+            }
+        }, 300);
     }
 }
+</file>
+
+<file path="app/src/main/java/com/example/unigo_das/UnigoApplication.java">
+package com.example.unigo_das;
+
+import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.preference.PreferenceManager;
+
+public class UnigoApplication extends Application {
+
+    private static UnigoApplication instance;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        instance = this;
+        aplicarTemaGuardado();
+    }
+
+    public static void aplicarTemaGuardado() {
+        SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences unigoPrefs = getContext().getSharedPreferences("UnigoPrefs", MODE_PRIVATE);
+        String userEmail = unigoPrefs.getString("user_email", null);
+        boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
+
+        boolean isDarkMode;
+
+        if (!isGuest && userEmail != null && !userEmail.isEmpty()) {
+            isDarkMode = unigoPrefs.getBoolean("dark_mode_" + userEmail, false);
+        } else {
+            isDarkMode = defaultPrefs.getBoolean("modo_oscuro_activado", false);
+        }
+
+        int targetMode = isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
+        AppCompatDelegate.setDefaultNightMode(targetMode);
+    }
+
+    public static Context getContext() {
+        return instance;
+    }
+}
+</file>
+
+<file path="app/src/main/res/color/bottom_nav_colors.xml">
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:color="@color/bilbao_red" />
+    <item android:state_checked="false" android:color="?android:attr/textColorSecondary" />
+</selector>
 </file>
 
 <file path="app/src/main/res/drawable/ic_launcher_foreground.xml">
@@ -4454,155 +4240,6 @@ public class LanguageDialogFragment extends DialogFragment {
         android:pathData="M300,660L580,580L660,300L380,380L300,660ZM480,540Q455,540 437.5,522.5Q420,505 420,480Q420,455 437.5,437.5Q455,420 480,420Q505,420 522.5,437.5Q540,455 540,480Q540,505 522.5,522.5Q505,540 480,540ZM480,880Q397,880 324,848.5Q251,817 197,763Q143,709 111.5,636Q80,563 80,480Q80,397 111.5,324Q143,251 197,197Q251,143 324,111.5Q397,80 480,80Q563,80 636,111.5Q709,143 763,197Q817,251 848.5,324Q880,397 880,480Q880,563 848.5,636Q817,709 763,763Q709,817 636,848.5Q563,880 480,880ZM480,800Q613,800 706.5,706.5Q800,613 800,480Q800,347 706.5,253.5Q613,160 480,160Q347,160 253.5,253.5Q160,347 160,480Q160,613 253.5,706.5Q347,800 480,800ZM480,480Q480,480 480,480Q480,480 480,480Q480,480 480,480Q480,480 480,480Q480,480 480,480Q480,480 480,480Q480,480 480,480Q480,480 480,480Z"/>
   </group>
 </vector>
-</file>
-
-<file path="app/src/main/res/layout/item_centro.xml">
-<?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="?attr/colorSurface"
-    app:strokeWidth="0dp">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <!-- PARTE SUPERIOR (Siempre visible) -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
-
-            <ImageView
-                android:id="@+id/ivLogoCentro"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_menu_school" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/ivLogoCentro"
-                android:layout_toStartOf="@id/ivExpand"
-                android:layout_marginStart="16dp"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvNombreCentro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvUniUbi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textSize="14sp" />
-            </LinearLayout>
-
-            <!-- Botón de expandir -->
-            <ImageView
-                android:id="@+id/ivExpand"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_toStartOf="@id/ivStar"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:src="@drawable/ic_expand_more"
-                app:tint="?attr/colorOnSurfaceVariant" />
-
-            <!-- Estrella -->
-            <ImageView
-                android:id="@+id/ivStar"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true" />
-        </RelativeLayout>
-
-        <!-- PARTE INFERIOR (Desplegable - Oculta por defecto) -->
-        <LinearLayout
-            android:id="@+id/layoutTransporte"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/colorSurfaceVariant"
-            android:padding="16dp"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/ivMapaCentro"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:contentDescription="Mapa del centro" />
-        </LinearLayout>
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
-</file>
-
-<file path="app/src/main/res/layout/item_clima_favorito.xml">
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="120dp"
-    android:layout_height="120dp"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="?attr/colorSurface">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="8dp">
-
-        <TextView
-            android:id="@+id/tvUniCampus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="UNI"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:textAllCaps="true"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginBottom="4dp"/>
-
-        <TextView
-            android:id="@+id/tvTempCampus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="-- ºC"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/bilbao_red" />
-
-        <TextView
-            android:id="@+id/tvNombreCampus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Nombre"
-            android:textSize="11sp"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:textColor="?attr/colorOnSurface" />
-    </LinearLayout>
-</androidx.cardview.widget.CardView>
 </file>
 
 <file path="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml">
@@ -4844,41 +4481,424 @@ public class LanguageDialogFragment extends DialogFragment {
 </resources>
 </file>
 
-<file path="app/src/main/res/values/colors.xml">
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Paleta Ayuntamiento de Bilbao -->
-    <color name="bilbao_red">#FFCC0000</color>
-    <color name="bilbao_red_dark">#FF990000</color>
-    <color name="bilbao_grey_dark">#FF333333</color>
-    <color name="bilbao_grey_light">#E0E0E0</color>
+<file path="app/src/main/res/values-night/themes.xml">
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme (Modo Oscuro). -->
+    <style name="Base.Theme.Unigodas" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Color principal: Rojo Bilbao -->
+        <item name="colorPrimary">@color/bilbao_red</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/bilbao_red_dark</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
 
-    <!-- Neutros -->
-    <color name="bg_light">#F4F4F4</color>
-    <color name="text_dark">#1A1A1A</color>
-    <color name="text_medium">#666666</color>
-    <color name="white">#FFFFFF</color>
+        <!-- Color secundario -->
+        <item name="colorSecondary">@color/bilbao_grey_light</item>
+        <item name="colorOnSecondary">@color/bilbao_grey_dark</item>
 
-    <!-- Colores Modo Oscuro Base -->
-    <color name="bg_dark">#121212</color>
-    <color name="surface_dark">#1E1E1E</color>
-    <color name="text_light">#EEEEEE</color>
-    <color name="text_secondary_light">#B0B0B0</color>
+        <!-- Fondos y superficies (Modo Oscuro) -->
+        <item name="android:colorBackground">@color/bg_dark</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorOnSurface">@color/text_light</item>
+        <item name="colorSurfaceVariant">@color/bilbao_grey_dark</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary_light</item>
 
-    <!-- Colores de Ruta (Modo Claro) -->
-    <color name="route_header_bg">#333333</color>
-    <color name="route_header_text">#FFFFFF</color>
-    <color name="route_text_primary">#1A1A1A</color>
-    <color name="route_text_secondary">#757575</color>
-    <color name="route_price_text">#3F51B5</color>
+        <!-- Otros elementos -->
+        <item name="android:textColorPrimary">@color/text_light</item>
+        <item name="android:textColorSecondary">@color/text_secondary_light</item>
 
-    <!-- Fallback para transporte si el color de la marca es ilegible en fondo claro -->
-    <color name="route_transit_fallback">#CC0000</color>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+    </style>
 
-    <!-- Colores CO2 (Claro) -->
-    <color name="co2_walking_color">#2E7D32</color>
-    <color name="co2_transit_color">#1976D2</color>
+    <!-- Diálogo flotante en modo oscuro -->
+    <style name="TemaVentanaFlotante" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+    </style>
 </resources>
+</file>
+
+<file path="app/src/main/java/com/example/unigo_das/activities/LoginActivity.java">
+package com.example.unigo_das.activities;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
+import androidx.core.os.LocaleListCompat;
+import androidx.preference.PreferenceManager;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.network.NetworkWorker;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.util.UUID;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private EditText etEmail, etPassword;
+    private Button btnLogin, btnRegister, btnGuest;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        etEmail = findViewById(R.id.etEmail);
+        etPassword = findViewById(R.id.etPassword);
+        btnLogin = findViewById(R.id.btnLogin);
+        btnRegister = findViewById(R.id.btnRegister);
+        btnGuest = findViewById(R.id.btnGuest);
+
+        TextView btnLangEs = findViewById(R.id.btnLangEs);
+        TextView btnLangEu = findViewById(R.id.btnLangEu);
+        TextView btnLangEn = findViewById(R.id.btnLangEn);
+        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn));
+        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn));
+        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu));
+
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String email = etEmail.getText().toString().trim();
+                String pass = etPassword.getText().toString().trim();
+
+                if (!email.isEmpty() && !pass.isEmpty()) {
+                    ejecutarLogin(email, pass);
+                } else {
+                    Toast.makeText(LoginActivity.this, "Por favor, llena los campos", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        btnRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnGuest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                marcarEstadoUsuario(true);
+                irAMainActivity();
+            }
+        });
+    }
+
+    private void ejecutarLogin(String email, String password) {
+        Data inputData = new Data.Builder()
+                .putString("script", "login.php")
+                .putString("email", email)
+                .putString("password", password)
+                .build();
+
+        OneTimeWorkRequest loginRequest = new OneTimeWorkRequest.Builder(NetworkWorker.class)
+                .setInputData(inputData)
+                .build();
+
+        WorkManager.getInstance(this).enqueue(loginRequest);
+
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(loginRequest.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                            String response = workInfo.getOutputData().getString("response");
+                            procesarRespuestaLogin(response);
+                        } else {
+                            String errorResponse = workInfo.getOutputData().getString("response");
+                            procesarError(errorResponse);
+                        }
+                    }
+                });
+    }
+
+    private void procesarRespuestaLogin(String jsonResponse) {
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(jsonResponse);
+
+            if (json.containsKey("success") && (Boolean) json.get("success")) {
+                String nombre = (String) json.get("nombre");
+                String email = etEmail.getText().toString().trim();
+                String fotoUrl = json.containsKey("foto") ? (String) json.get("foto") : null;
+
+                Toast.makeText(this, "Bienvenido " + nombre, Toast.LENGTH_SHORT).show();
+
+                SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("user_email", email);
+                editor.putBoolean("isGuest", false);
+
+                if (json.containsKey("id")) {
+                    editor.putInt("user_id", ((Long) json.get("id")).intValue());
+                }
+
+                // Guardar URL de la foto si existe
+                if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                    editor.putString("profile_photo_url_" + email, fotoUrl);
+                } else {
+                    editor.remove("profile_photo_url_" + email);
+                }
+
+                String savedLang = prefs.getString("language_" + email, "es");
+                LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(savedLang);
+                AppCompatDelegate.setApplicationLocales(appLocales);
+
+                editor.apply();
+
+                aplicarTemaUsuario(email);
+                irAMainActivity();
+            } else {
+                String error = (String) json.get("error");
+                Toast.makeText(this, "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        } catch (ParseException e) {
+            Toast.makeText(this, "Error al procesar respuesta del servidor", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void aplicarTemaUsuario(String email) {
+        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Obtener preferencia guardada para este usuario
+        boolean isDarkMode = prefs.getBoolean("dark_mode_" + email,
+                defaultPrefs.getBoolean("modo_oscuro_activado", false));
+
+        // También actualizamos la preferencia general para mantener sincronización
+        defaultPrefs.edit().putBoolean("modo_oscuro_activado", isDarkMode).apply();
+
+        AppCompatDelegate.setDefaultNightMode(
+                isDarkMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+        );
+    }
+
+    private void procesarError(String errorResponse) {
+        if (errorResponse != null) {
+            try {
+                JSONParser parser = new JSONParser();
+                JSONObject json = (JSONObject) parser.parse(errorResponse);
+                String error = (String) json.get("error");
+                Toast.makeText(this, error != null ? error : "Error en la conexión", Toast.LENGTH_SHORT).show();
+            } catch (ParseException e) {
+                Toast.makeText(this, "Error de red o credenciales incorrectas", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Error de conexión con el servidor", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void irAMainActivity() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void marcarEstadoUsuario(boolean esInvitado) {
+        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("isGuest", esInvitado);
+        editor.apply();
+    }
+
+    private void cambiarIdiomaLogin(String langCode, TextView activo, TextView... inactivos) {
+        LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
+        AppCompatDelegate.setApplicationLocales(appLocales);
+        marcarIdiomaActivo(activo, inactivos);
+    }
+
+    private void marcarIdiomaActivo(TextView activo, TextView... inactivos) {
+        activo.setBackgroundColor(ContextCompat.getColor(this, R.color.bilbao_red));
+        activo.setTextColor(ContextCompat.getColor(this, R.color.white));
+        for (TextView tv : inactivos) {
+            tv.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
+            tv.setTextColor(ContextCompat.getColor(this, R.color.white));
+        }
+    }
+}
+</file>
+
+<file path="app/src/main/java/com/example/unigo_das/activities/RegisterActivity.java">
+package com.example.unigo_das.activities;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
+import androidx.core.os.LocaleListCompat;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.network.NetworkWorker;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+public class RegisterActivity extends AppCompatActivity {
+
+    private TextInputEditText etNombreReg, etEmailReg, etPasswordReg;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_register);
+
+        etNombreReg = findViewById(R.id.etNombreReg);
+        etEmailReg = findViewById(R.id.etEmailReg);
+        etPasswordReg = findViewById(R.id.etPasswordReg);
+        MaterialButton btnDoRegister = findViewById(R.id.btnDoRegister);
+        MaterialButton btnBackToLogin = findViewById(R.id.btnBackToLogin);
+
+        TextView btnLangEs = findViewById(R.id.btnLangEs);
+        TextView btnLangEu = findViewById(R.id.btnLangEu);
+        TextView btnLangEn = findViewById(R.id.btnLangEn);
+        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn));
+        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn));
+        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu));
+
+        btnDoRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String nombre = etNombreReg.getText() != null ? etNombreReg.getText().toString().trim() : "";
+                String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
+                String pass = etPasswordReg.getText() != null ? etPasswordReg.getText().toString().trim() : "";
+
+                if (!nombre.isEmpty() && !email.isEmpty() && !pass.isEmpty()) {
+                    ejecutarRegistro(nombre, email, pass);
+                } else {
+                    Toast.makeText(RegisterActivity.this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        btnBackToLogin.setOnClickListener(v -> finish());
+    }
+
+    private void ejecutarRegistro(String username, String email, String password) {
+        Data inputData = new Data.Builder()
+                .putString("script", "registro.php")
+                .putString("username", username)
+                .putString("email", email)
+                .putString("password", password)
+                .build();
+
+        OneTimeWorkRequest registerRequest = new OneTimeWorkRequest.Builder(NetworkWorker.class)
+                .setInputData(inputData)
+                .build();
+
+        WorkManager.getInstance(this).enqueue(registerRequest);
+
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(registerRequest.getId())
+                .observe(this, workInfo -> {
+                    if (workInfo != null && workInfo.getState().isFinished()) {
+                        String response = workInfo.getOutputData().getString("response");
+                        if (response != null && !response.isEmpty()) {
+                            procesarRespuestaServidor(response);
+                        } else {
+                            Toast.makeText(this, "Fallo crítico: Respuesta vacía del servidor (PHP Crash)", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    private void procesarRespuestaServidor(String jsonResponse) {
+        try {
+            JSONParser parser = new JSONParser();
+            JSONObject json = (JSONObject) parser.parse(jsonResponse);
+
+            if (json.containsKey("success") && (Boolean) json.get("success")) {
+                String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
+
+                Toast.makeText(this, "¡Usuario registrado!", Toast.LENGTH_SHORT).show();
+
+                // Guardar email y estado
+                marcarEstadoUsuario(email);
+
+                // Los nuevos usuarios empiezan con modo claro por defecto
+                // (puedes cambiar esto si quieres)
+
+                irAMainActivity();
+            } else {
+                String error = (String) json.get("error");
+                Toast.makeText(this, "Error: " + (error != null ? error : "Fallo"), Toast.LENGTH_LONG).show();
+            }
+        } catch (ParseException e) {
+            Toast.makeText(this, "ERROR SERVIDOR: " + jsonResponse, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void marcarEstadoUsuario(String email) {
+        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("isGuest", false);
+        editor.putString("user_email", email);
+        editor.apply();
+    }
+
+    private void irAMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void marcarEstadoUsuario() {
+        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("isGuest", false);
+        editor.apply();
+    }
+
+    private void cambiarIdiomaLogin(String langCode, TextView activo, TextView... inactivos) {
+        LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
+        AppCompatDelegate.setApplicationLocales(appLocales);
+        marcarIdiomaActivo(activo, inactivos);
+    }
+
+    private void marcarIdiomaActivo(TextView activo, TextView... inactivos) {
+        activo.setBackgroundColor(ContextCompat.getColor(this, R.color.bilbao_red));
+        activo.setTextColor(ContextCompat.getColor(this, R.color.white));
+        for (TextView tv : inactivos) {
+            tv.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
+            tv.setTextColor(ContextCompat.getColor(this, R.color.white));
+        }
+    }
+}
 </file>
 
 <file path="app/src/main/java/com/example/unigo_das/db/DataBaseHelper.java">
@@ -5126,171 +5146,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 }
 </file>
 
-<file path="app/src/main/java/com/example/unigo_das/fragments/SettingsFragment.java">
-package com.example.unigo_das.fragments;
-
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
-import androidx.preference.SwitchPreferenceCompat;
-
-import com.example.unigo_das.R;
-import com.example.unigo_das.activities.LoginActivity;
-
-public class SettingsFragment extends PreferenceFragmentCompat implements LanguageDialogFragment.LanguageChangeListener {
-
-    private SharedPreferences customPrefs;
-    private SwitchPreferenceCompat darkModePref;
-
-    @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        setPreferencesFromResource(R.xml.preferences, rootKey);
-
-        customPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        boolean isGuest = customPrefs.getBoolean("isGuest", true);
-
-        setupProfileHeader();
-        setupAccountSection(isGuest);
-        setupGeneralConfig();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        syncDarkModeSwitch();
-    }
-
-    private void syncDarkModeSwitch() {
-        if (darkModePref != null) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-            boolean isDark = prefs.getBoolean("modo_oscuro_activado", false);
-            darkModePref.setChecked(isDark);
-        }
-    }
-
-    private void setupProfileHeader() {
-        Preference profileHeader = findPreference("pref_profile_header");
-        if (profileHeader != null) {
-            profileHeader.setOnPreferenceClickListener(preference -> {
-                ProfileDialogFragment dialog = new ProfileDialogFragment();
-                dialog.setListener(() -> {
-                    // Lógica para eliminar foto
-                });
-                dialog.show(getParentFragmentManager(), "ProfileDialog");
-                return true;
-            });
-            }
-    }
-
-    private void setupAccountSection(boolean isGuest) {
-        Preference myAccount = findPreference("pref_my_account");
-        Preference logout = findPreference("pref_logout");
-        Preference login = findPreference("pref_login");
-
-        if (isGuest) {
-            if (myAccount != null) myAccount.setVisible(false);
-            if (logout != null) logout.setVisible(false);
-            if (login != null) {
-                login.setVisible(true);
-                login.setOnPreferenceClickListener(p -> {
-                    // Eliminamos el forzado a modo claro aquí, ya que LoginActivity ya tiene su propio tema en el Manifest.
-                    // Mantener el modo noche actual para que se aplique al volver.
-                    Intent intent = new Intent(getActivity(), LoginActivity.class);
-                    startActivity(intent);
-                    if (getActivity() != null) {
-                        getActivity().finish();
-                    }
-                    return true;
-                });
-            }
-        } else {
-            if (myAccount != null) {
-                myAccount.setVisible(true);
-                myAccount.setSummary(customPrefs.getString("user_email", "usuario@example.com"));
-                myAccount.setOnPreferenceClickListener(p -> {
-                    getParentFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, new AccountDetailFragment())
-                            .addToBackStack(null)
-                            .commit();
-                    return true;
-                });
-            }
-            if (logout != null) {
-                logout.setVisible(true);
-                logout.setOnPreferenceClickListener(p -> {
-                    // Limpiar datos de usuario pero mantener su preferencia guardada
-                    customPrefs.edit()
-                            .putBoolean("isGuest", true)
-                            .putString("user_email", null) // Limpiar email
-                            .apply();
-
-                    // Volver al modo claro por defecto al cerrar sesión
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-                    requireActivity().recreate();
-                    return true;
-                });
-            }
-            if (login != null) login.setVisible(false);
-        }
-    }
-
-    private void setupGeneralConfig() {
-        Preference languagePref = findPreference("pref_language");
-        if (languagePref != null) {
-            languagePref.setOnPreferenceClickListener(preference -> {
-                LanguageDialogFragment dialog = new LanguageDialogFragment();
-                dialog.show(getChildFragmentManager(), "LanguageDialog");
-                return true;
-            });
-        }
-
-        darkModePref = findPreference("modo_oscuro_activado");
-        if (darkModePref != null) {
-            syncDarkModeSwitch();
-            darkModePref.setOnPreferenceChangeListener((preference, newValue) -> {
-                boolean checked = (boolean) newValue;
-
-                // Guardar en preferencias generales
-                SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-                defaultPrefs.edit().putBoolean("modo_oscuro_activado", checked).apply();
-
-                // Guardar preferencia personal del usuario
-                SharedPreferences unigoPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-                boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
-
-                if (!isGuest) {
-                    String userEmail = unigoPrefs.getString("user_email", "");
-                    if (!userEmail.isEmpty()) {
-                        // Guardar preferencia específica para este usuario
-                        unigoPrefs.edit().putBoolean("dark_mode_" + userEmail, checked).apply();
-                    }
-                }
-
-                AppCompatDelegate.setDefaultNightMode(checked ?
-                        AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-                return true;
-            });
-        }
-    }
-
-    @Override
-    public void onLanguageChanged() {
-        if (isAdded() && getActivity() != null) {
-            // Forzamos la recreación de la actividad para aplicar los cambios de idioma a toda la UI
-            getActivity().recreate();
-        }
-    }
-}
-</file>
-
 <file path="app/src/main/java/com/example/unigo_das/item/Centro.java">
 package com.example.unigo_das.item;
 
@@ -5354,6 +5209,192 @@ public class Centro {
         android:text="Sección: Ajustes"
         android:textSize="24sp" />
 </LinearLayout>
+</file>
+
+<file path="app/src/main/res/layout/item_centro.xml">
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="?attr/colorSurface"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- PARTE SUPERIOR (Siempre visible) -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/ivLogoCentro"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_menu_school" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/ivLogoCentro"
+                android:layout_toStartOf="@id/ivExpand"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvNombreCentro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvUniUbi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Botón de expandir -->
+            <ImageView
+                android:id="@+id/ivExpand"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_toStartOf="@id/ivStar"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_expand_more"
+                app:tint="?attr/colorOnSurfaceVariant" />
+
+            <!-- Estrella -->
+            <ImageView
+                android:id="@+id/ivStar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true" />
+        </RelativeLayout>
+
+        <!-- PARTE INFERIOR (Desplegable - Oculta por defecto) -->
+        <LinearLayout
+            android:id="@+id/layoutTransporte"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorSurfaceVariant"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/ivMapaCentro"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                android:contentDescription="Mapa del centro" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
+</file>
+
+<file path="app/src/main/res/layout/item_clima_favorito.xml">
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="120dp"
+    android:layout_height="120dp"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="?attr/colorSurface">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/tvUniCampus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UNI"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textAllCaps="true"
+            android:textColor="?android:attr/textColorSecondary"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/tvTempCampus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-- ºC"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="@color/bilbao_red" />
+
+        <TextView
+            android:id="@+id/tvNombreCampus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Nombre"
+            android:textSize="11sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:textColor="?attr/colorOnSurface" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+</file>
+
+<file path="app/src/main/res/values/colors.xml">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paleta Ayuntamiento de Bilbao -->
+    <color name="bilbao_red">#FFCC0000</color>
+    <color name="bilbao_red_dark">#FF990000</color>
+    <color name="bilbao_grey_dark">#FF333333</color>
+    <color name="bilbao_grey_light">#E0E0E0</color>
+
+    <!-- Neutros -->
+    <color name="bg_light">#F4F4F4</color>
+    <color name="text_dark">#1A1A1A</color>
+    <color name="text_medium">#666666</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- Colores Modo Oscuro Base -->
+    <color name="bg_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="text_light">#EEEEEE</color>
+    <color name="text_secondary_light">#B0B0B0</color>
+
+    <!-- Colores de Ruta (Modo Claro) -->
+    <color name="route_header_bg">#333333</color>
+    <color name="route_header_text">#FFFFFF</color>
+    <color name="route_text_primary">#1A1A1A</color>
+    <color name="route_text_secondary">#757575</color>
+    <color name="route_price_text">#3F51B5</color>
+
+    <!-- Fallback para transporte si el color de la marca es ilegible en fondo claro -->
+    <color name="route_transit_fallback">#CC0000</color>
+
+    <!-- Colores CO2 (Claro) -->
+    <color name="co2_walking_color">#2E7D32</color>
+    <color name="co2_transit_color">#1976D2</color>
+</resources>
 </file>
 
 <file path="app/src/main/java/com/example/unigo_das/adapters/CentroAdapter.java">
@@ -5617,6 +5658,430 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
 }
 </file>
 
+<file path="app/src/main/java/com/example/unigo_das/fragments/SettingsFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Outline;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Base64;
+import android.view.Gravity;
+import android.view.View;
+import android.view.ViewOutlineProvider;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.os.LocaleListCompat;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
+import androidx.preference.SwitchPreferenceCompat;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
+import com.example.unigo_das.R;
+import com.example.unigo_das.activities.LoginActivity;
+import com.example.unigo_das.network.NetworkWorker;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
+import android.app.ProgressDialog;
+import android.widget.Toast;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class SettingsFragment extends PreferenceFragmentCompat implements LanguageDialogFragment.LanguageChangeListener {
+
+    private SharedPreferences customPrefs;
+    private SwitchPreferenceCompat darkModePref;
+    private ActivityResultLauncher<Intent> galeriaLauncher;
+
+    @Override
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.preferences, rootKey);
+
+        customPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        boolean isGuest = customPrefs.getBoolean("isGuest", true);
+
+        galeriaLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                            Uri imageUri = result.getData().getData();
+                            if (imageUri != null) {
+                                mostrarConfirmacionFoto(imageUri);
+                            }
+                        }
+                    }
+                }
+        );
+
+        setupProfileHeader();
+        setupAccountSection(isGuest);
+        setupGeneralConfig();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        syncDarkModeSwitch();
+    }
+
+    private void syncDarkModeSwitch() {
+        if (darkModePref != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            boolean isDark = prefs.getBoolean("modo_oscuro_activado", false);
+            darkModePref.setChecked(isDark);
+        }
+    }
+
+    private void setupProfileHeader() {
+        Preference profileHeader = findPreference("pref_profile_header");
+        if (profileHeader != null) {
+            boolean isGuest = customPrefs.getBoolean("isGuest", true);
+
+            if (isGuest) {
+                profileHeader.setEnabled(false);
+            } else {
+                profileHeader.setEnabled(true);
+                profileHeader.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        ProfileDialogFragment dialog = new ProfileDialogFragment();
+                        dialog.setListener(new ProfileDialogFragment.ProfileAction() {
+                            @Override
+                            public void onRemovePhoto() {
+                                eliminarFotoPerfil();
+                            }
+                        });
+                        // AÑADIR ESTE LISTENER:
+                        dialog.setImageSelectedListener(new ProfileDialogFragment.OnImageSelectedListener() {
+                            @Override
+                            public void onImageSelected(Intent intent) {
+                                // Lanzar la galería usando el launcher del fragmento
+                                galeriaLauncher.launch(intent);
+                            }
+                        });
+                        dialog.show(getParentFragmentManager(), "ProfileDialog");
+                        return true;
+                    }
+                });
+            }
+        }
+    }
+
+    private void setupAccountSection(boolean isGuest) {
+        Preference myAccount = findPreference("pref_my_account");
+        Preference logout = findPreference("pref_logout");
+        Preference login = findPreference("pref_login");
+
+        if (isGuest) {
+            if (myAccount != null) myAccount.setVisible(false);
+            if (logout != null) logout.setVisible(false);
+            if (login != null) {
+                login.setVisible(true);
+                login.setOnPreferenceClickListener(p -> {
+                    // Eliminamos el forzado a modo claro aquí, ya que LoginActivity ya tiene su propio tema en el Manifest.
+                    // Mantener el modo noche actual para que se aplique al volver.
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    startActivity(intent);
+                    if (getActivity() != null) {
+                        getActivity().finish();
+                    }
+                    return true;
+                });
+            }
+        } else {
+            if (myAccount != null) {
+                myAccount.setVisible(true);
+                myAccount.setSummary(customPrefs.getString("user_email", "usuario@example.com"));
+                myAccount.setOnPreferenceClickListener(p -> {
+                    getParentFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new AccountDetailFragment())
+                            .addToBackStack(null)
+                            .commit();
+                    return true;
+                });
+            }
+            if (logout != null) {
+                logout.setVisible(true);
+                logout.setOnPreferenceClickListener(p -> {
+                    // Limpiar datos de usuario pero mantener su preferencia guardada
+                    customPrefs.edit()
+                            .putBoolean("isGuest", true)
+                            .putString("user_email", null) // Limpiar email
+                            .apply();
+
+                    // Volver al modo claro por defecto al cerrar sesión
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
+                    requireActivity().recreate();
+                    return true;
+                });
+            }
+            if (login != null) login.setVisible(false);
+        }
+    }
+
+    private void setupGeneralConfig() {
+        Preference languagePref = findPreference("pref_language");
+        if (languagePref != null) {
+            languagePref.setOnPreferenceClickListener(preference -> {
+                LanguageDialogFragment dialog = new LanguageDialogFragment();
+                dialog.show(getChildFragmentManager(), "LanguageDialog");
+                return true;
+            });
+        }
+
+        darkModePref = findPreference("modo_oscuro_activado");
+        if (darkModePref != null) {
+            syncDarkModeSwitch();
+            darkModePref.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean checked = (boolean) newValue;
+
+                // Guardar en preferencias generales
+                SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+                defaultPrefs.edit().putBoolean("modo_oscuro_activado", checked).apply();
+
+                // Guardar preferencia personal del usuario
+                SharedPreferences unigoPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+                boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
+
+                if (!isGuest) {
+                    String userEmail = unigoPrefs.getString("user_email", "");
+                    if (!userEmail.isEmpty()) {
+                        // Guardar preferencia específica para este usuario
+                        unigoPrefs.edit().putBoolean("dark_mode_" + userEmail, checked).apply();
+                    }
+                }
+
+                AppCompatDelegate.setDefaultNightMode(checked ?
+                        AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+                return true;
+            });
+        }
+    }
+
+    @Override
+    public void onLanguageChanged() {
+        // Guardar preferencia de idioma para este usuario
+        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        String userEmail = prefs.getString("user_email", "");
+        if (!userEmail.isEmpty()) {
+            LocaleListCompat currentLocales = AppCompatDelegate.getApplicationLocales();
+            String currentLang = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
+            prefs.edit().putString("language_" + userEmail, currentLang).apply();
+        }
+
+        // Recrear la activity solo si el fragmento sigue añadido
+        if (isAdded() && getActivity() != null && !getActivity().isFinishing()) {
+            getActivity().recreate();
+        }
+    }
+
+    private void mostrarConfirmacionFoto(final Uri imageUri) {
+        try {
+            // Cargar la imagen seleccionada
+            InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
+            final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            if (bitmap != null) {
+                // Crear un diálogo de confirmación con vista previa
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                builder.setTitle("Confirmar foto de perfil");
+
+                // Crear un ImageView para la vista previa
+                ImageView imageView = new ImageView(requireContext());
+                imageView.setImageBitmap(bitmap);
+
+                // Redimensionar para vista previa
+                int size = (int) (200 * getResources().getDisplayMetrics().density);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(size, size);
+                params.gravity = Gravity.CENTER;
+                params.setMargins(16, 16, 16, 16);
+                imageView.setLayoutParams(params);
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+                // Añadir borde circular
+                imageView.setClipToOutline(true);
+                imageView.setOutlineProvider(new ViewOutlineProvider() {
+                    @Override
+                    public void getOutline(View view, Outline outline) {
+                        outline.setOval(0, 0, view.getWidth(), view.getHeight());
+                    }
+                });
+
+                LinearLayout layout = new LinearLayout(requireContext());
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.setGravity(Gravity.CENTER);
+                layout.addView(imageView);
+
+                builder.setView(layout);
+                builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        guardarFotoPerfil(bitmap);
+                    }
+                });
+                builder.setNegativeButton("Cancelar", null);
+                builder.show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void guardarFotoPerfil(Bitmap bitmap) {
+        String userEmail = customPrefs.getString("user_email", "");
+        if (!userEmail.isEmpty()) {
+            // Mostrar progreso
+            final ProgressDialog progressDialog = new ProgressDialog(requireContext());
+            progressDialog.setMessage("Subiendo foto...");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            // Subir en hilo secundario
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        // Convertir bitmap a archivo temporal
+                        File tempFile = new File(requireContext().getCacheDir(), "temp_profile.jpg");
+                        FileOutputStream fos = new FileOutputStream(tempFile);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
+                        fos.close();
+
+                        // Preparar la petición multipart
+                        String boundary = "*****" + System.currentTimeMillis() + "*****";
+                        String url = "http://35.233.9.137/subir_foto.php";
+
+                        HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+                        connection.setRequestMethod("POST");
+                        connection.setDoOutput(true);
+                        connection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+
+                        DataOutputStream dos = new DataOutputStream(connection.getOutputStream());
+
+                        // Añadir campo email
+                        dos.writeBytes("--" + boundary + "\r\n");
+                        dos.writeBytes("Content-Disposition: form-data; name=\"email\"\r\n\r\n");
+                        dos.writeBytes(userEmail + "\r\n");
+
+                        // Añadir imagen
+                        dos.writeBytes("--" + boundary + "\r\n");
+                        dos.writeBytes("Content-Disposition: form-data; name=\"foto\";filename=\"profile.jpg\"\r\n");
+                        dos.writeBytes("Content-Type: image/jpeg\r\n\r\n");
+
+                        FileInputStream fis = new FileInputStream(tempFile);
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = fis.read(buffer)) != -1) {
+                            dos.write(buffer, 0, bytesRead);
+                        }
+                        fis.close();
+
+                        dos.writeBytes("\r\n");
+                        dos.writeBytes("--" + boundary + "--\r\n");
+                        dos.flush();
+                        dos.close();
+
+                        // Leer respuesta
+                        BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        StringBuilder response = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            response.append(line);
+                        }
+
+                        final String respuestaJson = response.toString();
+
+                        // Volver al hilo principal
+                        requireActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.dismiss();
+
+                                try {
+                                    JSONObject json = new JSONObject(respuestaJson);
+                                    if (json.getBoolean("success")) {
+                                        String fotoUrl = json.getString("foto_url");
+                                        customPrefs.edit()
+                                                .putString("profile_photo_url_" + userEmail, fotoUrl)
+                                                .apply();
+                                        requireActivity().recreate();
+                                        Toast.makeText(requireContext(), "Foto actualizada", Toast.LENGTH_SHORT).show();
+                                    }
+                                } catch (Exception e) {
+                                    Toast.makeText(requireContext(), "Error al subir foto", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        requireActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressDialog.dismiss();
+                                Toast.makeText(requireContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+    }
+
+    private void eliminarFotoPerfil() {
+        String userEmail = customPrefs.getString("user_email", "");
+        if (!userEmail.isEmpty()) {
+            // Enviar petición al servidor
+            Data inputData = new Data.Builder()
+                    .putString("script", "eliminar_foto.php")
+                    .putString("email", userEmail)
+                    .build();
+
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(NetworkWorker.class)
+                    .setInputData(inputData)
+                    .build();
+
+            WorkManager.getInstance(requireContext()).enqueue(request);
+
+            // Eliminar localmente
+            customPrefs.edit().remove("profile_photo_url_" + userEmail).apply();
+            requireActivity().recreate();
+        }
+    }
+}
+</file>
+
 <file path="app/src/main/res/layout/activity_login.xml">
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
@@ -5668,6 +6133,7 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
 
     <!-- Tarjeta Blanca para el formulario -->
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardForm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
@@ -5766,6 +6232,69 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- SELECTOR DE IDIOMA MEJORADO -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/bg_language_selector"
+        android:elevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardForm">
+
+        <TextView
+            android:id="@+id/btnLangEs"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="ES"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="#33FFFFFF" />
+
+        <TextView
+            android:id="@+id/btnLangEu"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="EU"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="#33FFFFFF" />
+
+        <TextView
+            android:id="@+id/btnLangEn"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="EN"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
     <!-- Botón Invitado abajo del todo -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnGuest"
@@ -5833,6 +6362,7 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
 
     <!-- Tarjeta del Formulario -->
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardForm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
@@ -5937,6 +6467,69 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
+
+    <!-- SELECTOR DE IDIOMA MEJORADO -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="@drawable/bg_language_selector"
+        android:elevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardForm">
+
+        <TextView
+            android:id="@+id/btnLangEs"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="ES"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="#33FFFFFF" />
+
+        <TextView
+            android:id="@+id/btnLangEu"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="EU"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="#33FFFFFF" />
+
+        <TextView
+            android:id="@+id/btnLangEn"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="EN"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
 
     <!-- Botón volver al Login -->
     <com.google.android.material.button.MaterialButton
@@ -6160,6 +6753,7 @@ package com.example.unigo_das.fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -6346,7 +6940,8 @@ public class SchoolFragment extends Fragment {
     }
 
     private void guardarFavorito(Centro centro) {
-        int idUsuarioActual = 1;
+        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        int idUsuarioActual = prefs.getInt("user_id", 0);
 
         if (centro.isStarred()) {
             dbHelper.anadirFavorito(idUsuarioActual, centro.getId());
@@ -6578,6 +7173,689 @@ public class SchoolFragment extends Fragment {
     </application>
 
 </manifest>
+</file>
+
+<file path="app/src/main/java/com/example/unigo_das/fragments/WeatherFragment.java">
+package com.example.unigo_das.fragments;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.unigo_das.R;
+import com.example.unigo_das.db.DataBaseHelper;
+import com.example.unigo_das.item.Centro;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.mlkit.common.model.DownloadConditions;
+import com.google.mlkit.nl.translate.TranslateLanguage;
+import com.google.mlkit.nl.translate.Translation;
+import com.google.mlkit.nl.translate.Translator;
+import com.google.mlkit.nl.translate.TranslatorOptions;
+
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.xml.sax.InputSource;
+import java.io.StringReader;
+import java.util.List;
+import java.util.Locale;
+
+public class WeatherFragment extends Fragment {
+
+    private ImageView ivIconoClimaPrincipal;
+    private TextView tvTemperaturaPrincipal;
+    private TextView tvPronosticoBilbao;
+    private TextView tvUbicacionPrincipal;
+    private TextView tvDescripcionClima;
+    private WebView wvRadarLluvia;
+    private FusedLocationProviderClient fusedLocationClient;
+
+    private com.android.volley.RequestQueue requestQueue;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_weather, container, false);
+
+        ivIconoClimaPrincipal = view.findViewById(R.id.ivIconoClimaPrincipal);
+        tvTemperaturaPrincipal = view.findViewById(R.id.tvTemperaturaPrincipal);
+        tvPronosticoBilbao = view.findViewById(R.id.tvPronosticoBilbao);
+        tvUbicacionPrincipal = view.findViewById(R.id.tvUbicacionPrincipal);
+        tvDescripcionClima = view.findViewById(R.id.tvDescripcionClima);
+        wvRadarLluvia = view.findViewById(R.id.wvRadarLluvia);
+
+        requestQueue = Volley.newRequestQueue(requireContext());
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        androidx.cardview.widget.CardView cvMapaAire = view.findViewById(R.id.cvMapaAire);
+        androidx.cardview.widget.CardView cvMapaPolen = view.findViewById(R.id.cvMapaPolen);
+
+        cvMapaAire.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirPantallaMapaCalor("AIRE");
+            }
+        });
+
+        cvMapaPolen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                abrirPantallaMapaCalor("POLEN");
+            }
+        });
+
+        wvRadarLluvia.setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override
+            public void getOutline(android.view.View view, android.graphics.Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 40f);
+            }
+        });
+        wvRadarLluvia.setClipToOutline(true);
+
+        wvRadarLluvia.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.getParent().requestDisallowInterceptTouchEvent(true);
+                return false;
+            }
+        });
+
+        cargarRadarRainViewer();
+        obtenerUbicacionYClima();
+        obtenerPronosticoOpenData();
+
+        return view;
+    }
+
+    private void abrirPantallaMapaCalor(String tipoMapa) {
+        android.content.Intent intent = new android.content.Intent(requireContext(), com.example.unigo_das.activities.HeatmapActivity.class);
+        intent.putExtra("TIPO_MAPA", tipoMapa);
+        startActivity(intent);
+    }
+
+    private void obtenerUbicacionYClima() {
+        if (!isAdded() || getContext() == null) return;
+
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            actualizarClimaConNombre(43.26, -2.94, "Bilbao");
+            return;
+        }
+
+        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (!isAdded() || getContext() == null) return;
+                if (location != null) {
+                    String nombreCiudad = obtenerNombreCiudad(location.getLatitude(), location.getLongitude());
+                    actualizarClimaConNombre(location.getLatitude(), location.getLongitude(), nombreCiudad);
+                } else {
+                    actualizarClimaConNombre(43.26, -2.94, "Bilbao");
+                }
+            }
+        });
+    }
+
+    private String obtenerNombreCiudad(double lat, double lon) {
+        if (!isAdded() || getContext() == null) return "Tu ubicación";
+
+        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                String city = addresses.get(0).getLocality();
+                return (city != null) ? city : "Tu ubicación";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Tu ubicación";
+    }
+
+    private void actualizarClimaConNombre(double lat, double lon, String nombre) {
+        if (tvUbicacionPrincipal != null) {
+            tvUbicacionPrincipal.setText(nombre);
+        }
+        obtenerClimaPorCoordenadas(lat, lon, ivIconoClimaPrincipal, tvTemperaturaPrincipal);
+
+        obtenerCalidadAire(lat, lon);
+        obtenerNivelPolen(lat, lon);
+    }
+
+    private void obtenerCalidadAire(double lat, double lon) {
+        String url = "https://airquality.googleapis.com/v1/currentConditions:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY;
+
+        try {
+            JSONObject body = new JSONObject();
+            JSONObject location = new JSONObject();
+            location.put("latitude", lat);
+            location.put("longitude", lon);
+            body.put("location", location);
+            body.put("languageCode", "en");
+
+            JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.POST, url, body,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            if (!isAdded() || getView() == null) return;
+                            try {
+                                String categoriaIngles = response.getJSONArray("indexes")
+                                        .getJSONObject(0)
+                                        .getString("category");
+
+                                String categoriaTraducida = traducirCalidadAire(categoriaIngles);
+
+                                TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
+                                if (tvIndiceAire != null) {
+                                    tvIndiceAire.setText(categoriaTraducida);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                TextView tv = getView().findViewById(R.id.tvIndiceAire);
+                                if (tv != null) tv.setText(getString(R.string.error_api));
+                            }
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            if (isAdded() && getView() != null) {
+                                TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
+                                if (tvIndiceAire != null) tvIndiceAire.setText(getString(R.string.no_data_short));
+                            }
+                        }
+                    }
+            );
+            requestQueue.add(peticion);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void obtenerNivelPolen(double lat, double lon) {
+        String url = "https://pollen.googleapis.com/v1/forecast:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY +
+                "&location.latitude=" + lat +
+                "&location.longitude=" + lon +
+                "&days=1&languageCode=en";
+
+        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (!isAdded() || getView() == null) return;
+                        try {
+                            if (!response.has("dailyInfo") || response.getJSONArray("dailyInfo").length() == 0) {
+                                actualizarTextoPolen(getString(R.string.no_data_long));
+                                return;
+                            }
+
+                            JSONObject daily = response.getJSONArray("dailyInfo").getJSONObject(0);
+                            String nivelMaximo = "None";
+
+                            if (daily.has("pollenTypeInfo")) {
+                                org.json.JSONArray types = daily.getJSONArray("pollenTypeInfo");
+                                int maxVal = -1;
+
+                                for (int i = 0; i < types.length(); i++) {
+                                    JSONObject item = types.getJSONObject(i);
+                                    if (item.has("indexInfo")) {
+                                        JSONObject indexInfo = item.getJSONObject("indexInfo");
+                                        int val = indexInfo.optInt("value", 0);
+                                        if (val >= maxVal) {
+                                            maxVal = val;
+                                            nivelMaximo = indexInfo.optString("category", "None");
+                                        }
+                                    }
+                                }
+                            }
+
+                            actualizarTextoPolen(traducirPolen(nivelMaximo));
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            actualizarTextoPolen(getString(R.string.no_data_short));
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded()) {
+                            actualizarTextoPolen(getString(R.string.no_data_short));
+                        }
+                    }
+                }
+        );
+        requestQueue.add(peticion);
+    }
+
+    private void actualizarTextoPolen(String texto) {
+        if (getView() != null) {
+            TextView tv = getView().findViewById(R.id.tvIndicePolen);
+            if (tv != null) tv.setText(texto);
+        }
+    }
+
+    private String traducirCalidadAire(String categoriaEn) {
+        if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
+
+        String cat = categoriaEn.toLowerCase().trim();
+
+        if (cat.contains("excellent")) return getString(R.string.air_excellent);
+        if (cat.contains("good")) return getString(R.string.air_good);
+        if (cat.contains("moderate")) return getString(R.string.air_moderate);
+        if (cat.contains("poor") && !cat.contains("very")) return getString(R.string.air_poor);
+        if (cat.contains("very poor")) return getString(R.string.air_very_poor);
+        if (cat.contains("severe")) return getString(R.string.air_severe);
+
+        return getString(R.string.air_unknown);
+    }
+
+    private String traducirPolen(String categoriaEn) {
+        if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
+
+        String cat = categoriaEn.toLowerCase().trim();
+
+        if (cat.contains("none")) return getString(R.string.pollen_none);
+        if (cat.contains("very low")) return getString(R.string.pollen_very_low);
+        if (cat.contains("low") && !cat.contains("very")) return getString(R.string.pollen_low);
+        if (cat.contains("moderate")) return getString(R.string.pollen_moderate);
+        if (cat.contains("high") && !cat.contains("very")) return getString(R.string.pollen_high);
+        if (cat.contains("very high")) return getString(R.string.pollen_very_high);
+        if (cat.contains("severe")) return getString(R.string.pollen_severe);
+
+        return getString(R.string.pollen_unknown);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getView() != null && isAdded()) cargarClimaFavoritos(getView());
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden && getView() != null && isAdded()) {
+            cargarClimaFavoritos(getView());
+        }
+    }
+
+    private void cargarRadarRainViewer() {
+        WebSettings settings = wvRadarLluvia.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setSupportZoom(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+
+        wvRadarLluvia.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest request) {
+                String urlDestino = request.getUrl().toString();
+                return !urlDestino.contains("rainviewer.com/map.html");
+            }
+        });
+        wvRadarLluvia.loadUrl("https://www.rainviewer.com/map.html?loc=43.26,-2.93,8&oFa=0&oC=1&oU=0&oCS=1&oF=0&oAP=1&c=1&o=83&lm=0&layer=radar&sm=1&sn=1");
+    }
+
+    private void obtenerPronosticoOpenData() {
+        String urlXmlOpenData = "https://opendata.euskadi.eus/contenidos/prevision_tiempo/met_forecast_zone/opendata/met_forecast_zone.xml";
+
+        StringRequest peticion = new StringRequest(Request.Method.GET, urlXmlOpenData,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (isAdded()) procesarXmlOpenData(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error conectando con Euskalmet.");
+                    }
+                }
+        );
+        requestQueue.add(peticion);
+    }
+
+    private void procesarXmlOpenData(String xml) {
+        try {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            InputSource is = new InputSource(new StringReader(xml));
+            Document doc = builder.parse(is);
+
+            NodeList areas = doc.getElementsByTagName("areaForecast");
+            for (int i = 0; i < areas.getLength(); i++) {
+                Element area = (Element) areas.item(i);
+                if (area.getAttribute("areaId").equals("8")) {
+                    NodeList periods = area.getElementsByTagName("periodData");
+                    for (int j = 0; j < periods.getLength(); j++) {
+                        Element period = (Element) periods.item(j);
+                        if (period.getAttribute("periodDay").equals("today")) {
+                            NodeList descriptions = period.getElementsByTagName("forecastDescription");
+                            if (descriptions.getLength() > 0) {
+                                Element descElement = (Element) descriptions.item(0);
+                                String idioma = java.util.Locale.getDefault().getLanguage();
+
+                                if (idioma.equals("es") || idioma.equals("eu")) {
+                                    String textoNativo = descElement.getElementsByTagName(idioma).item(0).getTextContent().trim();
+                                    if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoNativo);
+                                } else {
+                                    String textoEspanol = descElement.getElementsByTagName("es").item(0).getTextContent().trim();
+                                    traducirConIA(textoEspanol, idioma);
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error analizando datos.");
+        }
+    }
+
+    private void traducirConIA(String textoEspanol, String idiomaDestino) {
+        if (!isAdded()) return;
+        String mlKitLang = TranslateLanguage.fromLanguageTag(idiomaDestino);
+        if (mlKitLang == null) {
+            if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
+            return;
+        }
+        if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Traduciendo pronóstico...");
+
+        TranslatorOptions options = new TranslatorOptions.Builder()
+                .setSourceLanguage(TranslateLanguage.SPANISH)
+                .setTargetLanguage(mlKitLang)
+                .build();
+        final Translator traductor = Translation.getClient(options);
+        DownloadConditions conditions = new DownloadConditions.Builder().build();
+
+        traductor.downloadModelIfNeeded(conditions)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        traductor.translate(textoEspanol)
+                                .addOnSuccessListener(new OnSuccessListener<String>() {
+                                    @Override
+                                    public void onSuccess(String textoTraducido) {
+                                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoTraducido);
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
+                    }
+                });
+    }
+
+    private void asignarIconoYTexto(int code, ImageView iv) {
+        String desc = "Desconocido";
+        int resId = R.drawable.ic_clima_nubes;
+
+        if (code == 0) desc = "Cielo despejado";
+        else if (code == 1) desc = "Mayormente despejado";
+        else if (code == 2) desc = "Parcialmente nublado";
+        else if (code == 3) desc = "Totalmente nublado";
+        else if (code == 45 || code == 48) desc = "Niebla densa";
+        else if (code == 51 || code == 53 || code == 55) desc = "Llovizna";
+        else if (code == 56 || code == 57) desc = "Llovizna helada";
+        else if (code == 61) desc = "Lluvia ligera";
+        else if (code == 63) desc = "Lluvia moderada";
+        else if (code == 65) desc = "Lluvia fuerte";
+        else if (code == 66 || code == 67) desc = "Lluvia helada";
+        else if (code == 71) desc = "Nieve ligera";
+        else if (code == 73) desc = "Nieve moderada";
+        else if (code == 75) desc = "Nevada fuerte";
+        else if (code == 77) desc = "Granizo suave";
+        else if (code == 80) desc = "Chubascos ligeros";
+        else if (code == 81) desc = "Chubascos moderados";
+        else if (code == 82) desc = "Chubascos violentos";
+        else if (code == 85 || code == 86) desc = "Chubascos de nieve";
+        else if (code == 95) desc = "Tormenta eléctrica";
+        else if (code == 96 || code == 99) desc = "Tormenta con granizo";
+
+        if (code == 0) {
+            resId = R.drawable.ic_clima_sol;
+        } else if (code >= 1 && code <= 3) {
+            resId = R.drawable.ic_clima_nubes;
+        } else if (code >= 45 && code <= 48) {
+            resId = R.drawable.ic_clima_niebla;
+        } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
+            resId = R.drawable.ic_clima_lluvia;
+        } else if ((code >= 71 && code <= 77) || code == 85 || code == 86) {
+            resId = R.drawable.ic_clima_nieve;
+        } else if (code >= 95 && code <= 99) {
+            resId = R.drawable.ic_clima_tormenta;
+        }
+
+        iv.setImageResource(resId);
+
+        if (iv == ivIconoClimaPrincipal) {
+            if (tvDescripcionClima != null) tvDescripcionClima.setText(desc);
+            iv.setColorFilter(android.graphics.Color.parseColor("#D32F2F"));
+        } else {
+            iv.setColorFilter(null);
+        }
+    }
+
+    private void cargarClimaFavoritos(View view) {
+        if (!isAdded()) return;
+        android.widget.GridLayout contenedor = view.findViewById(R.id.glFavoritosContainer);
+        if (contenedor == null) return;
+        contenedor.removeAllViews();
+
+        DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
+        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        int idUsuarioActual = prefs.getInt("user_id", 0);
+
+        List<String> favoritos = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
+
+        if (favoritos.isEmpty()) {
+            TextView tvVacio = new TextView(requireContext());
+            tvVacio.setText("Aún no has guardado ningún campus en favoritos.");
+            tvVacio.setPadding(16, 16, 16, 16);
+            contenedor.addView(tvVacio);
+            return;
+        }
+
+        for (String idCampus : favoritos) {
+            Centro centro = dbHelper.obtenerCentroPorId(idCampus);
+
+            if (centro != null) {
+                View tarjeta = getLayoutInflater().inflate(R.layout.item_clima_favorito, contenedor, false);
+                TextView tvNombre = tarjeta.findViewById(R.id.tvNombreCampus);
+                TextView tvTemp = tarjeta.findViewById(R.id.tvTempCampus);
+                TextView tvUni = tarjeta.findViewById(R.id.tvUniCampus);
+
+                tvNombre.setText(centro.getNombre());
+                tvUni.setText(centro.getUniversidad());
+
+                if (centro.getUniversidad().equals("UPV/EHU")) {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#1A1A1A"));
+                } else if (centro.getUniversidad().equals("Mondragon")) {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#008a96"));
+                } else {
+                    tvUni.setTextColor(android.graphics.Color.parseColor("#1976D2"));
+                }
+
+                obtenerClimaConCola(centro.getLatitud(), centro.getLongitud(), tvTemp);
+
+                android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams();
+                params.columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1.0f);
+                params.width = 0;
+                params.setMargins(10, 10, 10, 20);
+
+                tarjeta.setLayoutParams(params);
+
+                contenedor.addView(tarjeta);
+            }
+        }
+    }
+
+    private void obtenerClimaPorCoordenadas(double latitud, double longitud, final ImageView ivIcono, final TextView tvTemp) {
+        // Cambiamos a 'daily=uv_index_max' que es 100% estable
+        String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitud +
+                "&longitude=" + longitud +
+                "&current_weather=true" +
+                "&daily=uv_index_max,sunrise,sunset" +
+                "&timezone=auto";
+
+        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, urlOpenMeteo, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (!isAdded() || getView() == null) return;
+                        try {
+                            // 1. Clima Principal
+                            if (response.has("current_weather")) {
+                                JSONObject currentWeather = response.getJSONObject("current_weather");
+                                double temperatura = currentWeather.optDouble("temperature", 0.0);
+                                int codigoClima = currentWeather.optInt("weathercode", 0);
+                                if (tvTemp != null) tvTemp.setText(temperatura + " ºC");
+                                if (ivIcono != null) asignarIconoYTexto(codigoClima, ivIcono);
+                            }
+
+                            // 2. Datos Diarios (UV y Luz)
+                            if (response.has("daily")) {
+                                JSONObject dailyParams = response.getJSONObject("daily");
+
+                                // Índice UV Máximo del día
+                                if (dailyParams.has("uv_index_max")) {
+                                    double uvIndex = dailyParams.getJSONArray("uv_index_max").optDouble(0, 0.0);
+                                    actualizarTarjetaUV(uvIndex);
+                                }
+
+                                // Horas de Luz
+                                if (dailyParams.has("sunrise") && dailyParams.has("sunset")) {
+                                    String amanecerIso = dailyParams.getJSONArray("sunrise").optString(0, "");
+                                    String anochecerIso = dailyParams.getJSONArray("sunset").optString(0, "");
+
+                                    // Extraemos solo la hora si el formato "YYYY-MM-DDTHH:MM" es correcto
+                                    if (amanecerIso.length() >= 16 && anochecerIso.length() >= 16) {
+                                        String amanecer = amanecerIso.substring(11, 16);
+                                        String anochecer = anochecerIso.substring(11, 16);
+
+                                        TextView tvAmanecer = getView().findViewById(R.id.tvAmanecer);
+                                        TextView tvAnochecer = getView().findViewById(R.id.tvAnochecer);
+
+                                        if (tvAmanecer != null) tvAmanecer.setText("🌅 " + amanecer);
+                                        if (tvAnochecer != null) tvAnochecer.setText("🌙 " + anochecer);
+                                    }
+                                }
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                    }
+                }
+        );
+        requestQueue.add(peticion);
+    }
+
+    private void actualizarTarjetaUV(double uvIndex) {
+        if (getView() == null) return;
+
+        TextView tvValorUV = getView().findViewById(R.id.tvValorUV);
+        TextView tvDescUV = getView().findViewById(R.id.tvDescUV);
+
+        if (tvValorUV == null || tvDescUV == null) return;
+
+        tvValorUV.setText(String.valueOf(Math.round(uvIndex)));
+
+        String idioma = java.util.Locale.getDefault().getLanguage();
+        String descripcion;
+
+        if (uvIndex < 3) {
+            descripcion = idioma.equals("eu") ? "Baxua" : (idioma.equals("en") ? "Low" : "Bajo");
+        } else if (uvIndex < 6) {
+            descripcion = idioma.equals("eu") ? "Ertaina" : (idioma.equals("en") ? "Moderate" : "Moderado");
+        } else if (uvIndex < 8) {
+            descripcion = idioma.equals("eu") ? "Altua" : (idioma.equals("en") ? "High" : "Alto");
+            tvValorUV.setTextColor(android.graphics.Color.parseColor("#F57C00"));
+        } else if (uvIndex < 11) {
+            descripcion = idioma.equals("eu") ? "Oso Altua" : (idioma.equals("en") ? "Very High" : "Muy Alto");
+            tvValorUV.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+        } else {
+            descripcion = idioma.equals("eu") ? "Muturrekoa" : (idioma.equals("en") ? "Extreme" : "Extremo");
+            tvValorUV.setTextColor(android.graphics.Color.parseColor("#7B1FA2"));
+        }
+
+        tvDescUV.setText(descripcion);
+    }
+
+    private void obtenerClimaConCola(double lat, double lon, final TextView tvTemp) {
+        String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        if (isAdded() && tvTemp != null) {
+                            try {
+                                double t = response.getJSONObject("current_weather").getDouble("temperature");
+                                tvTemp.setText(t + " ºC");
+                            } catch (Exception e) { tvTemp.setText("Error"); }
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                    }
+                }
+        );
+        requestQueue.add(request);
+    }
+}
 </file>
 
 <file path="app/src/main/res/layout/fragment_weather.xml">
@@ -6950,6 +8228,7 @@ package com.example.unigo_das.activities;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -6984,9 +8263,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Aplicar el modo oscuro antes de super.onCreate y de inflar el layout
+        // Aplicar el modo oscuro ANTES de super.onCreate
         aplicarModoOscuro();
-        
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -7025,9 +8304,7 @@ public class MainActivity extends AppCompatActivity {
         if (!isGuest) {
             String userEmail = unigoPrefs.getString("user_email", "");
             if (!userEmail.isEmpty()) {
-                // Obtener preferencia personal del usuario
                 isDarkMode = unigoPrefs.getBoolean("dark_mode_" + userEmail, false);
-                // Sincronizar con preferencia general
                 defaultPrefs.edit().putBoolean("modo_oscuro_activado", isDarkMode).apply();
             } else {
                 isDarkMode = defaultPrefs.getBoolean("modo_oscuro_activado", false);
@@ -7209,6 +8486,33 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        // Asegurar que el contexto use la configuración de idioma correcta
+        super.attachBaseContext(newBase);
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Esto asegura que los recursos se actualicen con la nueva configuración
+        getResources().updateConfiguration(newConfig, getResources().getDisplayMetrics());
+    }
+/*
+    private void applyOverrideConfiguration() {
+        // Obtener el idioma actual de la app
+        LocaleListCompat appLocales = AppCompatDelegate.getApplicationLocales();
+        if (!appLocales.isEmpty()) {
+            String langCode = appLocales.get(0).getLanguage();
+            Locale locale = new Locale(langCode);
+            Locale.setDefault(locale);
+
+            Configuration config = new Configuration(getResources().getConfiguration());
+            config.setLocale(locale);
+            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        }
+    }*/
 
 }
 </file>
@@ -8316,687 +9620,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Si la luminosidad es mayor a 0.75, el color es muy claro (cercano al blanco)
         // Ajusta este umbral según necesites: 0.7 = más estricto, 0.8 = más permisivo
         return luminosidad > 0.75;
-    }
-}
-</file>
-
-<file path="app/src/main/java/com/example/unigo_das/fragments/WeatherFragment.java">
-package com.example.unigo_das.fragments;
-
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.example.unigo_das.R;
-import com.example.unigo_das.db.DataBaseHelper;
-import com.example.unigo_das.item.Centro;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.mlkit.common.model.DownloadConditions;
-import com.google.mlkit.nl.translate.TranslateLanguage;
-import com.google.mlkit.nl.translate.Translation;
-import com.google.mlkit.nl.translate.Translator;
-import com.google.mlkit.nl.translate.TranslatorOptions;
-
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.xml.sax.InputSource;
-import java.io.StringReader;
-import java.util.List;
-import java.util.Locale;
-
-public class WeatherFragment extends Fragment {
-
-    private ImageView ivIconoClimaPrincipal;
-    private TextView tvTemperaturaPrincipal;
-    private TextView tvPronosticoBilbao;
-    private TextView tvUbicacionPrincipal;
-    private TextView tvDescripcionClima;
-    private WebView wvRadarLluvia;
-    private FusedLocationProviderClient fusedLocationClient;
-
-    private com.android.volley.RequestQueue requestQueue;
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_weather, container, false);
-
-        ivIconoClimaPrincipal = view.findViewById(R.id.ivIconoClimaPrincipal);
-        tvTemperaturaPrincipal = view.findViewById(R.id.tvTemperaturaPrincipal);
-        tvPronosticoBilbao = view.findViewById(R.id.tvPronosticoBilbao);
-        tvUbicacionPrincipal = view.findViewById(R.id.tvUbicacionPrincipal);
-        tvDescripcionClima = view.findViewById(R.id.tvDescripcionClima);
-        wvRadarLluvia = view.findViewById(R.id.wvRadarLluvia);
-
-        requestQueue = Volley.newRequestQueue(requireContext());
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-
-        androidx.cardview.widget.CardView cvMapaAire = view.findViewById(R.id.cvMapaAire);
-        androidx.cardview.widget.CardView cvMapaPolen = view.findViewById(R.id.cvMapaPolen);
-
-        cvMapaAire.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                abrirPantallaMapaCalor("AIRE");
-            }
-        });
-
-        cvMapaPolen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                abrirPantallaMapaCalor("POLEN");
-            }
-        });
-
-        wvRadarLluvia.setOutlineProvider(new android.view.ViewOutlineProvider() {
-            @Override
-            public void getOutline(android.view.View view, android.graphics.Outline outline) {
-                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 40f);
-            }
-        });
-        wvRadarLluvia.setClipToOutline(true);
-
-        wvRadarLluvia.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                v.getParent().requestDisallowInterceptTouchEvent(true);
-                return false;
-            }
-        });
-
-        cargarRadarRainViewer();
-        obtenerUbicacionYClima();
-        obtenerPronosticoOpenData();
-
-        return view;
-    }
-
-    private void abrirPantallaMapaCalor(String tipoMapa) {
-        android.content.Intent intent = new android.content.Intent(requireContext(), com.example.unigo_das.activities.HeatmapActivity.class);
-        intent.putExtra("TIPO_MAPA", tipoMapa);
-        startActivity(intent);
-    }
-
-    private void obtenerUbicacionYClima() {
-        if (!isAdded() || getContext() == null) return;
-
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            actualizarClimaConNombre(43.26, -2.94, "Bilbao");
-            return;
-        }
-
-        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (!isAdded() || getContext() == null) return;
-                if (location != null) {
-                    String nombreCiudad = obtenerNombreCiudad(location.getLatitude(), location.getLongitude());
-                    actualizarClimaConNombre(location.getLatitude(), location.getLongitude(), nombreCiudad);
-                } else {
-                    actualizarClimaConNombre(43.26, -2.94, "Bilbao");
-                }
-            }
-        });
-    }
-
-    private String obtenerNombreCiudad(double lat, double lon) {
-        if (!isAdded() || getContext() == null) return "Tu ubicación";
-
-        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
-            if (addresses != null && !addresses.isEmpty()) {
-                String city = addresses.get(0).getLocality();
-                return (city != null) ? city : "Tu ubicación";
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "Tu ubicación";
-    }
-
-    private void actualizarClimaConNombre(double lat, double lon, String nombre) {
-        if (tvUbicacionPrincipal != null) {
-            tvUbicacionPrincipal.setText(nombre);
-        }
-        obtenerClimaPorCoordenadas(lat, lon, ivIconoClimaPrincipal, tvTemperaturaPrincipal);
-
-        obtenerCalidadAire(lat, lon);
-        obtenerNivelPolen(lat, lon);
-    }
-
-    private void obtenerCalidadAire(double lat, double lon) {
-        String url = "https://airquality.googleapis.com/v1/currentConditions:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY;
-
-        try {
-            JSONObject body = new JSONObject();
-            JSONObject location = new JSONObject();
-            location.put("latitude", lat);
-            location.put("longitude", lon);
-            body.put("location", location);
-            body.put("languageCode", "en");
-
-            JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.POST, url, body,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            if (!isAdded() || getView() == null) return;
-                            try {
-                                String categoriaIngles = response.getJSONArray("indexes")
-                                        .getJSONObject(0)
-                                        .getString("category");
-
-                                String categoriaTraducida = traducirCalidadAire(categoriaIngles);
-
-                                TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
-                                if (tvIndiceAire != null) {
-                                    tvIndiceAire.setText(categoriaTraducida);
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                TextView tv = getView().findViewById(R.id.tvIndiceAire);
-                                if (tv != null) tv.setText(getString(R.string.error_api));
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            if (isAdded() && getView() != null) {
-                                TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
-                                if (tvIndiceAire != null) tvIndiceAire.setText(getString(R.string.no_data_short));
-                            }
-                        }
-                    }
-            );
-            requestQueue.add(peticion);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void obtenerNivelPolen(double lat, double lon) {
-        String url = "https://pollen.googleapis.com/v1/forecast:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY +
-                "&location.latitude=" + lat +
-                "&location.longitude=" + lon +
-                "&days=1&languageCode=en";
-
-        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        if (!isAdded() || getView() == null) return;
-                        try {
-                            if (!response.has("dailyInfo") || response.getJSONArray("dailyInfo").length() == 0) {
-                                actualizarTextoPolen(getString(R.string.no_data_long));
-                                return;
-                            }
-
-                            JSONObject daily = response.getJSONArray("dailyInfo").getJSONObject(0);
-                            String nivelMaximo = "None";
-
-                            if (daily.has("pollenTypeInfo")) {
-                                org.json.JSONArray types = daily.getJSONArray("pollenTypeInfo");
-                                int maxVal = -1;
-
-                                for (int i = 0; i < types.length(); i++) {
-                                    JSONObject item = types.getJSONObject(i);
-                                    if (item.has("indexInfo")) {
-                                        JSONObject indexInfo = item.getJSONObject("indexInfo");
-                                        int val = indexInfo.optInt("value", 0);
-                                        if (val >= maxVal) {
-                                            maxVal = val;
-                                            nivelMaximo = indexInfo.optString("category", "None");
-                                        }
-                                    }
-                                }
-                            }
-
-                            actualizarTextoPolen(traducirPolen(nivelMaximo));
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            actualizarTextoPolen(getString(R.string.no_data_short));
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if (isAdded()) {
-                            actualizarTextoPolen(getString(R.string.no_data_short));
-                        }
-                    }
-                }
-        );
-        requestQueue.add(peticion);
-    }
-
-    private void actualizarTextoPolen(String texto) {
-        if (getView() != null) {
-            TextView tv = getView().findViewById(R.id.tvIndicePolen);
-            if (tv != null) tv.setText(texto);
-        }
-    }
-
-    private String traducirCalidadAire(String categoriaEn) {
-        if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
-
-        String cat = categoriaEn.toLowerCase().trim();
-
-        if (cat.contains("excellent")) return getString(R.string.air_excellent);
-        if (cat.contains("good")) return getString(R.string.air_good);
-        if (cat.contains("moderate")) return getString(R.string.air_moderate);
-        if (cat.contains("poor") && !cat.contains("very")) return getString(R.string.air_poor);
-        if (cat.contains("very poor")) return getString(R.string.air_very_poor);
-        if (cat.contains("severe")) return getString(R.string.air_severe);
-
-        return getString(R.string.air_unknown);
-    }
-
-    private String traducirPolen(String categoriaEn) {
-        if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
-
-        String cat = categoriaEn.toLowerCase().trim();
-
-        if (cat.contains("none")) return getString(R.string.pollen_none);
-        if (cat.contains("very low")) return getString(R.string.pollen_very_low);
-        if (cat.contains("low") && !cat.contains("very")) return getString(R.string.pollen_low);
-        if (cat.contains("moderate")) return getString(R.string.pollen_moderate);
-        if (cat.contains("high") && !cat.contains("very")) return getString(R.string.pollen_high);
-        if (cat.contains("very high")) return getString(R.string.pollen_very_high);
-        if (cat.contains("severe")) return getString(R.string.pollen_severe);
-
-        return getString(R.string.pollen_unknown);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (getView() != null && isAdded()) cargarClimaFavoritos(getView());
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden && getView() != null && isAdded()) {
-            cargarClimaFavoritos(getView());
-        }
-    }
-
-    private void cargarRadarRainViewer() {
-        WebSettings settings = wvRadarLluvia.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setLoadWithOverviewMode(true);
-        settings.setUseWideViewPort(true);
-        settings.setSupportZoom(true);
-        settings.setBuiltInZoomControls(true);
-        settings.setDisplayZoomControls(false);
-
-        wvRadarLluvia.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest request) {
-                String urlDestino = request.getUrl().toString();
-                return !urlDestino.contains("rainviewer.com/map.html");
-            }
-        });
-        wvRadarLluvia.loadUrl("https://www.rainviewer.com/map.html?loc=43.26,-2.93,8&oFa=0&oC=1&oU=0&oCS=1&oF=0&oAP=1&c=1&o=83&lm=0&layer=radar&sm=1&sn=1");
-    }
-
-    private void obtenerPronosticoOpenData() {
-        String urlXmlOpenData = "https://opendata.euskadi.eus/contenidos/prevision_tiempo/met_forecast_zone/opendata/met_forecast_zone.xml";
-
-        StringRequest peticion = new StringRequest(Request.Method.GET, urlXmlOpenData,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        if (isAdded()) procesarXmlOpenData(response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error conectando con Euskalmet.");
-                    }
-                }
-        );
-        requestQueue.add(peticion);
-    }
-
-    private void procesarXmlOpenData(String xml) {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(xml));
-            Document doc = builder.parse(is);
-
-            NodeList areas = doc.getElementsByTagName("areaForecast");
-            for (int i = 0; i < areas.getLength(); i++) {
-                Element area = (Element) areas.item(i);
-                if (area.getAttribute("areaId").equals("8")) {
-                    NodeList periods = area.getElementsByTagName("periodData");
-                    for (int j = 0; j < periods.getLength(); j++) {
-                        Element period = (Element) periods.item(j);
-                        if (period.getAttribute("periodDay").equals("today")) {
-                            NodeList descriptions = period.getElementsByTagName("forecastDescription");
-                            if (descriptions.getLength() > 0) {
-                                Element descElement = (Element) descriptions.item(0);
-                                String idioma = java.util.Locale.getDefault().getLanguage();
-
-                                if (idioma.equals("es") || idioma.equals("eu")) {
-                                    String textoNativo = descElement.getElementsByTagName(idioma).item(0).getTextContent().trim();
-                                    if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoNativo);
-                                } else {
-                                    String textoEspanol = descElement.getElementsByTagName("es").item(0).getTextContent().trim();
-                                    traducirConIA(textoEspanol, idioma);
-                                }
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error analizando datos.");
-        }
-    }
-
-    private void traducirConIA(String textoEspanol, String idiomaDestino) {
-        if (!isAdded()) return;
-        String mlKitLang = TranslateLanguage.fromLanguageTag(idiomaDestino);
-        if (mlKitLang == null) {
-            if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
-            return;
-        }
-        if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Traduciendo pronóstico...");
-
-        TranslatorOptions options = new TranslatorOptions.Builder()
-                .setSourceLanguage(TranslateLanguage.SPANISH)
-                .setTargetLanguage(mlKitLang)
-                .build();
-        final Translator traductor = Translation.getClient(options);
-        DownloadConditions conditions = new DownloadConditions.Builder().build();
-
-        traductor.downloadModelIfNeeded(conditions)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        traductor.translate(textoEspanol)
-                                .addOnSuccessListener(new OnSuccessListener<String>() {
-                                    @Override
-                                    public void onSuccess(String textoTraducido) {
-                                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoTraducido);
-                                    }
-                                });
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
-                    }
-                });
-    }
-
-    private void asignarIconoYTexto(int code, ImageView iv) {
-        String desc = "Desconocido";
-        int resId = R.drawable.ic_clima_nubes;
-
-        if (code == 0) desc = "Cielo despejado";
-        else if (code == 1) desc = "Mayormente despejado";
-        else if (code == 2) desc = "Parcialmente nublado";
-        else if (code == 3) desc = "Totalmente nublado";
-        else if (code == 45 || code == 48) desc = "Niebla densa";
-        else if (code == 51 || code == 53 || code == 55) desc = "Llovizna";
-        else if (code == 56 || code == 57) desc = "Llovizna helada";
-        else if (code == 61) desc = "Lluvia ligera";
-        else if (code == 63) desc = "Lluvia moderada";
-        else if (code == 65) desc = "Lluvia fuerte";
-        else if (code == 66 || code == 67) desc = "Lluvia helada";
-        else if (code == 71) desc = "Nieve ligera";
-        else if (code == 73) desc = "Nieve moderada";
-        else if (code == 75) desc = "Nevada fuerte";
-        else if (code == 77) desc = "Granizo suave";
-        else if (code == 80) desc = "Chubascos ligeros";
-        else if (code == 81) desc = "Chubascos moderados";
-        else if (code == 82) desc = "Chubascos violentos";
-        else if (code == 85 || code == 86) desc = "Chubascos de nieve";
-        else if (code == 95) desc = "Tormenta eléctrica";
-        else if (code == 96 || code == 99) desc = "Tormenta con granizo";
-
-        if (code == 0) {
-            resId = R.drawable.ic_clima_sol;
-        } else if (code >= 1 && code <= 3) {
-            resId = R.drawable.ic_clima_nubes;
-        } else if (code >= 45 && code <= 48) {
-            resId = R.drawable.ic_clima_niebla;
-        } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
-            resId = R.drawable.ic_clima_lluvia;
-        } else if ((code >= 71 && code <= 77) || code == 85 || code == 86) {
-            resId = R.drawable.ic_clima_nieve;
-        } else if (code >= 95 && code <= 99) {
-            resId = R.drawable.ic_clima_tormenta;
-        }
-
-        iv.setImageResource(resId);
-
-        if (iv == ivIconoClimaPrincipal) {
-            if (tvDescripcionClima != null) tvDescripcionClima.setText(desc);
-            iv.setColorFilter(android.graphics.Color.parseColor("#D32F2F"));
-        } else {
-            iv.setColorFilter(null);
-        }
-    }
-
-    private void cargarClimaFavoritos(View view) {
-        if (!isAdded()) return;
-        android.widget.GridLayout contenedor = view.findViewById(R.id.glFavoritosContainer);
-        if (contenedor == null) return;
-        contenedor.removeAllViews();
-
-        DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
-        int idUsuarioActual = 1;
-
-        List<String> favoritos = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
-
-        if (favoritos.isEmpty()) {
-            TextView tvVacio = new TextView(requireContext());
-            tvVacio.setText("Aún no has guardado ningún campus en favoritos.");
-            tvVacio.setPadding(16, 16, 16, 16);
-            contenedor.addView(tvVacio);
-            return;
-        }
-
-        for (String idCampus : favoritos) {
-            Centro centro = dbHelper.obtenerCentroPorId(idCampus);
-
-            if (centro != null) {
-                View tarjeta = getLayoutInflater().inflate(R.layout.item_clima_favorito, contenedor, false);
-                TextView tvNombre = tarjeta.findViewById(R.id.tvNombreCampus);
-                TextView tvTemp = tarjeta.findViewById(R.id.tvTempCampus);
-                TextView tvUni = tarjeta.findViewById(R.id.tvUniCampus);
-
-                tvNombre.setText(centro.getNombre());
-                tvUni.setText(centro.getUniversidad());
-
-                if (centro.getUniversidad().equals("UPV/EHU")) {
-                    tvUni.setTextColor(android.graphics.Color.parseColor("#1A1A1A"));
-                } else if (centro.getUniversidad().equals("Mondragon")) {
-                    tvUni.setTextColor(android.graphics.Color.parseColor("#008a96"));
-                } else {
-                    tvUni.setTextColor(android.graphics.Color.parseColor("#1976D2"));
-                }
-
-                obtenerClimaConCola(centro.getLatitud(), centro.getLongitud(), tvTemp);
-
-                android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams();
-                params.columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1.0f);
-                params.width = 0;
-                params.setMargins(10, 10, 10, 20);
-
-                tarjeta.setLayoutParams(params);
-
-                contenedor.addView(tarjeta);
-            }
-        }
-    }
-
-    private void obtenerClimaPorCoordenadas(double latitud, double longitud, final ImageView ivIcono, final TextView tvTemp) {
-        // Cambiamos a 'daily=uv_index_max' que es 100% estable
-        String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitud +
-                "&longitude=" + longitud +
-                "&current_weather=true" +
-                "&daily=uv_index_max,sunrise,sunset" +
-                "&timezone=auto";
-
-        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, urlOpenMeteo, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        if (!isAdded() || getView() == null) return;
-                        try {
-                            // 1. Clima Principal
-                            if (response.has("current_weather")) {
-                                JSONObject currentWeather = response.getJSONObject("current_weather");
-                                double temperatura = currentWeather.optDouble("temperature", 0.0);
-                                int codigoClima = currentWeather.optInt("weathercode", 0);
-                                if (tvTemp != null) tvTemp.setText(temperatura + " ºC");
-                                if (ivIcono != null) asignarIconoYTexto(codigoClima, ivIcono);
-                            }
-
-                            // 2. Datos Diarios (UV y Luz)
-                            if (response.has("daily")) {
-                                JSONObject dailyParams = response.getJSONObject("daily");
-
-                                // Índice UV Máximo del día
-                                if (dailyParams.has("uv_index_max")) {
-                                    double uvIndex = dailyParams.getJSONArray("uv_index_max").optDouble(0, 0.0);
-                                    actualizarTarjetaUV(uvIndex);
-                                }
-
-                                // Horas de Luz
-                                if (dailyParams.has("sunrise") && dailyParams.has("sunset")) {
-                                    String amanecerIso = dailyParams.getJSONArray("sunrise").optString(0, "");
-                                    String anochecerIso = dailyParams.getJSONArray("sunset").optString(0, "");
-
-                                    // Extraemos solo la hora si el formato "YYYY-MM-DDTHH:MM" es correcto
-                                    if (amanecerIso.length() >= 16 && anochecerIso.length() >= 16) {
-                                        String amanecer = amanecerIso.substring(11, 16);
-                                        String anochecer = anochecerIso.substring(11, 16);
-
-                                        TextView tvAmanecer = getView().findViewById(R.id.tvAmanecer);
-                                        TextView tvAnochecer = getView().findViewById(R.id.tvAnochecer);
-
-                                        if (tvAmanecer != null) tvAmanecer.setText("🌅 " + amanecer);
-                                        if (tvAnochecer != null) tvAnochecer.setText("🌙 " + anochecer);
-                                    }
-                                }
-                            }
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
-                    }
-                }
-        );
-        requestQueue.add(peticion);
-    }
-
-    private void actualizarTarjetaUV(double uvIndex) {
-        if (getView() == null) return;
-
-        TextView tvValorUV = getView().findViewById(R.id.tvValorUV);
-        TextView tvDescUV = getView().findViewById(R.id.tvDescUV);
-
-        if (tvValorUV == null || tvDescUV == null) return;
-
-        tvValorUV.setText(String.valueOf(Math.round(uvIndex)));
-
-        String idioma = java.util.Locale.getDefault().getLanguage();
-        String descripcion;
-
-        if (uvIndex < 3) {
-            descripcion = idioma.equals("eu") ? "Baxua" : (idioma.equals("en") ? "Low" : "Bajo");
-        } else if (uvIndex < 6) {
-            descripcion = idioma.equals("eu") ? "Ertaina" : (idioma.equals("en") ? "Moderate" : "Moderado");
-        } else if (uvIndex < 8) {
-            descripcion = idioma.equals("eu") ? "Altua" : (idioma.equals("en") ? "High" : "Alto");
-            tvValorUV.setTextColor(android.graphics.Color.parseColor("#F57C00"));
-        } else if (uvIndex < 11) {
-            descripcion = idioma.equals("eu") ? "Oso Altua" : (idioma.equals("en") ? "Very High" : "Muy Alto");
-            tvValorUV.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
-        } else {
-            descripcion = idioma.equals("eu") ? "Muturrekoa" : (idioma.equals("en") ? "Extreme" : "Extremo");
-            tvValorUV.setTextColor(android.graphics.Color.parseColor("#7B1FA2"));
-        }
-
-        tvDescUV.setText(descripcion);
-    }
-
-    private void obtenerClimaConCola(double lat, double lon, final TextView tvTemp) {
-        String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        if (isAdded() && tvTemp != null) {
-                            try {
-                                double t = response.getJSONObject("current_weather").getDouble("temperature");
-                                tvTemp.setText(t + " ºC");
-                            } catch (Exception e) { tvTemp.setText("Error"); }
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
-                    }
-                }
-        );
-        requestQueue.add(request);
     }
 }
 </file>

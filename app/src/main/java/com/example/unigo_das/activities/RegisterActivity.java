@@ -5,9 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
+import androidx.core.os.LocaleListCompat;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
@@ -36,6 +40,13 @@ public class RegisterActivity extends AppCompatActivity {
         etPasswordReg = findViewById(R.id.etPasswordReg);
         MaterialButton btnDoRegister = findViewById(R.id.btnDoRegister);
         MaterialButton btnBackToLogin = findViewById(R.id.btnBackToLogin);
+
+        TextView btnLangEs = findViewById(R.id.btnLangEs);
+        TextView btnLangEu = findViewById(R.id.btnLangEu);
+        TextView btnLangEn = findViewById(R.id.btnLangEn);
+        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn));
+        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn));
+        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu));
 
         btnDoRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,10 +105,10 @@ public class RegisterActivity extends AppCompatActivity {
 
                 // Guardar email y estado
                 marcarEstadoUsuario(email);
-
-                // Los nuevos usuarios empiezan con modo claro por defecto
-                // (puedes cambiar esto si quieres)
-
+                if (json.containsKey("id")) {
+                    SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+                    prefs.edit().putInt("user_id", ((Long) json.get("id")).intValue()).apply();
+                }
                 irAMainActivity();
             } else {
                 String error = (String) json.get("error");
@@ -123,10 +134,18 @@ public class RegisterActivity extends AppCompatActivity {
         finish();
     }
 
-    private void marcarEstadoUsuario() {
-        SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean("isGuest", false);
-        editor.apply();
+    private void cambiarIdiomaLogin(String langCode, TextView activo, TextView... inactivos) {
+        LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
+        AppCompatDelegate.setApplicationLocales(appLocales);
+        marcarIdiomaActivo(activo, inactivos);
+    }
+
+    private void marcarIdiomaActivo(TextView activo, TextView... inactivos) {
+        activo.setBackgroundColor(ContextCompat.getColor(this, R.color.bilbao_red));
+        activo.setTextColor(ContextCompat.getColor(this, R.color.white));
+        for (TextView tv : inactivos) {
+            tv.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
+            tv.setTextColor(ContextCompat.getColor(this, R.color.white));
+        }
     }
 }

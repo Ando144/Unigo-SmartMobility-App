@@ -2,6 +2,7 @@ package com.example.unigo_das.fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -508,7 +509,8 @@ public class WeatherFragment extends Fragment {
         contenedor.removeAllViews();
 
         DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
-        int idUsuarioActual = 1;
+        SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        int idUsuarioActual = prefs.getInt("user_id", 0);
 
         List<String> favoritos = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
 

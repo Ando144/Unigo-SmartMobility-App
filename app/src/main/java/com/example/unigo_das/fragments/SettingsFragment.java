@@ -108,6 +108,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
+        customPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        String userEmail = customPrefs.getString("user_email", "");
+
+        // ===================================================================
+        // HORA DE NOTIFICACIÓN Y SWITCH DE NOTIFICACIONES
+        // ===================================================================
         final androidx.preference.Preference horaPref = findPreference("pref_hora_notificacion");
         final androidx.preference.SwitchPreferenceCompat switchNotif = findPreference("pref_notificaciones_clima");
 
@@ -115,179 +121,216 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
             horaPref.setSummary(prefs.getString("pref_hora_notificacion", "07:30"));
 
-            horaPref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(androidx.preference.Preference preference) {
+            // Cargar estado inicial del switch desde UnigoPrefs
+            boolean notifActivada = false;
+            if (!userEmail.isEmpty()) {
+                notifActivada = customPrefs.getBoolean("pref_notificaciones_" + userEmail, false);
+            }
+            switchNotif.setChecked(notifActivada);
+
+            horaPref.setOnPreferenceClickListener(preference -> {
+                String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
+                int h = Integer.parseInt(horaActual.split(":")[0]);
+                int m = Integer.parseInt(horaActual.split(":")[1]);
+
+                android.app.TimePickerDialog timePicker = new android.app.TimePickerDialog(requireContext(),
+                        (view, hourOfDay, minute) -> {
+                            String horaFormateada = String.format(java.util.Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
+                            prefs.edit().putString("pref_hora_notificacion", horaFormateada).apply();
+                            horaPref.setSummary(horaFormateada);
+
+                            if (switchNotif.isChecked()) {
+                                programarAlarmaDiaria(requireContext(), hourOfDay, minute);
+                            }
+                        }, h, m, true);
+                timePicker.show();
+                return true;
+            });
+
+            switchNotif.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean activado = (Boolean) newValue;
+
+                // Guardar preferencia por usuario
+                if (!userEmail.isEmpty()) {
+                    customPrefs.edit().putBoolean("pref_notificaciones_" + userEmail, activado).apply();
+                }
+
+                if (activado) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+                            return true;
+                        }
+                    }
                     String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
                     int h = Integer.parseInt(horaActual.split(":")[0]);
                     int m = Integer.parseInt(horaActual.split(":")[1]);
-
-                    android.app.TimePickerDialog timePicker = new android.app.TimePickerDialog(requireContext(),
-                            new android.app.TimePickerDialog.OnTimeSetListener() {
-                                @Override
-                                public void onTimeSet(android.widget.TimePicker view, int hourOfDay, int minute) {
-                                    String horaFormateada = String.format(java.util.Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
-                                    prefs.edit().putString("pref_hora_notificacion", horaFormateada).apply();
-                                    horaPref.setSummary(horaFormateada);
-
-                                    if (switchNotif.isChecked()) {
-                                        programarAlarmaDiaria(requireContext(), hourOfDay, minute);
-                                    }
-                                }
-                            }, h, m, true);
-                    timePicker.show();
-                    return true;
+                    programarAlarmaDiaria(requireContext(), h, m);
+                } else {
+                    cancelarAlarma(requireContext());
                 }
-            });
-
-            switchNotif.setOnPreferenceChangeListener(new androidx.preference.Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(androidx.preference.Preference preference, Object newValue) {
-                    boolean activado = (Boolean) newValue;
-                    if (activado) {
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-                            if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
-                                return true;
-                            }
-                        }
-
-                        String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
-                        int h = Integer.parseInt(horaActual.split(":")[0]);
-                        int m = Integer.parseInt(horaActual.split(":")[1]);
-                        programarAlarmaDiaria(requireContext(), h, m);
-                    } else {
-                        cancelarAlarma(requireContext());
-                    }
-                    return true;
-                }
+                return true;
             });
         }
 
-        // -------------------------------------------------------------------
-        // DIÁLOGO ESTÉTICO: TRANSPORTE FAVORITO
-        // -------------------------------------------------------------------
+        // ===================================================================
+        // DIÁLOGO DE TRANSPORTE FAVORITO
+        // ===================================================================
         final androidx.preference.Preference transportePref = findPreference("pref_transporte_favorito");
         if (transportePref != null) {
             final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
             final String[] nombresTransporte = getResources().getStringArray(R.array.nombres_transporte);
             final String[] valoresTransporte = getResources().getStringArray(R.array.valores_transporte);
 
-            String actual = prefs.getString("pref_transporte_favorito", "publico");
+            // Leer de UnigoPrefs si hay usuario
+            String actual;
+            if (!userEmail.isEmpty()) {
+                actual = customPrefs.getString("transporte_favorito_" + userEmail, "publico");
+            } else {
+                actual = prefs.getString("pref_transporte_favorito", "publico");
+            }
             for (int i = 0; i < valoresTransporte.length; i++) {
                 if (valoresTransporte[i].equals(actual)) transportePref.setSummary(nombresTransporte[i]);
             }
 
-            transportePref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(androidx.preference.Preference preference) {
-                    int seleccionado = 0;
-                    String guardado = prefs.getString("pref_transporte_favorito", "publico");
-                    for (int i = 0; i < valoresTransporte.length; i++) {
-                        if (valoresTransporte[i].equals(guardado)) seleccionado = i;
-                    }
-
-                    com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
-                            new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
-                    builder.setTitle(R.string.transporte_favorito);
-
-                    builder.setSingleChoiceItems(nombresTransporte, seleccionado, new android.content.DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(final android.content.DialogInterface dialog, int which) {
-                            prefs.edit().putString("pref_transporte_favorito", valoresTransporte[which]).apply();
-                            transportePref.setSummary(nombresTransporte[which]);
-
-                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    dialog.dismiss();
-                                }
-                            }, 150);
-                        }
-                    });
-                    builder.setNegativeButton(R.string.cancelar3, null);
-                    builder.show();
-                    return true;
+            transportePref.setOnPreferenceClickListener(preference -> {
+                int seleccionado = 0;
+                String guardado;
+                if (!userEmail.isEmpty()) {
+                    guardado = customPrefs.getString("transporte_favorito_" + userEmail, "publico");
+                } else {
+                    guardado = prefs.getString("pref_transporte_favorito", "publico");
                 }
+                for (int i = 0; i < valoresTransporte.length; i++) {
+                    if (valoresTransporte[i].equals(guardado)) seleccionado = i;
+                }
+
+                com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
+                builder.setTitle(R.string.transporte_favorito);
+                builder.setSingleChoiceItems(nombresTransporte, seleccionado, (dialog, which) -> {
+                    String valorElegido = valoresTransporte[which];
+
+                    // Guardar en UnigoPrefs si hay usuario
+                    if (!userEmail.isEmpty()) {
+                        customPrefs.edit().putString("transporte_favorito_" + userEmail, valorElegido).apply();
+                    } else {
+                        prefs.edit().putString("pref_transporte_favorito", valorElegido).apply();
+                    }
+                    transportePref.setSummary(nombresTransporte[which]);
+
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> dialog.dismiss(), 150);
+                });
+                builder.setNegativeButton(R.string.cancelar3, null);
+                builder.show();
+                return true;
             });
         }
 
-        // -------------------------------------------------------------------
-        // DIÁLOGO ESTÉTICO: ESTILO DE MAPA
-        // -------------------------------------------------------------------
+        // ===================================================================
+        // DIÁLOGO DE ESTILO DE MAPA
+        // ===================================================================
         final androidx.preference.Preference mapaPref = findPreference("pref_tipo_mapa");
         if (mapaPref != null) {
             final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
             final String[] nombresMapa = getResources().getStringArray(R.array.nombres_tipo_mapa);
             final String[] valoresMapa = getResources().getStringArray(R.array.valores_tipo_mapa);
 
-            String actual = prefs.getString("pref_tipo_mapa", "1");
+            // Leer de UnigoPrefs si hay usuario
+            String actualMapa;
+            if (!userEmail.isEmpty()) {
+                actualMapa = customPrefs.getString("tipo_mapa_" + userEmail, "1");
+            } else {
+                actualMapa = prefs.getString("pref_tipo_mapa", "1");
+            }
             for (int i = 0; i < valoresMapa.length; i++) {
-                if (valoresMapa[i].equals(actual)) mapaPref.setSummary(nombresMapa[i]);
+                if (valoresMapa[i].equals(actualMapa)) mapaPref.setSummary(nombresMapa[i]);
             }
 
-            mapaPref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(androidx.preference.Preference preference) {
-                    int seleccionado = 0;
-                    String guardado = prefs.getString("pref_tipo_mapa", "1");
-                    for (int i = 0; i < valoresMapa.length; i++) {
-                        if (valoresMapa[i].equals(guardado)) seleccionado = i;
-                    }
-
-                    com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
-                            new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
-                    builder.setTitle(R.string.estilo_de_mapa);
-
-                    builder.setSingleChoiceItems(nombresMapa, seleccionado, new android.content.DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(final android.content.DialogInterface dialog, int which) {
-                            prefs.edit().putString("pref_tipo_mapa", valoresMapa[which]).apply();
-                            mapaPref.setSummary(nombresMapa[which]);
-
-                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    dialog.dismiss();
-                                }
-                            }, 150);
-                        }
-                    });
-                    builder.setNegativeButton(R.string.cancelar4, null);
-                    builder.show();
-                    return true;
+            mapaPref.setOnPreferenceClickListener(preference -> {
+                int seleccionado = 0;
+                String guardado;
+                if (!userEmail.isEmpty()) {
+                    guardado = customPrefs.getString("tipo_mapa_" + userEmail, "1");
+                } else {
+                    guardado = prefs.getString("pref_tipo_mapa", "1");
                 }
+                for (int i = 0; i < valoresMapa.length; i++) {
+                    if (valoresMapa[i].equals(guardado)) seleccionado = i;
+                }
+
+                com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
+                builder.setTitle(R.string.estilo_de_mapa);
+                builder.setSingleChoiceItems(nombresMapa, seleccionado, (dialog, which) -> {
+                    String valorElegido = valoresMapa[which];
+
+                    // Guardar en UnigoPrefs si hay usuario
+                    if (!userEmail.isEmpty()) {
+                        customPrefs.edit().putString("tipo_mapa_" + userEmail, valorElegido).apply();
+                    } else {
+                        prefs.edit().putString("pref_tipo_mapa", valorElegido).apply();
+                    }
+                    mapaPref.setSummary(nombresMapa[which]);
+
+                    new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> dialog.dismiss(), 150);
+                });
+                builder.setNegativeButton(R.string.cancelar4, null);
+                builder.show();
+                return true;
             });
         }
 
+        // ===================================================================
+        // SWITCH COCHE ELÉCTRICO - Guardar por usuario
+        // ===================================================================
+        SwitchPreferenceCompat cocheElectricoPref = findPreference("pref_coche_electrico");
+        if (cocheElectricoPref != null) {
+            // Cargar estado inicial
+            boolean cocheElecState = false;
+            if (!userEmail.isEmpty()) {
+                cocheElecState = customPrefs.getBoolean("pref_coche_electrico_" + userEmail, false);
+            }
+            cocheElectricoPref.setChecked(cocheElecState);
+
+            cocheElectricoPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean checked = (boolean) newValue;
+                if (!userEmail.isEmpty()) {
+                    customPrefs.edit().putBoolean("pref_coche_electrico_" + userEmail, checked).apply();
+                } else {
+                    getPreferenceManager().getSharedPreferences().edit().putBoolean("pref_coche_electrico", checked).apply();
+                }
+                return true;
+            });
+        }
+
+        // ===================================================================
+        // OPEN DATA
+        // ===================================================================
         androidx.preference.Preference openDataPref = findPreference("pref_open_data");
         if (openDataPref != null) {
-            openDataPref.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(androidx.preference.Preference preference) {
-                    new MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(R.string.fuentes_de_datos)
-                            .setMessage(R.string.esta_aplicaci_n_utiliza_datos_abiertos_proporcionados_por_euskalmet_open_meteo_open_data_euskadi_bizkaibus_euskotren_y_metro_bilbao_geobilbao_agradecemos_su_labor_en_la_apertura_de_datos_para_esta_aplicaci_n)
-                            .setPositiveButton(R.string.aceptar, null)
-                            .show();
-                    return true;
-                }
+            openDataPref.setOnPreferenceClickListener(preference -> {
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.fuentes_de_datos)
+                        .setMessage(R.string.esta_aplicaci_n_utiliza_datos_abiertos_proporcionados_por_euskalmet_open_meteo_open_data_euskadi_bizkaibus_euskotren_y_metro_bilbao_geobilbao_agradecemos_su_labor_en_la_apertura_de_datos_para_esta_aplicaci_n)
+                        .setPositiveButton(R.string.aceptar, null)
+                        .show();
+                return true;
             });
         }
 
-        customPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        // ===================================================================
+        // INICIALIZACIÓN FINAL
+        // ===================================================================
         boolean isGuest = customPrefs.getBoolean("isGuest", true);
 
         galeriaLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<androidx.activity.result.ActivityResult>() {
-                    @Override
-                    public void onActivityResult(androidx.activity.result.ActivityResult result) {
-                        if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
-                            android.net.Uri imageUri = result.getData().getData();
-                            if (imageUri != null) {
-                                mostrarConfirmacionFoto(imageUri);
-                            }
+                result -> {
+                    if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+                        android.net.Uri imageUri = result.getData().getData();
+                        if (imageUri != null) {
+                            mostrarConfirmacionFoto(imageUri);
                         }
                     }
                 }
@@ -393,56 +436,69 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         Preference logout = findPreference("pref_logout");
         Preference login = findPreference("pref_login");
 
+        // Nuevas preferencias de información
+        Preference emailInfo = findPreference("pref_email_info");
+        Preference nameInfo = findPreference("pref_name_info");
+        Preference changePassword = findPreference("pref_change_password");
+
         if (isGuest) {
+            // Ocultar todo lo de usuario registrado
             if (myAccount != null) myAccount.setVisible(false);
             if (logout != null) logout.setVisible(false);
+            if (emailInfo != null) emailInfo.setVisible(false);
+            if (nameInfo != null) nameInfo.setVisible(false);
+            if (changePassword != null) changePassword.setVisible(false);
+
             if (login != null) {
                 login.setVisible(true);
-                login.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(androidx.preference.Preference p) {
-                        Intent intent = new Intent(getActivity(), LoginActivity.class);
-                        startActivity(intent);
-                        if (getActivity() != null) {
-                            getActivity().finish();
-                        }
-                        return true;
+                login.setOnPreferenceClickListener(p -> {
+                    Intent intent = new Intent(getActivity(), LoginActivity.class);
+                    startActivity(intent);
+                    if (getActivity() != null) {
+                        getActivity().finish();
                     }
+                    return true;
                 });
             }
         } else {
-            if (myAccount != null) {
-                myAccount.setVisible(true);
-                myAccount.setSummary(customPrefs.getString("user_email", "usuario@example.com"));
-                myAccount.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(androidx.preference.Preference p) {
-                        getParentFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, new AccountDetailFragment())
-                                .addToBackStack(null)
-                                .commit();
-                        return true;
-                    }
+            // Usuario con sesión iniciada: mostrar info y ocultar login
+            if (login != null) login.setVisible(false);
+            if (myAccount != null) myAccount.setVisible(false); // Ocultamos "Mi cuenta"
+
+            // Mostrar y configurar las filas de información
+            String userEmail = customPrefs.getString("user_email", "");
+            String userName = customPrefs.getString("user_name", getString(R.string.name_label));
+
+            if (emailInfo != null) {
+                emailInfo.setVisible(true);
+                emailInfo.setSummary(userEmail);
+            }
+            if (nameInfo != null) {
+                nameInfo.setVisible(true);
+                nameInfo.setSummary(userName);
+            }
+            if (changePassword != null) {
+                changePassword.setVisible(true);
+                changePassword.setOnPreferenceClickListener(p -> {
+                    ChangePasswordDialogFragment dialog = new ChangePasswordDialogFragment();
+                    dialog.show(getParentFragmentManager(), "ChangePasswordDialog");
+                    return true;
                 });
             }
+
             if (logout != null) {
                 logout.setVisible(true);
-                logout.setOnPreferenceClickListener(new androidx.preference.Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(androidx.preference.Preference p) {
-                        customPrefs.edit()
-                                .putBoolean("isGuest", true)
-                                .putString("user_email", null)
-                                .remove("user_id")
-                                .apply();
-
-                        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                        requireActivity().recreate();
-                        return true;
-                    }
+                logout.setOnPreferenceClickListener(p -> {
+                    customPrefs.edit()
+                            .putBoolean("isGuest", true)
+                            .putString("user_email", null)
+                            .remove("user_id")
+                            .apply();
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    requireActivity().recreate();
+                    return true;
                 });
             }
-            if (login != null) login.setVisible(false);
         }
     }
 
@@ -454,8 +510,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             languagePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    final String[] idiomas = {"Castellano", "Euskara", "English"};
-                    final String[] codigos = {"es", "eu", "en"};
+                    final String[] idiomas = {"Castellano", "Euskara", "English", "Français", "Deutsch", "Italiano"};
+                    final String[] codigos = {"es", "eu", "en", "fr", "de", "it"};
 
                     LocaleListCompat currentLocales = AppCompatDelegate.getApplicationLocales();
                     String langActual = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
@@ -537,6 +593,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                 break;
             case "en":
                 pref.setSummary("English");
+                break;
+            case "fr":
+                pref.setSummary("Français");
+                break;
+            case "de":
+                pref.setSummary("Deutsch");
+                break;
+            case "it":
+                pref.setSummary("Italiano");
                 break;
             default:
                 pref.setSummary("Castellano");

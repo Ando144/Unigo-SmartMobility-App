@@ -23,6 +23,23 @@
 
         <Preference
             app:iconSpaceReserved="false"
+            app:key="pref_email_info"
+            app:title="@string/email_label"
+            app:selectable="false" />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="pref_name_info"
+            app:title="@string/name_label"
+            app:selectable="false" />
+
+        <Preference
+            app:iconSpaceReserved="false"
+            app:key="pref_change_password"
+            app:title="@string/change_password" />
+
+        <Preference
+            app:iconSpaceReserved="false"
             app:key="pref_logout"
             app:title="@string/pref_logout" />
 

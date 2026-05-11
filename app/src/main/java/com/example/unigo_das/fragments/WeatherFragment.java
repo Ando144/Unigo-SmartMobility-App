@@ -535,7 +535,7 @@ public class WeatherFragment extends Fragment {
                 tvUni.setText(centro.getUniversidad());
 
                 if (centro.getUniversidad().equals("UPV/EHU")) {
-                    tvUni.setTextColor(android.graphics.Color.parseColor("#1A1A1A"));
+                    tvUni.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.university_tag_color_ehu));
                 } else if (centro.getUniversidad().equals("Mondragon")) {
                     tvUni.setTextColor(android.graphics.Color.parseColor("#008a96"));
                 } else {

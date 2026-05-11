@@ -6,6 +6,7 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -348,10 +349,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     // --- MÉTODO PARA APLICAR LAS PREFERENCIAS ---
     private void cargarAjustesMapa() {
         if (getContext() == null) return;
-        android.content.SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext());
+
+        SharedPreferences unigoPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
+        SharedPreferences defaultPrefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext());
+        String userEmail = unigoPrefs.getString("user_email", "");
+        boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
 
         // 1. Aplicar Estilo de Mapa
-        String tipoMapaStr = prefs.getString("pref_tipo_mapa", "1"); // 1 es Normal
+        String tipoMapaStr;
+        if (!isGuest && !userEmail.isEmpty()) {
+            tipoMapaStr = unigoPrefs.getString("tipo_mapa_" + userEmail, defaultPrefs.getString("pref_tipo_mapa", "1"));
+        } else {
+            tipoMapaStr = defaultPrefs.getString("pref_tipo_mapa", "1");
+        }
         int tipoMapa;
         try {
             tipoMapa = Integer.parseInt(tipoMapaStr);
@@ -363,14 +373,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
 
         // 2. Coche Eléctrico persistente
-        this.isCocheElectrico = prefs.getBoolean("pref_coche_electrico", false);
+        if (!isGuest && !userEmail.isEmpty()) {
+            this.isCocheElectrico = unigoPrefs.getBoolean("pref_coche_electrico_" + userEmail,
+                    defaultPrefs.getBoolean("pref_coche_electrico", false));
+        } else {
+            this.isCocheElectrico = defaultPrefs.getBoolean("pref_coche_electrico", false);
+        }
 
         // 3. Transporte Favorito
-        // Solo sobreescribimos los botones si el mapa está limpio.
-        // Si destinoActual NO es null, significa que el usuario está viendo una ruta,
-        // así que respetamos la que tenga seleccionada.
         if (destinoActual == null) {
-            String transporteFav = prefs.getString("pref_transporte_favorito", "publico");
+            String transporteFav;
+            if (!isGuest && !userEmail.isEmpty()) {
+                transporteFav = unigoPrefs.getString("transporte_favorito_" + userEmail,
+                        defaultPrefs.getString("pref_transporte_favorito", "publico"));
+            } else {
+                transporteFav = defaultPrefs.getString("pref_transporte_favorito", "publico");
+            }
+
             RadioGroup rgModoTransporte = getView() != null ? getView().findViewById(R.id.rg_modo_transporte) : null;
 
             switch (transporteFav) {
@@ -445,14 +464,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+        cargarAjustesMapa();
+
         if (getArguments() != null && getArguments().containsKey("destino_nombre")) {
             tituloPendiente = getArguments().getString("destino_nombre");
             destinoPendiente = new LatLng(getArguments().getDouble("destino_lat"), getArguments().getDouble("destino_lng"));
         }
         comprobarPermisosDeUbicacion();
-
-        // APLICAMOS LAS PREFERENCIAS UNA VEZ QUE EL MAPA ESTÁ LISTO
-        cargarAjustesMapa();
     }
 
     private void comprobarPermisosDeUbicacion() {
@@ -467,6 +485,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void procesarRutaPendiente() {
         if (destinoPendiente != null && tituloPendiente != null) {
+            cargarAjustesMapa();
             dibujarLineaHastaDestino(tituloPendiente, destinoPendiente.latitude, destinoPendiente.longitude, currentTransportMode);
             destinoPendiente = null;
             tituloPendiente = null;
@@ -1200,5 +1219,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Si la luminosidad es mayor a 0.75, el color es muy claro (cercano al blanco)
         // Ajusta este umbral según necesites: 0.7 = más estricto, 0.8 = más permisivo
         return luminosidad > 0.75;
+    }
+
+    public void iniciarRutaHaciaDestino(String titulo, double latDestino, double lngDestino) {
+        // Primero, aplicamos las preferencias (que es lo que establece el modo de transporte por defecto)
+        cargarAjustesMapa();
+
+        // Luego, disparamos el cálculo de la ruta con el modo de transporte recién leído.
+        dibujarLineaHastaDestino(titulo, latDestino, lngDestino, currentTransportMode);
     }
 }

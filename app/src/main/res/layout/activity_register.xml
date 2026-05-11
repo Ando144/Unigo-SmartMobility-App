@@ -215,6 +215,60 @@
             android:background="@drawable/bg_lang_item"
             android:clickable="true"
             android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="#33FFFFFF" />
+
+        <TextView
+            android:id="@+id/btnLangFr"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="FR"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="#33FFFFFF" />
+
+        <TextView
+            android:id="@+id/btnLangDe"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="DE"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="24dp"
+            android:background="#33FFFFFF" />
+
+        <TextView
+            android:id="@+id/btnLangIt"
+            android:layout_width="50dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="IT"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_lang_item"
+            android:clickable="true"
+            android:focusable="true" />
     </LinearLayout>
 
     <!-- Botón volver al Login -->

@@ -31,4 +31,6 @@
     <!-- Colores CO2 (Claro) -->
     <color name="co2_walking_color">#2E7D32</color>
     <color name="co2_transit_color">#1976D2</color>
+
+    <color name="university_tag_color_ehu">#1A1A1A</color>
 </resources>

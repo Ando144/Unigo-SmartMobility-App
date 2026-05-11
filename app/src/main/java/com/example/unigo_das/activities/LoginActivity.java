@@ -47,9 +47,15 @@ public class LoginActivity extends AppCompatActivity {
         TextView btnLangEs = findViewById(R.id.btnLangEs);
         TextView btnLangEu = findViewById(R.id.btnLangEu);
         TextView btnLangEn = findViewById(R.id.btnLangEn);
-        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn));
-        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn));
-        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu));
+        TextView btnLangFr = findViewById(R.id.btnLangFr);
+        TextView btnLangDe = findViewById(R.id.btnLangDe);
+        TextView btnLangIt = findViewById(R.id.btnLangIt);
+        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe, btnLangIt));
+        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn, btnLangFr, btnLangDe, btnLangIt));
+        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu, btnLangFr, btnLangDe, btnLangIt));
+        btnLangFr.setOnClickListener(v -> cambiarIdiomaLogin("fr", btnLangFr, btnLangEs, btnLangEu, btnLangEn, btnLangDe, btnLangIt));
+        btnLangDe.setOnClickListener(v -> cambiarIdiomaLogin("de", btnLangDe, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangIt));
+        btnLangIt.setOnClickListener(v -> cambiarIdiomaLogin("it", btnLangIt, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe));
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,11 +125,10 @@ public class LoginActivity extends AppCompatActivity {
                 String email = etEmail.getText().toString().trim();
                 String fotoUrl = json.containsKey("foto") ? (String) json.get("foto") : null;
 
-                Toast.makeText(this, "Bienvenido " + nombre, Toast.LENGTH_SHORT).show();
-
                 SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putString("user_email", email);
+                editor.putString("user_name", nombre);
                 editor.putBoolean("isGuest", false);
 
                 editor.remove("user_id");

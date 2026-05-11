@@ -44,9 +44,15 @@ public class RegisterActivity extends AppCompatActivity {
         TextView btnLangEs = findViewById(R.id.btnLangEs);
         TextView btnLangEu = findViewById(R.id.btnLangEu);
         TextView btnLangEn = findViewById(R.id.btnLangEn);
-        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn));
-        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn));
-        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu));
+        TextView btnLangFr = findViewById(R.id.btnLangFr);
+        TextView btnLangDe = findViewById(R.id.btnLangDe);
+        TextView btnLangIt = findViewById(R.id.btnLangIt);
+        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe, btnLangIt));
+        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn, btnLangFr, btnLangDe, btnLangIt));
+        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu, btnLangFr, btnLangDe, btnLangIt));
+        btnLangFr.setOnClickListener(v -> cambiarIdiomaLogin("fr", btnLangFr, btnLangEs, btnLangEu, btnLangEn, btnLangDe, btnLangIt));
+        btnLangDe.setOnClickListener(v -> cambiarIdiomaLogin("de", btnLangDe, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangIt));
+        btnLangIt.setOnClickListener(v -> cambiarIdiomaLogin("it", btnLangIt, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe));
 
         btnDoRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,11 +106,12 @@ public class RegisterActivity extends AppCompatActivity {
 
             if (json.containsKey("success") && (Boolean) json.get("success")) {
                 String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
+                String nombre = etNombreReg.getText() != null ? etNombreReg.getText().toString().trim() : "";
 
                 Toast.makeText(this, "¡Usuario registrado!", Toast.LENGTH_SHORT).show();
 
                 // Guardar email y estado
-                marcarEstadoUsuario(email);
+                marcarEstadoUsuario(email, nombre);
                 if (json.containsKey("id")) {
                     SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
                     prefs.edit().putInt("user_id", ((Long) json.get("id")).intValue()).apply();
@@ -119,11 +126,12 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private void marcarEstadoUsuario(String email) {
+    private void marcarEstadoUsuario(String email, String nombre) {
         SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("isGuest", false);
         editor.putString("user_email", email);
+        editor.putString("user_name", nombre);
         editor.apply();
     }
 

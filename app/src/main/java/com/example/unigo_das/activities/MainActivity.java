@@ -144,11 +144,10 @@ public class MainActivity extends AppCompatActivity {
         else {
             transaction.show(targetFragment);
             if (itemId == R.id.nav_map && mapArgs != null) {
-                ((MapFragment) targetFragment).dibujarLineaHastaDestino(
+                ((MapFragment) targetFragment).iniciarRutaHaciaDestino(
                         mapArgs.getString("destino_nombre"),
                         mapArgs.getDouble("destino_lat"),
-                        mapArgs.getDouble("destino_lng"),
-                        "walking"
+                        mapArgs.getDouble("destino_lng")
                 );
                 mapArgs = null;
             }
@@ -187,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
         if (bottomNav.getSelectedItemId() == R.id.nav_map) {
             MapFragment mapFragment = (MapFragment) fm.findFragmentByTag("map");
             if (mapFragment != null) {
-                mapFragment.dibujarLineaHastaDestino(nombreCentro, latDestino, lngDestino, "walking");
+                mapFragment.iniciarRutaHaciaDestino(nombreCentro, latDestino, lngDestino);
                 mapArgs = null;
             }
         } else {
@@ -277,19 +276,5 @@ public class MainActivity extends AppCompatActivity {
         // Esto asegura que los recursos se actualicen con la nueva configuración
         getResources().updateConfiguration(newConfig, getResources().getDisplayMetrics());
     }
-/*
-    private void applyOverrideConfiguration() {
-        // Obtener el idioma actual de la app
-        LocaleListCompat appLocales = AppCompatDelegate.getApplicationLocales();
-        if (!appLocales.isEmpty()) {
-            String langCode = appLocales.get(0).getLanguage();
-            Locale locale = new Locale(langCode);
-            Locale.setDefault(locale);
-
-            Configuration config = new Configuration(getResources().getConfiguration());
-            config.setLocale(locale);
-            getResources().updateConfiguration(config, getResources().getDisplayMetrics());
-        }
-    }*/
 
 }

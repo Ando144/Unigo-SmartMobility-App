@@ -20,6 +20,9 @@
     <string name="lang_es">Castellano</string>
     <string name="lang_eu">Euskara</string>
     <string name="lang_en">English</string>
+    <string name="lang_fr">Francés</string>
+    <string name="lang_de">Alemán</string>
+    <string name="lang_it">Italiano</string>
 
     <!-- Profile Dialog -->
     <string name="profile_image_options">Opciones de imagen</string>
@@ -31,6 +34,14 @@
     <string name="email_label">Email</string>
     <string name="name_label">Nombre completo</string>
     <string name="change_password">Cambiar contraseña</string>
+    <string name="current_password">Contraseña actual</string>
+    <string name="new_password">Nueva contraseña</string>
+    <string name="required_field">Campo obligatorio</string>
+    <string name="password_length_error">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="password_changed_success">Contraseña cambiada con éxito</string>
+    <string name="network_error">Error de conexión</string>
+    <string name="error_generic">Ha ocurrido un error</string>
+    <string name="server_error">Error del servidor</string>
 
     <!-- Clima Strings -->
     <string name="seccion_clima_de_euskadi">Sección: Clima de Euskadi</string>

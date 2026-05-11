@@ -18,6 +18,9 @@
     <string name="lang_es">Gaztelania</string>
     <string name="lang_eu">Euskara</string>
     <string name="lang_en">Ingelesa</string>
+    <string name="lang_fr">Frantsesa</string>
+    <string name="lang_de">Alemana</string>
+    <string name="lang_it">Italiera</string>
 
     <string name="profile_image_options">Irudiaren aukerak</string>
     <string name="remove_photo">Argazkia ezabatu</string>
@@ -27,6 +30,14 @@
     <string name="email_label">Posta elektronikoa</string>
     <string name="name_label">Izen-abizenak</string>
     <string name="change_password">Pasahitza aldatu</string>
+    <string name="current_password">Oraingo pasahitza</string>
+    <string name="new_password">Pasahitz berria</string>
+    <string name="required_field">Derrigorrezko eremua</string>
+    <string name="password_length_error">Pasahitzak gutxienez 6 karaktere izan behar ditu</string>
+    <string name="password_changed_success">Pasahitza ongi aldatu da</string>
+    <string name="network_error">Konexio errorea</string>
+    <string name="error_generic">Errore bat gertatu da</string>
+    <string name="server_error">Zerbitzariaren errorea</string>
 
     <string name="seccion_clima_de_euskadi">Atala: Euskadiko Eguraldia</string>
     <string name="weather_title">Eguraldia</string>

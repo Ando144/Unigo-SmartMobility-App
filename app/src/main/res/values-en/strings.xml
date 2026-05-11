@@ -18,6 +18,9 @@
     <string name="lang_es">Spanish</string>
     <string name="lang_eu">Basque</string>
     <string name="lang_en">English</string>
+    <string name="lang_fr">French</string>
+    <string name="lang_de">German</string>
+    <string name="lang_it">Italian</string>
 
     <string name="profile_image_options">Image options</string>
     <string name="remove_photo">Remove photo</string>
@@ -27,6 +30,14 @@
     <string name="email_label">Email</string>
     <string name="name_label">Full name</string>
     <string name="change_password">Change password</string>
+    <string name="current_password">Current password</string>
+    <string name="new_password">New password</string>
+    <string name="required_field">Required field</string>
+    <string name="password_length_error">Password must be at least 6 characters</string>
+    <string name="password_changed_success">Password changed successfully</string>
+    <string name="network_error">Connection error</string>
+    <string name="error_generic">An error occurred</string>
+    <string name="server_error">Server error</string>
 
     <string name="seccion_clima_de_euskadi">Section: Basque Country Weather</string>
     <string name="weather_title">Weather</string>

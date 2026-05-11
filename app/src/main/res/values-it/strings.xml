@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UniGO</string>
+    <string name="hello_blank_fragment">Ciao frammento vuoto</string>
+
+    <string name="settings_title">Impostazioni</string>
+    <string name="pref_header_profile">Profilo</string>
+    <string name="pref_account_section">Account</string>
+    <string name="pref_my_account">Il mio account</string>
+    <string name="pref_logout">Disconnetti</string>
+    <string name="pref_register">Registrati</string>
+    <string name="pref_login">Accedi</string>
+    <string name="pref_general_config">Configurazione Generale</string>
+    <string name="pref_language">Cambia Lingua</string>
+    <string name="pref_dark_mode">Modalità Scura</string>
+    <string name="pref_dark_mode_summary">Attiva/Disattiva il tema scuro</string>
+
+    <string name="select_language">Seleziona Lingua</string>
+    <string name="lang_es">Spagnolo</string>
+    <string name="lang_eu">Basco</string>
+    <string name="lang_en">Inglese</string>
+    <string name="lang_fr">Francese</string>
+    <string name="lang_de">Tedesco</string>
+    <string name="lang_it">Italiano</string>
+
+    <string name="profile_image_options">Opzioni immagine</string>
+    <string name="remove_photo">Rimuovi foto</string>
+    <string name="change_photo">Cambia foto</string>
+
+    <string name="account_detail_title">Il Mio Account</string>
+    <string name="email_label">Email</string>
+    <string name="name_label">Nome completo</string>
+    <string name="change_password">Cambia password</string>
+    <string name="current_password">Password attuale</string>
+    <string name="new_password">Nuova password</string>
+    <string name="required_field">Campo obbligatorio</string>
+    <string name="password_length_error">La password deve contenere almeno 6 caratteri</string>
+    <string name="password_changed_success">Password cambiata con successo</string>
+    <string name="network_error">Errore di connessione</string>
+    <string name="error_generic">Si è verificato un errore</string>
+    <string name="server_error">Errore del server</string>
+
+    <string name="seccion_clima_de_euskadi">Sezione: Clima dei Paesi Baschi</string>
+    <string name="weather_title">Meteo</string>
+
+    <string name="centres_title">Centri</string>
+    <string name="search_centre">Cerca centro (es. Deusto, Leioa…)</string>
+    <string name="all">Tutti</string>
+    <string name="bus">Autobus</string>
+    <string name="line">Linea</string>
+    <string name="metro">Metropolitana</string>
+    <string name="station">Stazione</string>
+    <string name="tram">Tram</string>
+    <string name="stop">Fermata</string>
+    <string name="bicycle">Bicicletta</string>
+    <string name="bilbaobizi_50m">Stazione Bilbaobizi a 50m</string>
+    <string name="cycle_path">Pista ciclabile</string>
+    <string name="cycle_path_joined">Pista ciclabile connessa</string>
+
+    <!-- Centri Universitari EHU -->
+    <string name="centro_ehu_ingenieria_bilbao">Scuola di Ingegneria di Bilbao, Edificio principale</string>
+    <string name="centro_ehu_ingenieria_bilbao1">Scuola di Ingegneria di Bilbao, Edificio I</string>
+    <string name="centro_ehu_ingenieria_bilbao2">Scuola di Ingegneria di Bilbao, Edificio II</string>
+    <string name="centro_ehu_ingenieria_bilbao3">Scuola di Ingegneria di Bilbao, Nautica</string>
+    <string name="centro_ehu_bellas_artes">Facoltà di Belle Arti</string>
+    <string name="centro_ehu_ciencia_tecnologia">Facoltà di Scienza e Tecnologia</string>
+    <string name="centro_ehu_ciencias_sociales_comunicacion">Facoltà di Scienze Sociali e della Comunicazione</string>
+    <string name="centro_ehu_derecho">Facoltà di Giurisprudenza. Sezione Biscaglia</string>
+    <string name="centro_ehu_economia_empresa">Facoltà di Economia e Impresa</string>
+    <string name="centro_ehu_economia_empresa_elcano">Facoltà di Economia e Impresa. Sezione Elkano</string>
+    <string name="centro_ehu_educacion_bilbao">Facoltà di Scienze della Formazione di Bilbao</string>
+    <string name="centro_ehu_medicina_enfermeria">Facoltà di Medicina e Infermieristica</string>
+    <string name="centro_ehu_unidad_docente_medicina">Unità Didattica Fac. Medicina e Infermieristica</string>
+    <string name="centro_ehu_aulas_experiencia">Aule dell\'Esperienza</string>
+
+    <!-- Centri Universitari Mondragon Unibertsitatea -->
+    <string name="centro_mu_bbf_empresariales">Bilbao Berrikuntza Faktoria (BBF): Economia Aziendale</string>
+    <string name="centro_mu_bbf_leinn">Bilbao Berrikuntza Faktoria (BBF): LEINN</string>
+    <string name="centro_mu_as_politecnica">As Fabrik: Scuola Politecnica Superiore</string>
+    <string name="centro_mu_as_humanidades">As Fabrik: Fac. Scienze Umane e della Formazione</string>
+
+    <!-- Centri Universitari Deusto -->
+    <string name="centro_deusto_business">Deusto Business School</string>
+    <string name="centro_deusto_derecho">Facoltà di Giurisprudenza</string>
+    <string name="centro_deusto_sociales_humanas">Facoltà di Scienze Sociali e Umane</string>
+    <string name="centro_deusto_ingenieria">Facoltà di Ingegneria</string>
+    <string name="centro_deusto_educacion_deporte">Facoltà di Scienze della Formazione e dello Sport</string>
+    <string name="centro_deusto_salud">Facoltà di Scienze della Salute</string>
+    <string name="centro_deusto_sociales_comunicacion">Facoltà di Scienze Sociali e della Comunicazione</string>
+
+    <!-- Strings della Mappa -->
+    <string name="map_title">Mappa</string>
+    <string name="precio_variable">"Prezzo variabile"</string>
+    <string name="billete_ocasional">Biglietto occasionale</string>
+    <string name="coste_estimado">Costo stimato</string>
+    <string name="coste_estimado_aviso">Il prezzo sarà notevolmente inferiore utilizzando la carta Barik o abbonamenti.</string>
+    <string name="destino_final">Destinazione finale</string>
+    <string name="caminar">Camminare</string>
+    <string name="bici">Bici</string>
+    <string name="direccion">Direzione</string>
+    <string name="desde">Da</string>
+    <string name="hasta">A</string>
+    <string name="paradas">fermate</string>
+    <string name="coche_electrico_contaminacion">Usare il trasporto pubblico aiuta a ridurre il traffico, anche se la tua auto elettrica è già un\'opzione pulita.</string>
+    <string name="has_evitado">Hai evitato</string>
+    <string name="co2_respecto_combustion">g di CO2 rispetto a un\'auto a combustione.</string>
+    <string name="ruta_no_valida_titulo">Nessun percorso esclusivo</string>
+    <string name="ruta_no_valida_mensaje">Non esiste un percorso valido utilizzando esclusivamente i mezzi selezionati.\n\nProva ad attivare più mezzi di trasporto.</string>
+    <string name="cancelar">Annulla</string>
+    <string name="cambiar_filtros">Cambia filtri</string>
+    <string name="filtros_ruta_titulo">Filtri Percorso</string>
+    <string name="salida_dias_max">Partenza (Max. 14 giorni)</string>
+    <string name="hoy">Oggi</string>
+    <string name="ahora">Ora</string>
+    <string name="medios_preferidos">Mezzi preferiti</string>
+    <string name="autobus">Autobus</string>
+    <string name="tren">Treno</string>
+    <string name="mi_coche_es_electrico">La mia auto è elettrica</string>
+    <string name="aplicar">Applica</string>
+    <string name="restablecer">Ripristina</string>
+    <string name="mostrar_paradas_titulo">Rete di Trasporto</string>
+    <string name="ocultar_paradas">Nascondi fermate</string>
+    <string name="tranvia">Tram</string>
+    <string name="cerrar">Chiudi</string>
+
+    <string name="xml_buscar_centro_facultad">Cerca centro o facoltà...</string>
+    <string name="xml_detalles_del_trayecto">Dettagli del Percorso</string>
+    <string name="xml_a_pie">A piedi</string>
+    <string name="xml_bici">Bici</string>
+    <string name="xml_publico">Pubblico</string>
+    <string name="xml_donde_quieres_ir">Dove vuoi andare?</string>
+
+    <!-- Login & Register Strings -->
+    <string name="login_title">UNIGO</string>
+    <string name="login_subtitle">Il tuo campus, il tuo percorso.</string>
+    <string name="login_email_hint">Indirizzo email</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_button">Accedi</string>
+    <string name="register_button">Crea un account</string>
+    <string name="guest_button">Continua come ospite</string>
+    <string name="register_title">Crea Account</string>
+    <string name="register_subtitle">Unisciti alla mobilità UNIGO</string>
+    <string name="register_name_hint">Nome completo</string>
+    <string name="register_do_button">Registrati</string>
+    <string name="register_back_to_login">Hai già un account? Accedi</string>
+
+    <string name="air_excellent">Eccellente</string>
+    <string name="air_good">Buona</string>
+    <string name="air_moderate">Moderata</string>
+    <string name="air_poor">Scarsa</string>
+    <string name="air_very_poor">Molto Scarsa</string>
+    <string name="air_severe">Severa</string>
+    <string name="air_unknown">Sconosciuta</string>
+
+    <string name="pollen_none">Nessuno</string>
+    <string name="pollen_very_low">Molto Basso</string>
+    <string name="pollen_low">Basso</string>
+    <string name="pollen_moderate">Moderato</string>
+    <string name="pollen_high">Alto</string>
+    <string name="pollen_very_high">Molto Alto</string>
+    <string name="pollen_severe">Severo</string>
+    <string name="pollen_unknown">Sconosciuto</string>
+
+    <string name="no_data_short">N/D</string>
+    <string name="no_data_long">Nessun dato</string>
+    <string name="error_api">Errore</string>
+    <string name="aire">ARIA</string>
+    <string name="polen">POLLINE</string>
+    <string name="tu_ubicaci_n">La tua posizione</string>
+    <string name="tu_ubicaci_n2">La tua posizione</string>
+    <string name="desconocido">Sconosciuto</string>
+    <string name="cielo_despejado">Cielo sereno</string>
+    <string name="mayormente_despejado">Per lo più sereno</string>
+    <string name="parcialmente_nublado">Parzialmente nuvoloso</string>
+    <string name="totalmente_nublado">Coperto</string>
+    <string name="niebla_densa">Nebbia fitta</string>
+    <string name="llovizna">Pioviggine</string>
+    <string name="llovizna_helada">Pioviggine gelata</string>
+    <string name="lluvia_ligera">Pioggia leggera</string>
+    <string name="lluvia_moderada">Pioggia moderata</string>
+    <string name="lluvia_fuerte">Pioggia forte</string>
+    <string name="lluvia_helada">Pioggia gelata</string>
+    <string name="nieve_ligera">Neve leggera</string>
+    <string name="nieve_moderada">Neve moderata</string>
+    <string name="nevada_fuerte">Forti nevicate</string>
+    <string name="granizo_suave">Grandine leggera</string>
+    <string name="chubascos_ligeros">Rovesci leggeri</string>
+    <string name="chubascos_moderados">Rovesci moderati</string>
+    <string name="chubascos_violentos">Rovesci violenti</string>
+    <string name="chubascos_de_nieve">Rovesci di neve</string>
+    <string name="tormenta_el_ctrica">Temporale</string>
+    <string name="tormenta_con_granizo">Temporale con grandine</string>
+    <string name="a_n_no_has_guardado_ning_n_campus_en_favoritos">Non hai ancora salvato nessun campus nei preferiti.</string>
+    <string name="bajo">Basso</string>
+    <string name="moderado">Moderato</string>
+    <string name="alto">Alto</string>
+    <string name="muy_alto">Molto Alto</string>
+    <string name="extremo">Estremo</string>
+    <string name="detectando_ubicaci_n">Rilevamento posizione...</string>
+    <string name="cargando">Caricamento...</string>
+    <string name="calidad_aire">QUALITÀ DELL\'ARIA</string>
+    <string name="ver_mapa">Vedi mappa</string>
+    <string name="polen2">LIVELLO DI POLLINE</string>
+    <string name="ver_mapa2">Vedi mappa</string>
+    <string name="ndice_uv_maximo">INDICE UV MASSIMO</string>
+    <string name="cargando2">Caricamento...</string>
+    <string name="horas_de_luz">ORE DI LUCE</string>
+    <string name="clima_en_tus_campus_favoritos">Meteo nei tuoi Campus Preferiti</string>
+    <string name="pron_stico_euskalmet">Previsioni Euskalmet</string>
+    <string name="cargando_informaci_n_oficial">Caricamento informazioni ufficiali...</string>
+    <string name="radar_de_precipitaciones_en_vivo">Radar Precipitazioni in Diretta</string>
+    <string name="ruta_al_campus">Percorso al campus</string>
+    <string name="quieres_abrir_el_mapa_para_ver_c_mo_llegar_a">"Vuoi aprire la mappa per vedere come arrivare a "</string>
+    <string name="s_trazar_ruta">Sì, traccia percorso</string>
+    <string name="cancelar2">Annulla</string>
+    <string name="clima_en_bilbao">Meteo a Bilbao (</string>
+    <string name="hace_fr_o_abr_gate_bien">"Fa freddo, copriti bene! "</string>
+    <string name="d_a_caluroso">"Giornata calda. "</string>
+    <string name="cielo_despejado2">"Cielo sereno. "</string>
+    <string name="ojo_hay_niebla_precauci_n_si_vas_en_coche_o_bici">"Attenzione! C\'è nebbia, prudenza se viaggi in auto o in bici. "</string>
+    <string name="atenci_n_riesgo_de_nevadas">"Attenzione! Rischio di nevicate. "</string>
+    <string name="alerta_por_tormentas_el_ctricas">"Allerta per temporali. "</string>
+    <string name="lluvia_fuerte_hoy">Pioggia forte oggi (</string>
+    <string name="mm_imprescindible_paraguas">"mm). Ombrello indispensabile. "</string>
+    <string name="se_esperan_algunos_chubascos">Previsti alcuni rovesci (</string>
+    <string name="no_se_esperan_lluvias">"Nessuna pioggia prevista. "</string>
+    <string name="precauci_n_rachas_de_viento_de">"Attenzione: Raffiche di vento di "</string>
+    <string name="protecci_n_solar_necesaria_uv">"Protezione solare necessaria (UV: "</string>
+    <string name="unigo_clima_del_campus">UniGo: Meteo del Campus</string>
+    <string name="abre_la_app_para_consultar_la_previsi_n_detallada_antes_de_salir">Apri l\'app per consultare le previsioni dettagliate prima di uscire.</string>
+    <string name="unigo_clima_del_campus2">UniGo: Meteo del Campus</string>
+    <string name="con_ctate_a_internet_para_ver_el_pron_stico_de_hoy">Collegati a internet per vedere le previsioni di oggi.</string>
+    <string name="alertas_de_clima">Avvisi Meteo</string>
+    <string name="avisos_diarios_sobre_el_entorno">Avvisi giornalieri sull\'ambiente</string>
+    <string name="transporte_favorito">Trasporto preferito</string>
+    <string name="cancelar3">Annulla</string>
+    <string name="estilo_de_mapa">Stile mappa</string>
+    <string name="cancelar4">Annulla</string>
+    <string name="fuentes_de_datos">Fonti di Dati</string>
+    <string name="esta_aplicaci_n_utiliza_datos_abiertos_proporcionados_por_euskalmet_open_meteo_open_data_euskadi_bizkaibus_euskotren_y_metro_bilbao_geobilbao_agradecemos_su_labor_en_la_apertura_de_datos_para_esta_aplicaci_n">Questa applicazione utilizza dati aperti forniti da:\n\n• Euskalmet\n• Open Meteo\n• Open Data Euskadi\n• Bizkaibus\n• Euskotren e Metro Bilbao\n• GeoBilbao\n\nLi ringraziamo per il loro lavoro nell\'apertura dei dati per questa applicazione.</string>
+    <string name="aceptar">Accetta</string>
+    <string name="aviso_programado_para_las">"Avviso programmato per le "</string>
+    <string name="seleccionar_idioma">Seleziona Lingua</string>
+    <string name="cancelar5">Annulla</string>
+    <string name="confirmar_foto_de_perfil">Conferma foto profilo</string>
+    <string name="aceptar3">Accetta</string>
+    <string name="cancelar6">Annulla</string>
+    <string name="subiendo_foto">Caricamento foto...</string>
+    <string name="foto_actualizada">Foto aggiornata</string>
+    <string name="error_al_subir_foto">Errore durante il caricamento della foto</string>
+    <string name="error_de_conexi_n">Errore di connessione</string>
+    <string name="eliminar_foto">Elimina foto</string>
+    <string name="est_s_seguro_de_que_quieres_eliminar_tu_foto_de_perfil">Sei sicuro di voler eliminare la tua foto del profilo?</string>
+    <string name="eliminar">Elimina</string>
+    <string name="cancelar7">Annulla</string>
+    <string name="rutas_y_transporte">Percorsi e Trasporti</string>
+    <string name="transporte_favorito2">Trasporto preferito</string>
+    <string name="medio_de_transporte_por_defecto">Mezzo di trasporto predefinito</string>
+    <string name="veh_culo_el_ctrico">Veicolo elettrico</string>
+    <string name="priorizar_rutas_con_puntos_de_recarga">Dare priorità ai percorsi con punti di ricarica</string>
+    <string name="alertas_y_clima">Avvisi e Meteo</string>
+    <string name="notificaciones_de_salud_y_clima">Notifiche su salute e meteo</string>
+    <string name="recibir_avisos_diarios_sobre_polen_lluvia_y_uv">Ricevi avvisi giornalieri su polline, pioggia e UV</string>
+    <string name="hora_del_aviso_diario">Orario dell\'avviso giornaliero</string>
+    <string name="visualizaci_n_del_mapa">Visualizzazione Mappa</string>
+    <string name="estilo_de_mapa2">Stile mappa</string>
+    <string name="normal">Normale</string>
+    <string name="informaci_n">Informazioni</string>
+    <string name="fuentes_de_datos_open_data">Fonti di Dati (Open Data)</string>
+    <string name="agradecimientos_a_las_entidades_colaboradoras">Ringraziamenti agli enti collaboratori</string>
+    <string name="equipo_de_desarrollo">Team di Sviluppo</string>
+    <string name="creado_por_jon_ander_duque_asier_faraig_y_andoni_ortiz_de_zarate">Creato da Jon Ander Duque, Asier Faraig e Andoni Ortiz de Zarate</string>
+    <string name="versi_n_de_la_aplicaci_n">Versione dell\'applicazione</string>
+
+    <string-array name="nombres_transporte">
+        <item>Trasporto Pubblico</item>
+        <item>Bicicletta</item>
+        <item>A piedi</item>
+    </string-array>
+    <string-array name="valores_transporte">
+        <item>publico</item>
+        <item>bici</item>
+        <item>pie</item>
+    </string-array>
+
+    <string-array name="nombres_tipo_mapa">
+        <item>Normale</item>
+        <item>Satellite</item>
+        <item>Rilievo</item>
+        <item>Ibrido</item>
+    </string-array>
+    <string-array name="valores_tipo_mapa">
+        <item>1</item> <item>2</item> <item>3</item> <item>4</item>
+    </string-array>
+</resources>

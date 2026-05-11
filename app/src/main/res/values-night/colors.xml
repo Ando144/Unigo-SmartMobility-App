@@ -11,4 +11,6 @@
     <!-- Colores CO2 (Oscuro - Tonalidades más claras para legibilidad) -->
     <color name="co2_walking_color">#81C784</color>
     <color name="co2_transit_color">#64B5F6</color>
+
+    <color name="university_tag_color_ehu">#FFFFFF</color>
 </resources>

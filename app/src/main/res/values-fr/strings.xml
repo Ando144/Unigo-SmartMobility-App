@@ -272,6 +272,12 @@
     <string name="creado_por_jon_ander_duque_asier_faraig_y_andoni_ortiz_de_zarate">Créé par Jon Ander Duque, Asier Faraig et Andoni Ortiz de Zarate</string>
     <string name="versi_n_de_la_aplicaci_n">Version de l\'application</string>
 
+    <string name="fallo_cr_tico_respuesta_vac_a_del_servidor_php_crash">Erreur critique : Réponse vide du serveur (PHP Crash)</string>
+    <string name="error_al_procesar_respuesta_del_servidor">Erreur lors du traitement de la réponse du serveur</string>
+    <string name="error_en_la_conexi_n">Erreur de connexion</string>
+    <string name="error_de_red_o_credenciales_incorrectas">Erreur réseau ou identifiants incorrects</string>
+    <string name="error_de_conexi_n_con_el_servidor">Erreur de connexion au serveur</string>
+
     <string-array name="nombres_transporte">
         <item>Transport Public</item>
         <item>Vélo</item>

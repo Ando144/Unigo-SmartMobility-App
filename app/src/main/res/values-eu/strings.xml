@@ -278,6 +278,12 @@
     <string name="creado_por_jon_ander_duque_asier_faraig_y_andoni_ortiz_de_zarate">Jon Ander Duque, Asier Faraig eta Andoni Ortiz de Zaratek sortua</string>
     <string name="versi_n_de_la_aplicaci_n">Aplikazioaren bertsioa</string>
 
+    <string name="fallo_cr_tico_respuesta_vac_a_del_servidor_php_crash">Akats kritikoa: Zerbitzariaren erantzun hutsa (PHP Crash)</string>
+    <string name="error_al_procesar_respuesta_del_servidor">Errorea zerbitzariaren erantzuna prozesatzean</string>
+    <string name="error_en_la_conexi_n">Konexio-errorea</string>
+    <string name="error_de_red_o_credenciales_incorrectas">Sare-errorea edo kredentzial okerrak</string>
+    <string name="error_de_conexi_n_con_el_servidor">Zerbitzariarekiko konexio-errorea</string>
+
     <string-array name="nombres_transporte">
         <item>Garraio Publikoa</item>
         <item>Bizikleta</item>

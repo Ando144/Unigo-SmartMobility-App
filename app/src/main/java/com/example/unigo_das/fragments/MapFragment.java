@@ -142,6 +142,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //sistema de Android para pedir múltiples permisos a la vez de forma limpia.
         locationPermissionRequest = registerForActivityResult(
                 new ActivityResultContracts.RequestMultiplePermissions(),
                 new ActivityResultCallback<Map<String, Boolean>>() {
@@ -153,6 +154,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         if ((fineLocationGranted != null && fineLocationGranted) ||
                                 (coarseLocationGranted != null && coarseLocationGranted)) {
                             activarUbicacionEnMapa();
+                            // Si el usuario venía de "SchoolFragment" y acaba de darnos permiso,
+                            // le pintamos la ruta que había pedido.
                             procesarRutaPendiente();
                         }
                     }
@@ -161,10 +164,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         cargarDatosBuscador();
     }
+
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        // "hidden" es false cuando el fragmento vuelve a ser visible en pantalla
+        // "hidden" es false cuando el fragmento vuelve a ser visible en pantalla.
+        // Si el usuario cambia el estilo del mapa en Ajustes y vuelve aquí, refrescamos.
         if (!hidden && isAdded() && campusMap != null) {
             cargarAjustesMapa();
         }
@@ -263,6 +268,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         currentTransportMode = "walking";
                     }
 
+                    // Si cambiamos de pestaña  y hay una ruta ya cargada, la recalculamos.
                     if (destinoActual != null && tituloDestinoActual != null) {
                         dibujarLineaHastaDestino(tituloDestinoActual, destinoActual.latitude, destinoActual.longitude, currentTransportMode);
                     }
@@ -273,6 +279,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         searchAdapter = new BuscadorMapaAdapter(requireContext(), listaTodosLosCentros);
         lvSearchResults.setAdapter(searchAdapter);
 
+        //Al hacer clic en el buscador, desplegamos la pantalla blanca completa
+        // y abrimos el teclado automáticamente.
         capaClickBuscador.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -332,6 +340,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
+        // Sistema para que la barra de búsqueda  justo debajo de la cámara,
+        // sin tapar la barra de notificaicones.
         ViewCompat.setOnApplyWindowInsetsListener(view, new androidx.core.view.OnApplyWindowInsetsListener() {
             @NonNull
             @Override
@@ -346,7 +356,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    // --- MÉTODO PARA APLICAR LAS PREFERENCIAS ---
+    // Este metodo cruza la base de datos local (SharedPreferences de la sesión activa)
+    // con el mapa para personalizar la experiencia.
     private void cargarAjustesMapa() {
         if (getContext() == null) return;
 
@@ -355,7 +366,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         String userEmail = unigoPrefs.getString("user_email", "");
         boolean isGuest = unigoPrefs.getBoolean("isGuest", true);
 
-        // 1. Aplicar Estilo de Mapa
+        //Aplicar Estilo de Mapa
         String tipoMapaStr;
         if (!isGuest && !userEmail.isEmpty()) {
             tipoMapaStr = unigoPrefs.getString("tipo_mapa_" + userEmail, defaultPrefs.getString("pref_tipo_mapa", "1"));
@@ -372,7 +383,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             campusMap.setMapType(tipoMapa);
         }
 
-        // 2. Coche Eléctrico persistente
+        //Coche Eléctrico
         if (!isGuest && !userEmail.isEmpty()) {
             this.isCocheElectrico = unigoPrefs.getBoolean("pref_coche_electrico_" + userEmail,
                     defaultPrefs.getBoolean("pref_coche_electrico", false));
@@ -380,7 +391,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             this.isCocheElectrico = defaultPrefs.getBoolean("pref_coche_electrico", false);
         }
 
-        // 3. Transporte Favorito
+        // Transporte Favorito
         if (destinoActual == null) {
             String transporteFav;
             if (!isGuest && !userEmail.isEmpty()) {
@@ -411,14 +422,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private int obtenerColorTextoParaTarjeta() {
-        // Para la tarjeta de rutas, necesitamos texto oscuro en modo claro y texto claro en modo oscuro
         int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
         boolean isDarkMode = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
         if (isDarkMode) {
-            return Color.parseColor("#EEEEEE"); // Texto claro para fondo oscuro
+            return Color.parseColor("#EEEEEE");
         } else {
-            return Color.parseColor("#1A1A1A"); // Texto oscuro para fondo claro
+            return Color.parseColor("#1A1A1A");
         }
     }
 
@@ -427,9 +437,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         boolean isDarkMode = nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
 
         if (isDarkMode) {
-            return Color.parseColor("#B0B0B0"); // Texto secundario claro para fondo oscuro
+            return Color.parseColor("#B0B0B0");
         } else {
-            return Color.parseColor("#666666"); // Texto secundario oscuro para fondo claro
+            return Color.parseColor("#666666");
         }
     }
 
@@ -452,12 +462,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.campusMap = googleMap;
+        // Vista inicial por defecto (Bilbao)
         LatLng campusLocationEIB = new LatLng(43.265842, -2.940452);
         campusMap.moveCamera(CameraUpdateFactory.newLatLngZoom(campusLocationEIB, 15f));
 
         campusMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+                // Para que el usuario no se sienta atrapado con la lista enorme de rutas.
+                // Un tap en el mapa minimiza las instrucciones.
                 if (cardInfoRutas.getVisibility() == View.VISIBLE && isTarjetaExpandida) {
                     alternarEstadoTarjeta();
                 }
@@ -466,6 +479,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         cargarAjustesMapa();
 
+        // Si MainActivity le ha dicho que trace una ruta nada más nacer (por ejemplo, desde Favoritos en la lista de centros).
         if (getArguments() != null && getArguments().containsKey("destino_nombre")) {
             tituloPendiente = getArguments().getString("destino_nombre");
             destinoPendiente = new LatLng(getArguments().getDouble("destino_lat"), getArguments().getDouble("destino_lng"));
@@ -500,14 +514,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    // Punto de entrada centralizado para pedir rutas a la API
     public void dibujarLineaHastaDestino(String titulo, double latDestino, double lngDestino, String modoTransporte) {
         if (campusMap == null) return;
 
+        // Ocultamos las paradas/bidegorris estáticas mientras trazamos una ruta real para no emborronar el mapa
         if (fabCapasTransporte != null) {
             fabCapasTransporte.setVisibility(View.GONE);
         }
         limpiarMarcadoresParadasLibres();
 
+        // Solo mostramos los filtros  si el usuario elige Transporte Público.
         if ("transit".equals(modoTransporte) && btnFiltrosTransporte != null) {
             btnFiltrosTransporte.setVisibility(View.VISIBLE);
         } else if (btnFiltrosTransporte != null) {
@@ -552,6 +569,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    // Realiza la llamada HTTP pura a la API de Directions de Google.
+    // Lo hacemos en un SingleThreadExecutor para no bloquear la interfaz gráfica mientras esperamos la respuesta de internet.
     private void obtenerRutaRealGoogle(final LatLng origen, final LatLng destino, final String modoTransporte) {
         String apiKey = BuildConfig.DIRECTIONS_API_KEY;
         String idiomaActual = Locale.getDefault().getLanguage();
@@ -564,6 +583,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         builderUrl.appendQueryParameter("language", idiomaActual);
 
         if ("transit".equals(modoTransporte)) {
+            // Forzamos a Google a que nos devuelva todas las alternativas posibles,
+            // así luego nosotros podemos descartar las que usen transportes desmarcados.
             builderUrl.appendQueryParameter("alternatives", "true");
 
             if (timestampSalidaPersonalizado > 0) {
@@ -620,6 +641,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             double kmTotalesFinal = 0.0;
                             int co2TotalRutaFinal = 0;
 
+                            // Iteramos todas las rutas alternativas que nos ha dado Google
                             for (int r = 0; r < routesArray.length(); r++) {
                                 JSONObject route = routesArray.getJSONObject(r);
                                 List<SegmentoRuta> listaSegmentosTemp = new ArrayList<>();
@@ -636,6 +658,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                                 if ("transit".equals(modoTransporte)) {
                                     JSONArray steps = route.getJSONArray("legs").getJSONObject(0).getJSONArray("steps");
+                                    // Y ahora troceamos la ruta paso a paso (andar hasta parada, coger bus, andar hasta destino)
                                     for (int i = 0; i < steps.length(); i++) {
                                         JSONObject step = steps.getJSONObject(i);
                                         List<LatLng> decodificados = decodificarPolyline(step.getJSONObject("polyline").getString("points"));
@@ -651,6 +674,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         double kmTramo = metrosTramo / 1000.0;
                                         kmTotalesTemp += kmTramo;
 
+                                        // Si es un transporte real (bus, metro...) leemos los detalles (color de línea, paradas, etc)
                                         if (!segmento.esCaminando && step.has("transit_details")) {
                                             usaVehiculoPublico = true;
                                             JSONObject td = step.getJSONObject("transit_details");
@@ -685,11 +709,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                                             String vType = lineData.has("vehicle") && lineData.getJSONObject("vehicle").has("type") ? lineData.getJSONObject("vehicle").getString("type") : "";
 
+                                            // Comprobación de seguridad extra porque Google a veces cuela rutas de Bus aunque le digas que no.
                                             if (vType.contains("BUS") && !usarBus) rutaCumpleFiltrosEstrictos = false;
                                             else if (vType.contains("SUBWAY") && !usarMetro) rutaCumpleFiltrosEstrictos = false;
                                             else if (vType.contains("TRAM") && !usarTranvia) rutaCumpleFiltrosEstrictos = false;
                                             else if ((vType.contains("TRAIN") || vType.contains("RAIL")) && !usarTren) rutaCumpleFiltrosEstrictos = false;
 
+                                            // Cálculo estimado de huella de carbono según el transporte
                                             int co2Tramo = 0;
                                             if (vType.contains("BUS")) {
                                                 co2Tramo = (int)(kmTramo * 80);
@@ -702,6 +728,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                             co2TotalRutaTemp += co2Tramo;
 
                                         } else {
+                                            // Tramo caminando
                                             segmento.color = Color.GRAY;
                                             segmento.tituloInstruccion = "Andando";
                                             segmento.infoCO2 = "0g CO2";
@@ -710,6 +737,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         listaSegmentosTemp.add(segmento);
                                     }
                                 } else {
+                                    // Modo Bici o Andando simple. Solo hay una única línea gigante.
                                     List<LatLng> decodificados = decodificarPolyline(route.getJSONObject("overview_polyline").getString("points"));
                                     puntosTemp.addAll(decodificados);
                                     SegmentoRuta sr = new SegmentoRuta();
@@ -725,6 +753,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                     listaSegmentosTemp.add(sr);
                                 }
 
+                                // Si la ruta ha sobrevivido a nuestra purga, rompemos el bucle y nos la quedamos (suele ser la más rápida).
                                 if (rutaCumpleFiltrosEstrictos) {
                                     rutaValidaEncontrada = true;
                                     listaSegmentosFinal.addAll(listaSegmentosTemp);
@@ -739,6 +768,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             final boolean esRutaTotalmenteValida = rutaValidaEncontrada;
                             final String precioDefinitivo = precioTotalFinal;
 
+                            // Cálculo para la tarjeta final
                             float[] resultadosDistancia = new float[1];
                             Location.distanceBetween(origen.latitude, origen.longitude, destino.latitude, destino.longitude, resultadosDistancia);
                             double kmLineaRecta = resultadosDistancia[0] / 1000.0;
@@ -754,11 +784,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             final int ahorroCO2Definitivo = Math.max(0, co2CocheEstimado - co2TotalRutaFinal);
                             final boolean cocheEraElectrico = isCocheElectrico;
 
+                            // Volvemos al hilo principal para tocar vistas
                             mainHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
                                     if (campusMap != null && isAdded()) {
 
+                                        // Si has desmarcado todos los filtros, avisamos con un Alert
                                         if (!esRutaTotalmenteValida) {
                                             AlertDialog.Builder errorBuilder = new AlertDialog.Builder(requireContext());
                                             errorBuilder.setTitle(getString(R.string.ruta_no_valida_titulo));
@@ -777,6 +809,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                             return;
                                         }
 
+                                        // Pintamos la línea y creamos el textview
                                         llListaInstrucciones.removeAllViews();
                                         for (SegmentoRuta seg : listaSegmentosFinal) {
                                             PolylineOptions opt = new PolylineOptions().addAll(seg.puntos).width(12f).color(seg.color).geodesic(true);
@@ -784,6 +817,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                             tv.setTextSize(14f); tv.setPadding(0, 16, 0, 16); tv.setTextColor(obtenerColorTextoParaTarjeta());
 
                                             if (seg.esCaminando && "transit".equals(modoTransporte)) {
+                                                // Camino a pie = puntos
                                                 opt.pattern(Arrays.asList(new Dot(), new Gap(15f)));
                                                 String base = getString(R.string.caminar) + " (" + seg.duracion + ") • ";
                                                 SpannableStringBuilder ssb = new SpannableStringBuilder(base + seg.infoCO2);
@@ -791,6 +825,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                                 ssb.setSpan(new StyleSpan(Typeface.BOLD), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                                                 tv.setText(ssb);
                                             } else if (!seg.esCaminando && "transit".equals(modoTransporte)) {
+                                                // Transporte público = línea gruesa de su color
                                                 campusMap.addMarker(new MarkerOptions().position(seg.puntoInicio).title(seg.tituloInstruccion).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                                                 String base = seg.tituloInstruccion + " (" + seg.duracion + ") • ";
                                                 SpannableStringBuilder ssb = new SpannableStringBuilder(base + seg.infoCO2);
@@ -803,6 +838,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                                 tv.setTextColor(seg.color);
                                                 tv.setTypeface(null, Typeface.BOLD);
                                             } else {
+                                                // Bici o caminando principal
                                                 String base = ("bicycling".equals(modoTransporte) ? getString(R.string.bici) + " " : getString(R.string.caminar) + " ") + "(" + seg.duracion + ") • ";
                                                 SpannableStringBuilder ssb = new SpannableStringBuilder(base + seg.infoCO2);
                                                 ssb.setSpan(new ForegroundColorSpan(seg.colorCO2), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -813,6 +849,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                             campusMap.addPolyline(opt);
                                         }
 
+                                        //Tarjeta resumen con dinero y CO2
                                         if (!listaSegmentosFinal.isEmpty()) {
                                             View separadorAhorro = new View(requireContext());
                                             separadorAhorro.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
@@ -849,6 +886,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                             cardInfoRutas.setVisibility(View.VISIBLE);
                                         }
                                         if (!puntosFinal.isEmpty()) {
+                                            //La cámara se ajusta para que toda la ruta entre en pantalla
                                             LatLngBounds.Builder b = new LatLngBounds.Builder();
                                             for (LatLng p : puntosFinal) { b.include(p); }
                                             campusMap.animateCamera(CameraUpdateFactory.newLatLngBounds(b.build(), 100));
@@ -864,6 +902,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    // Google manda las lineas de las rutas comprimidas en una única String con caracteres extraños.
+    // Este algoritmo estándar las descomprime devolviendo una lista de lat/long para dibujar.
     private List<LatLng> decodificarPolyline(String encoded) {
         List<LatLng> poly = new ArrayList<>();
         int index = 0, len = encoded.length();
@@ -910,6 +950,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         // Al limpiar la pantalla, los botones vuelven a tu transporte favorito
         cargarAjustesMapa();
 
+        // Si tenías abierto los filtros te los volvemos a mostrar
         if (fabCapasTransporte != null) {
             fabCapasTransporte.setVisibility(View.VISIBLE);
         }
@@ -924,12 +965,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private void mostrarMenuCapasParadas() {
         final String[] opciones = {getString(R.string.ocultar_paradas), "Bilbaobizi", "Bilbobus", "Bizkaibus", "Euskotren", getString(R.string.metro), "Renfe", getString(R.string.tranvia)};
 
-        // Cambio a MaterialAlertDialogBuilder
         com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
                 new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
 
         builder.setTitle(getString(R.string.mostrar_paradas_titulo));
-        builder.setIcon(R.drawable.ic_menu_map); // Icono
+        builder.setIcon(R.drawable.ic_menu_map);
 
         builder.setSingleChoiceItems(opciones, capaSeleccionadaIndex, new DialogInterface.OnClickListener() {
             @Override
@@ -937,7 +977,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 capaSeleccionadaIndex = which;
                 redibujarCapaParadas(which);
 
-                // Pequeño delay para que el usuario vea qué ha pulsado antes de que se cierre
+                // Delay para que el usuario vea qué ha pulsado antes de que se cierre
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -947,25 +987,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
-        builder.setNegativeButton(getString(R.string.cerrar), null); // Añadimos un botón de cerrar por si el usuario se arrepiente
+        builder.setNegativeButton(getString(R.string.cerrar), null);
         builder.show();
     }
 
+    // Pinta todos los puntitos de las estaciones en el mapa
     private void redibujarCapaParadas(int index) {
         limpiarMarcadoresParadasLibres();
 
-        // 1. Apagamos la capa KML de bidegorris si estaba encendida previamente
         if (capaBidegorris != null && capaBidegorris.isLayerOnMap()) {
             capaBidegorris.removeLayerFromMap();
         }
 
         if (index == 0) return;
 
-        // Arreglamos el array para que coincida exactamente con las opciones del menú
         String[] tiposDB = {"", "Bilbaobizi", "Bilbobus", "Bizkaibus", "Euskotren", "Metro", "Renfe", "Tranvía"};
         String tipoSeleccionado = tiposDB[index];
 
-        // 2. Si es Bilbaobizi, cargamos la capa KML de los bidegorris
+        // Bilbaobizi es especial, carga un archivo KML  desde raw en vez de leer de SQLite
         if ("Bilbaobizi".equals(tipoSeleccionado)) {
             if (campusMap != null) {
                 try {
@@ -977,10 +1016,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     Log.e("UnigoDAS", "Error cargando el KML", e);
                 }
             }
-            // no ponemos "return;" aquí para que siga y dibuje las paradas abajo
         }
 
-        // 3. Dibujamos las chinchetas (Paradas)
         float colorPinche = BitmapDescriptorFactory.HUE_RED;
         String tipoParaBaseDeDatos = tipoSeleccionado;
 
@@ -1013,7 +1050,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 builder.include(pos);
             }
 
-            // Si es Bilbaobizi hacemos zoom a toda Bizkaia, sino zoom a las paradas específicas
             if ("Bilbaobizi".equals(tipoSeleccionado)) {
                 LatLng centroBizkaia = new LatLng(43.263, -2.935);
                 campusMap.animateCamera(CameraUpdateFactory.newLatLngZoom(centroBizkaia, 11f));
@@ -1029,7 +1065,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void mostrarFiltrosTransporte() {
-        // Eliminamos el segundo parámetro del estilo
         com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
                 new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
 
@@ -1038,7 +1073,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
-        // Más padding para que "respire" mejor
         layout.setPadding(60, 40, 60, 20);
 
         TextView tvTiempo = new TextView(requireContext());
@@ -1052,7 +1086,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         layoutFechaHora.setWeightSum(2f);
         layoutFechaHora.setPadding(0, 16, 0, 16);
 
-        // Usamos MaterialButton estilo "Tonal" para que queden más bonitos y redondeados
         final com.google.android.material.button.MaterialButton btnFecha = new com.google.android.material.button.MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
         LinearLayout.LayoutParams pF = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         pF.setMarginEnd(8); btnFecha.setLayoutParams(pF);
@@ -1104,7 +1137,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         tvMedios.setTextColor(obtenerColorTextoSecundario());
         layout.addView(tvMedios);
 
-        // Checkboxes con color de acento
         final CheckBox cbBus = new CheckBox(requireContext()); cbBus.setText(getString(R.string.autobus)); cbBus.setChecked(usarBus);
         layout.addView(cbBus);
         final CheckBox cbMetro = new CheckBox(requireContext()); cbMetro.setText(getString(R.string.metro)); cbMetro.setChecked(usarMetro);
@@ -1196,24 +1228,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         String horaSalida; String horaLlegada; String infoCO2; int colorCO2;
     }
 
-    /**
-     * Detecta si el dispositivo está en modo oscuro
-     */
+
+     //Detecta si el dispositivo está en modo oscuro
+
     private boolean isDarkModeOnDevice() {
         int nightModeFlags = getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
         return nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES;
     }
 
-    /**
-     * Detecta si un color es demasiado claro (poco contraste con fondo blanco)
-     * Retorna true si el color tiene alta luminosidad
-     */
+
     private boolean esColorDemasiadoClaro(int color) {
         int red = Color.red(color);
         int green = Color.green(color);
         int blue = Color.blue(color);
 
-        // Calcular luminosidad relativa (fórmula W3C simplificada)
         double luminosidad = (0.299 * red + 0.587 * green + 0.114 * blue) / 255.0;
 
         // Si la luminosidad es mayor a 0.75, el color es muy claro (cercano al blanco)
@@ -1222,7 +1250,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void iniciarRutaHaciaDestino(String titulo, double latDestino, double lngDestino) {
-        // Primero, aplicamos las preferencias (que es lo que establece el modo de transporte por defecto)
+        // Primero, aplicamos las preferencias
         cargarAjustesMapa();
 
         // Luego, disparamos el cálculo de la ruta con el modo de transporte recién leído.

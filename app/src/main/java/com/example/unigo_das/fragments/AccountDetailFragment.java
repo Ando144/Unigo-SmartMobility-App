@@ -27,7 +27,6 @@ public class AccountDetailFragment extends Fragment {
         tvName.setText(prefs.getString("user_name", "Juan Pérez"));
 
         view.findViewById(R.id.btnChangePassword).setOnClickListener(v -> {
-            // Sin lógica funcional por ahora
         });
 
         return view;

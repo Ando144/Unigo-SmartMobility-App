@@ -21,7 +21,6 @@ public class ProfileDialogFragment extends DialogFragment {
         void onRemovePhoto();
     }
 
-    // Nuevo callback para pasar la URI de la imagen seleccionada
     public interface OnImageSelectedListener {
         void onImageSelected(Intent data);
     }
@@ -75,11 +74,8 @@ public class ProfileDialogFragment extends DialogFragment {
     }
 
     private void abrirGaleria() {
-        // Usar el imageSelectedListener para comunicarse con SettingsFragment
         if (imageSelectedListener != null) {
-            // Crear un launcher temporal (esto se manejará en SettingsFragment)
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            // Devolver el intent a SettingsFragment para que use su propio launcher
             imageSelectedListener.onImageSelected(intent);
         }
     }

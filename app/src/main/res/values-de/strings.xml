@@ -272,6 +272,12 @@
     <string name="creado_por_jon_ander_duque_asier_faraig_y_andoni_ortiz_de_zarate">Erstellt von Jon Ander Duque, Asier Faraig und Andoni Ortiz de Zarate</string>
     <string name="versi_n_de_la_aplicaci_n">App-Version</string>
 
+    <string name="fallo_cr_tico_respuesta_vac_a_del_servidor_php_crash">Kritischer Fehler: Leere Serverantwort (PHP Crash)</string>
+    <string name="error_al_procesar_respuesta_del_servidor">Fehler beim Verarbeiten der Serverantwort</string>
+    <string name="error_en_la_conexi_n">Verbindungsfehler</string>
+    <string name="error_de_red_o_credenciales_incorrectas">Netzwerkfehler oder falsche Anmeldedaten</string>
+    <string name="error_de_conexi_n_con_el_servidor">Serververbindungsfehler</string>
+
     <string-array name="nombres_transporte">
         <item>Öffentlicher Verkehr</item>
         <item>Fahrrad</item>

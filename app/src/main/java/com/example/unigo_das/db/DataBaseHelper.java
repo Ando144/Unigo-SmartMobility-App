@@ -83,7 +83,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return idUsuario;
     }
 
-    // AÑADIDO PARÁMETRO UBICACION - Modificado para actualizar si ya existe (para cambio de idioma)
+    // Modificado para actualizar si ya existe (para cambio de idioma)
     public boolean insertarCentro(String id_centro, String nombre, String universidad, String descripcion, String ubicacion, double latitud, double longitud) {
         SQLiteDatabase bd = getWritableDatabase();
         ContentValues nuevo = new ContentValues();
@@ -95,7 +95,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         nuevo.put("latitud", latitud);
         nuevo.put("longitud", longitud);
         
-        // Usamos IGNORE para no fallar si existe, y luego UPDATE para refrescar los campos de texto
+        // IGNORE para no fallar si existe, y luego UPDATE para refrescar los campos de texto
         long resultado = bd.insertWithOnConflict("Centros", null, nuevo, SQLiteDatabase.CONFLICT_IGNORE);
         if (resultado == -1) {
             bd.update("Centros", nuevo, "id_centro=?", new String[]{id_centro});

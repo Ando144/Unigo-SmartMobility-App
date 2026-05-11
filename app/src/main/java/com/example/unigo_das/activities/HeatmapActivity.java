@@ -52,7 +52,7 @@ public class HeatmapActivity extends AppCompatActivity implements OnMapReadyCall
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bilbao, 10f));
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-        // Creamos el proveedor de la capa térmica (TileOverlay)
+        // Creamos el proveedor de la capa térmica
         TileProvider tileProvider = new UrlTileProvider(256, 256) {
             @Override
             public URL getTileUrl(int x, int y, int zoom) {
@@ -60,10 +60,10 @@ public class HeatmapActivity extends AppCompatActivity implements OnMapReadyCall
                 String url;
 
                 if ("AIRE".equals(tipoMapa)) {
-                    // API de Calidad del Aire de Google (Índice UAQI)
+                    // API de Calidad del Aire de Google
                     url = "https://airquality.googleapis.com/v1/mapTypes/UAQI_INDIGO_PERSIAN/heatmapTiles/" + zoom + "/" + x + "/" + y + "?key=" + apiKey;
                 } else {
-                    // API de Polen de Google (Árboles - TREE_UPI)
+                    // API de Polen de Google
                     url = "https://pollen.googleapis.com/v1/mapTypes/TREE_UPI/heatmapTiles/" + zoom + "/" + x + "/" + y + "?key=" + apiKey;
                 }
 
@@ -75,7 +75,6 @@ public class HeatmapActivity extends AppCompatActivity implements OnMapReadyCall
             }
         };
 
-        // Superponemos la capa térmica eliminando el "Fade In" para que la carga se perciba instantánea
         googleMap.addTileOverlay(new TileOverlayOptions()
                 .tileProvider(tileProvider)
                 .fadeIn(false)

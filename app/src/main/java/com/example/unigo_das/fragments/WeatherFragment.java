@@ -100,6 +100,7 @@ public class WeatherFragment extends Fragment {
             }
         });
 
+        // Le damos esquinas redondeadas al radar por código para que encaje con el diseño de las tarjetas
         wvRadarLluvia.setOutlineProvider(new android.view.ViewOutlineProvider() {
             @Override
             public void getOutline(android.view.View view, android.graphics.Outline outline) {
@@ -108,6 +109,8 @@ public class WeatherFragment extends Fragment {
         });
         wvRadarLluvia.setClipToOutline(true);
 
+        // Solucionamos el problema del scroll. Al tocar el WebView, le decimos al padre (el ScrollView)
+        // que no intercepte el toque, así podemos mover el mapa libremente sin que la pantalla suba o baje.
         wvRadarLluvia.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -129,9 +132,12 @@ public class WeatherFragment extends Fragment {
         startActivity(intent);
     }
 
+    // Metodo principal que coordina los datos del clima
     private void obtenerUbicacionYClima() {
         if (!isAdded() || getContext() == null) return;
 
+        // Si no nos han dado permisos de ubicación, cargamos Bilbao por defecto
+        // para que la pantalla no se quede en blanco.
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             actualizarClimaConNombre(43.26, -2.94, "Bilbao");
             return;
@@ -177,6 +183,8 @@ public class WeatherFragment extends Fragment {
         obtenerNivelPolen(lat, lon);
     }
 
+    // A diferencia de OpenMeteo, la API de Google requiere que le pasemos las coordenadas
+    // en formato JSON dentro de una petición POST, por eso preparamos el 'body' primero.
     private void obtenerCalidadAire(double lat, double lon) {
         String url = "https://airquality.googleapis.com/v1/currentConditions:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY;
 
@@ -192,6 +200,8 @@ public class WeatherFragment extends Fragment {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
+                            // Muy importante comprobar isAdded() en los callbacks  para que la app
+                            // no pete si el usuario ya ha cambiado de pestaña cuando llega la respuesta.
                             if (!isAdded() || getView() == null) return;
                             try {
                                 String categoriaIngles = response.getJSONArray("indexes")
@@ -227,6 +237,7 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    // Petición GET  a la API del polen de Google
     private void obtenerNivelPolen(double lat, double lon) {
         String url = "https://pollen.googleapis.com/v1/forecast:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY +
                 "&location.latitude=" + lat +
@@ -244,6 +255,8 @@ public class WeatherFragment extends Fragment {
                                 return;
                             }
 
+                            // Google devuelve varios tipos de polen (hierba, árboles, maleza).
+                            // Recorremos el array y nos quedamos con el valor más alto para avisar al usuario.
                             JSONObject daily = response.getJSONArray("dailyInfo").getJSONObject(0);
                             String nivelMaximo = "None";
 
@@ -336,6 +349,7 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    // Cargamos el mapa de radar mediante un iframe en el WebView
     private void cargarRadarRainViewer() {
         WebSettings settings = wvRadarLluvia.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -346,6 +360,8 @@ public class WeatherFragment extends Fragment {
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
 
+        // Interceptamos las URLs para evitar que si el usuario clica en un logo o enlace del mapa,
+        // se abra el navegador del móvil y lo saque de la aplicación.
         wvRadarLluvia.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest request) {
@@ -356,6 +372,7 @@ public class WeatherFragment extends Fragment {
         wvRadarLluvia.loadUrl("https://www.rainviewer.com/map.html?loc=43.26,-2.93,8&oFa=0&oC=1&oU=0&oCS=1&oF=0&oAP=1&c=1&o=83&lm=0&layer=radar&sm=1&sn=1");
     }
 
+    // Petición a OpenData Euskadi. Como devuelven XML puro en vez de JSON, usamos StringRequest
     private void obtenerPronosticoOpenData() {
         String urlXmlOpenData = "https://opendata.euskadi.eus/contenidos/prevision_tiempo/met_forecast_zone/opendata/met_forecast_zone.xml";
 
@@ -376,6 +393,7 @@ public class WeatherFragment extends Fragment {
         requestQueue.add(peticion);
     }
 
+    // Parseo manual del documento XML de Euskalmet
     private void procesarXmlOpenData(String xml) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -383,11 +401,14 @@ public class WeatherFragment extends Fragment {
             InputSource is = new InputSource(new StringReader(xml));
             Document doc = builder.parse(is);
 
+            // Buscamos directamente el areaId 8 que corresponde a la zona Gran Bilbao
             NodeList areas = doc.getElementsByTagName("areaForecast");
             for (int i = 0; i < areas.getLength(); i++) {
                 Element area = (Element) areas.item(i);
                 if (area.getAttribute("areaId").equals("8")) {
                     NodeList periods = area.getElementsByTagName("periodData");
+
+                    // Nos interesa solo el pronóstico del hoy
                     for (int j = 0; j < periods.getLength(); j++) {
                         Element period = (Element) periods.item(j);
                         if (period.getAttribute("periodDay").equals("today")) {
@@ -396,6 +417,8 @@ public class WeatherFragment extends Fragment {
                                 Element descElement = (Element) descriptions.item(0);
                                 String idioma = java.util.Locale.getDefault().getLanguage();
 
+                                // Euskalmet solo provee textos en CAstellano y Euskera.
+                                // Si el usuario tiene la app en Inglés, llamamos a ML Kit para traducirlo al vuelo.
                                 if (idioma.equals("es") || idioma.equals("eu")) {
                                     String textoNativo = descElement.getElementsByTagName(idioma).item(0).getTextContent().trim();
                                     if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoNativo);
@@ -415,6 +438,7 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    // Utiliza los modelos de Google ML Kit locales para traducir textos offline
     private void traducirConIA(String textoEspanol, String idiomaDestino) {
         if (!isAdded()) return;
         String mlKitLang = TranslateLanguage.fromLanguageTag(idiomaDestino);
@@ -431,6 +455,7 @@ public class WeatherFragment extends Fragment {
         final Translator traductor = Translation.getClient(options);
         DownloadConditions conditions = new DownloadConditions.Builder().build();
 
+        // Si es la primera vez que se usa, descarga el paquete de idioma
         traductor.downloadModelIfNeeded(conditions)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -447,6 +472,7 @@ public class WeatherFragment extends Fragment {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        // si falla la descarga o traducción, mostramos la versión en español original
                         if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
                     }
                 });
@@ -494,6 +520,7 @@ public class WeatherFragment extends Fragment {
 
         iv.setImageResource(resId);
 
+        // Si es el icono principal le damos el color rojo , sino lo dejamos con su color por defecto
         if (iv == ivIconoClimaPrincipal) {
             if (tvDescripcionClima != null) tvDescripcionClima.setText(desc);
             iv.setColorFilter(android.graphics.Color.parseColor("#D32F2F"));
@@ -502,10 +529,13 @@ public class WeatherFragment extends Fragment {
         }
     }
 
+    // Lee la BD local para saber qué campus están en favoritos e crea las tarjetas
     private void cargarClimaFavoritos(View view) {
         if (!isAdded()) return;
         android.widget.GridLayout contenedor = view.findViewById(R.id.glFavoritosContainer);
         if (contenedor == null) return;
+
+        // Vaciamos el contenedor primero para evitar que se dupliquen las tarjetas si volvemos a esta pantalla
         contenedor.removeAllViews();
 
         DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
@@ -526,6 +556,7 @@ public class WeatherFragment extends Fragment {
             Centro centro = dbHelper.obtenerCentroPorId(idCampus);
 
             if (centro != null) {
+                // Inflamos el layout de la tarjeta a mano para cada centro guardado
                 View tarjeta = getLayoutInflater().inflate(R.layout.item_clima_favorito, contenedor, false);
                 TextView tvNombre = tarjeta.findViewById(R.id.tvNombreCampus);
                 TextView tvTemp = tarjeta.findViewById(R.id.tvTempCampus);
@@ -542,6 +573,7 @@ public class WeatherFragment extends Fragment {
                     tvUni.setTextColor(android.graphics.Color.parseColor("#1976D2"));
                 }
 
+                // Llamada individual a la API para cada tarjeta
                 obtenerClimaConCola(centro.getLatitud(), centro.getLongitud(), tvTemp);
 
                 android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams();
@@ -550,14 +582,13 @@ public class WeatherFragment extends Fragment {
                 params.setMargins(10, 10, 10, 20);
 
                 tarjeta.setLayoutParams(params);
-
                 contenedor.addView(tarjeta);
             }
         }
     }
 
+    // Petición  a OpenMeteo: pedimos temperatura actual, UV máximo diario y horas de sol todo de golpe
     private void obtenerClimaPorCoordenadas(double latitud, double longitud, final ImageView ivIcono, final TextView tvTemp) {
-        // Cambiamos a 'daily=uv_index_max' que es 100% estable
         String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitud +
                 "&longitude=" + longitud +
                 "&current_weather=true" +
@@ -570,7 +601,6 @@ public class WeatherFragment extends Fragment {
                     public void onResponse(JSONObject response) {
                         if (!isAdded() || getView() == null) return;
                         try {
-                            // 1. Clima Principal
                             if (response.has("current_weather")) {
                                 JSONObject currentWeather = response.getJSONObject("current_weather");
                                 double temperatura = currentWeather.optDouble("temperature", 0.0);
@@ -579,22 +609,19 @@ public class WeatherFragment extends Fragment {
                                 if (ivIcono != null) asignarIconoYTexto(codigoClima, ivIcono);
                             }
 
-                            // 2. Datos Diarios (UV y Luz)
                             if (response.has("daily")) {
                                 JSONObject dailyParams = response.getJSONObject("daily");
 
-                                // Índice UV Máximo del día
                                 if (dailyParams.has("uv_index_max")) {
                                     double uvIndex = dailyParams.getJSONArray("uv_index_max").optDouble(0, 0.0);
                                     actualizarTarjetaUV(uvIndex);
                                 }
 
-                                // Horas de Luz
                                 if (dailyParams.has("sunrise") && dailyParams.has("sunset")) {
                                     String amanecerIso = dailyParams.getJSONArray("sunrise").optString(0, "");
                                     String anochecerIso = dailyParams.getJSONArray("sunset").optString(0, "");
 
-                                    // Extraemos solo la hora si el formato "YYYY-MM-DDTHH:MM" es correcto
+                                    // Limpiamos la fecha que nos manda la API para quedarnos únicamente con la hora y los minutos
                                     if (amanecerIso.length() >= 16 && anochecerIso.length() >= 16) {
                                         String amanecer = amanecerIso.substring(11, 16);
                                         String anochecer = anochecerIso.substring(11, 16);

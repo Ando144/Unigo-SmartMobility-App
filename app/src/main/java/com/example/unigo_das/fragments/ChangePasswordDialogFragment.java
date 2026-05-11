@@ -95,13 +95,12 @@ public class ChangePasswordDialogFragment extends DialogFragment {
 
         WorkManager.getInstance(requireContext()).enqueue(workRequest);
 
-        // Usamos getWorkInfoByIdLiveData con observeForever para que funcione aunque el diálogo se cierre
+        // Usamos 'getWorkInfoByIdLiveData' con observeForever para que funcione aunque el diálogo se cierre
         WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(workRequest.getId())
                 .observeForever(new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
                         if (workInfo != null && workInfo.getState().isFinished()) {
-                            // Quitamos el observer para evitar fugas de memoria
                             WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(workRequest.getId())
                                     .removeObserver(this);
 
@@ -110,11 +109,9 @@ public class ChangePasswordDialogFragment extends DialogFragment {
                             if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
                                 procesarRespuestaCambio(response, dialog);
                             } else {
-                                // Si el worker falló (timeout, etc.)
                                 if (getContext() != null) {
                                     Toast.makeText(getContext(), R.string.network_error, Toast.LENGTH_LONG).show();
                                 }
-                                // Re-habilitar botones si el diálogo sigue abierto
                                 if (dialog.isShowing()) {
                                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                                     dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(true);
@@ -139,16 +136,13 @@ public class ChangePasswordDialogFragment extends DialogFragment {
             JSONObject json = (JSONObject) parser.parse(jsonResponse);
 
             if (json.containsKey("success") && (Boolean) json.get("success")) {
-                // Cerrar el diálogo inmediatamente
                 if (dialog.isShowing()) {
                     dialog.dismiss();
                 }
-                // Mostrar el Toast después de cerrar el diálogo
                 Toast.makeText(getContext(), R.string.password_changed_success, Toast.LENGTH_LONG).show();
             } else {
                 String error = json.containsKey("error") ? (String) json.get("error") : getString(R.string.error_generic);
                 Toast.makeText(getContext(), error, Toast.LENGTH_LONG).show();
-                // Re-habilitar botones para que el usuario pueda corregir
                 if (dialog.isShowing()) {
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                     dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(true);

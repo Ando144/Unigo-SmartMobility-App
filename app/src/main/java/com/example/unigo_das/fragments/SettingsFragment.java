@@ -66,6 +66,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     private SwitchPreferenceCompat darkModePref;
     private ActivityResultLauncher<Intent> galeriaLauncher;
 
+    // Launcher para solicitar permisos de notificaciones.
+    // Si el usuario acepta, disparamos la programación de la alarma; si rechaza, desmarcamos el switch automáticamente
     private final androidx.activity.result.ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), new androidx.activity.result.ActivityResultCallback<Boolean>() {
                 @Override
@@ -92,7 +94,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Arreglar la superposición visual con el Insets listener
         ViewCompat.setOnApplyWindowInsetsListener(view, new androidx.core.view.OnApplyWindowInsetsListener() {
             @NonNull
             @Override
@@ -106,6 +107,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        // Inflamos la jerarquía desde el XML, pero toda la lógica la manejamos aquí.
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
         customPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
@@ -121,7 +123,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
             horaPref.setSummary(prefs.getString("pref_hora_notificacion", "07:30"));
 
-            // Cargar estado inicial del switch desde UnigoPrefs
             boolean notifActivada = false;
             if (!userEmail.isEmpty()) {
                 notifActivada = customPrefs.getBoolean("pref_notificaciones_" + userEmail, false);
@@ -139,6 +140,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                             prefs.edit().putString("pref_hora_notificacion", horaFormateada).apply();
                             horaPref.setSummary(horaFormateada);
 
+                            // Si cambiamos la hora y el switch está activo, ponemos la alarma vieja con la nueva hora.
                             if (switchNotif.isChecked()) {
                                 programarAlarmaDiaria(requireContext(), hourOfDay, minute);
                             }
@@ -150,7 +152,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             switchNotif.setOnPreferenceChangeListener((preference, newValue) -> {
                 boolean activado = (Boolean) newValue;
 
-                // Guardar preferencia por usuario
                 if (!userEmail.isEmpty()) {
                     customPrefs.edit().putBoolean("pref_notificaciones_" + userEmail, activado).apply();
                 }
@@ -174,7 +175,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
 
         // ===================================================================
-        // DIÁLOGO DE TRANSPORTE FAVORITO
+        // TRANSPORTE FAVORITO
         // ===================================================================
         final androidx.preference.Preference transportePref = findPreference("pref_transporte_favorito");
         if (transportePref != null) {
@@ -182,7 +183,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             final String[] nombresTransporte = getResources().getStringArray(R.array.nombres_transporte);
             final String[] valoresTransporte = getResources().getStringArray(R.array.valores_transporte);
 
-            // Leer de UnigoPrefs si hay usuario
             String actual;
             if (!userEmail.isEmpty()) {
                 actual = customPrefs.getString("transporte_favorito_" + userEmail, "publico");
@@ -211,7 +211,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                 builder.setSingleChoiceItems(nombresTransporte, seleccionado, (dialog, which) -> {
                     String valorElegido = valoresTransporte[which];
 
-                    // Guardar en UnigoPrefs si hay usuario
                     if (!userEmail.isEmpty()) {
                         customPrefs.edit().putString("transporte_favorito_" + userEmail, valorElegido).apply();
                     } else {
@@ -228,7 +227,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
 
         // ===================================================================
-        // DIÁLOGO DE ESTILO DE MAPA
+        // ESTILO DE MAPA
         // ===================================================================
         final androidx.preference.Preference mapaPref = findPreference("pref_tipo_mapa");
         if (mapaPref != null) {
@@ -236,7 +235,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             final String[] nombresMapa = getResources().getStringArray(R.array.nombres_tipo_mapa);
             final String[] valoresMapa = getResources().getStringArray(R.array.valores_tipo_mapa);
 
-            // Leer de UnigoPrefs si hay usuario
             String actualMapa;
             if (!userEmail.isEmpty()) {
                 actualMapa = customPrefs.getString("tipo_mapa_" + userEmail, "1");
@@ -265,7 +263,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                 builder.setSingleChoiceItems(nombresMapa, seleccionado, (dialog, which) -> {
                     String valorElegido = valoresMapa[which];
 
-                    // Guardar en UnigoPrefs si hay usuario
                     if (!userEmail.isEmpty()) {
                         customPrefs.edit().putString("tipo_mapa_" + userEmail, valorElegido).apply();
                     } else {
@@ -282,11 +279,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
 
         // ===================================================================
-        // SWITCH COCHE ELÉCTRICO - Guardar por usuario
+        // COCHE ELÉCTRICO - Guardado por usuario
         // ===================================================================
         SwitchPreferenceCompat cocheElectricoPref = findPreference("pref_coche_electrico");
         if (cocheElectricoPref != null) {
-            // Cargar estado inicial
             boolean cocheElecState = false;
             if (!userEmail.isEmpty()) {
                 cocheElecState = customPrefs.getBoolean("pref_coche_electrico_" + userEmail, false);
@@ -305,7 +301,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
 
         // ===================================================================
-        // OPEN DATA
+        // OPEN DATA -- CREDITOS
         // ===================================================================
         androidx.preference.Preference openDataPref = findPreference("pref_open_data");
         if (openDataPref != null) {
@@ -341,6 +337,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         setupGeneralConfig();
     }
 
+    // Utilizamos AlarmManager para delegar en el sistema operativo la ejecución de nuestra notificación en un momento exacto.
     private void programarAlarmaDiaria(Context context, int hora, int minuto) {
         java.util.Calendar calendario = java.util.Calendar.getInstance();
         calendario.set(java.util.Calendar.HOUR_OF_DAY, hora);
@@ -348,6 +345,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         calendario.set(java.util.Calendar.SECOND, 0);
         calendario.set(java.util.Calendar.MILLISECOND, 0);
 
+        // Si la hora elegida ya ha pasado en el día de hoy, le sumamos 1 día al calendario.
         if (calendario.getTimeInMillis() <= System.currentTimeMillis()) {
             calendario.add(java.util.Calendar.DAY_OF_YEAR, 1);
         }
@@ -361,6 +359,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
         android.app.PendingIntent ibc = android.app.PendingIntent.getBroadcast(context, 1, intentBC, flags);
 
+        // 'setExactAndAllowWhileIdle' asegura que la alarma se dispare incluso si el móvil está en reposo.
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             gestor.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, calendario.getTimeInMillis(), ibc);
         } else {
@@ -381,6 +380,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
         android.app.PendingIntent ibc = android.app.PendingIntent.getBroadcast(context, 1, intentBC, flags);
 
+        // Al cancelarla, el sistema operativo desvincula ese PendingIntent de sus rutinas.
         gestor.cancel(ibc);
     }
 
@@ -431,18 +431,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
     }
 
+    // Configura dinámicamente qué partes del menú se muestran según si es un Invitado o un Usuario con cuenta.
     private void setupAccountSection(boolean isGuest) {
         Preference myAccount = findPreference("pref_my_account");
         Preference logout = findPreference("pref_logout");
         Preference login = findPreference("pref_login");
 
-        // Nuevas preferencias de información
         Preference emailInfo = findPreference("pref_email_info");
         Preference nameInfo = findPreference("pref_name_info");
         Preference changePassword = findPreference("pref_change_password");
 
         if (isGuest) {
-            // Ocultar todo lo de usuario registrado
             if (myAccount != null) myAccount.setVisible(false);
             if (logout != null) logout.setVisible(false);
             if (emailInfo != null) emailInfo.setVisible(false);
@@ -461,11 +460,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                 });
             }
         } else {
-            // Usuario con sesión iniciada: mostrar info y ocultar login
             if (login != null) login.setVisible(false);
-            if (myAccount != null) myAccount.setVisible(false); // Ocultamos "Mi cuenta"
+            if (myAccount != null) myAccount.setVisible(false);
 
-            // Mostrar y configurar las filas de información
             String userEmail = customPrefs.getString("user_email", "");
             String userName = customPrefs.getString("user_name", getString(R.string.name_label));
 
@@ -527,21 +524,20 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                                 public void onClick(final DialogInterface dialog, int which) {
                                     final String nuevoCodigo = codigos[which];
 
-                                    // 1. Cerramos el diálogo inmediatamente
+                                    //Cerramos el diálogo antes de aplicar el cambio de idioma.
+                                    // AppCompatDelegate reinicia la Activity al cambiar el Locale para redibujar los textos.
+                                    // Si el diálogo sigue abierto durante ese reinicio, la app crashea lanzando
+                                    // una excepción 'WindowLeaked' al perder la referencia de la ventana.
                                     dialog.dismiss();
 
-                                    // 2. Guardamos la preferencia personal del usuario
                                     String userEmail = customPrefs.getString("user_email", "");
                                     if (!userEmail.isEmpty()) {
                                         customPrefs.edit().putString("language_" + userEmail, nuevoCodigo).apply();
                                     }
 
-                                    // 3. Aplicamos el idioma con un pequeño retraso visual
                                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
                                         @Override
                                         public void run() {
-                                            // Esto reinicia la app y aplica los recursos automáticamente.
-                                            // IMPORTANTE: Ya NO llamamos a onLanguageChanged() ni a recreate()
                                             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(nuevoCodigo));
                                         }
                                     }, 150);
@@ -583,35 +579,22 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
     }
 
-    // Método auxiliar para que el resumen refleje el idioma actual al entrar
     private void actualizarSummaryIdioma(androidx.preference.Preference pref) {
         androidx.core.os.LocaleListCompat currentLocales = androidx.appcompat.app.AppCompatDelegate.getApplicationLocales();
         String lang = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
         switch (lang) {
-            case "eu":
-                pref.setSummary("Euskara");
-                break;
-            case "en":
-                pref.setSummary("English");
-                break;
-            case "fr":
-                pref.setSummary("Français");
-                break;
-            case "de":
-                pref.setSummary("Deutsch");
-                break;
-            case "it":
-                pref.setSummary("Italiano");
-                break;
-            default:
-                pref.setSummary("Castellano");
-                break;
+            case "eu": pref.setSummary("Euskara"); break;
+            case "en": pref.setSummary("English"); break;
+            case "fr": pref.setSummary("Français"); break;
+            case "de": pref.setSummary("Deutsch"); break;
+            case "it": pref.setSummary("Italiano"); break;
+            default: pref.setSummary("Castellano"); break;
         }
     }
 
     @Override
     public void onLanguageChanged() {
-        //El reinicio lo gestiona ahora AppCompatDelegate automáticamente.
+        // El reinicio lo gestiona ahora AppCompatDelegate automáticamente.
     }
 
     private void mostrarConfirmacionFoto(final Uri imageUri) {
@@ -661,6 +644,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
     }
 
+    // Proceso de subida de imagen "a pelo" utilizando HttpURLConnection nativo y encapsulación multipart/form-data.
+    // Volley suele dar problemas con archivos binarios pesados, así que montamos la cabecera HTTP a mano.
     private void guardarFotoPerfil(final Bitmap bitmap) {
         final String userEmail = customPrefs.getString("user_email", "");
         if (!userEmail.isEmpty()) {
@@ -669,15 +654,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             progressDialog.setCancelable(false);
             progressDialog.show();
 
+            // Las llamadas de red bloquean la interfaz. Desviamos el trabajo a un Thread en segundo plano.
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         File tempFile = new File(requireContext().getCacheDir(), "temp_profile.jpg");
                         FileOutputStream fos = new FileOutputStream(tempFile);
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos); // Comprimimos la imagen para no saturar el servidor
                         fos.close();
 
+                        // El boundary actúa como el "separador" de las distintas partes del formulario (texto e imagen)
                         String boundary = "*****" + System.currentTimeMillis() + "*****";
                         String url = "http://35.233.9.137/subir_foto.php";
 
@@ -688,14 +675,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
                         DataOutputStream dos = new DataOutputStream(connection.getOutputStream());
 
+                        // El email del usuario
                         dos.writeBytes("--" + boundary + "\r\n");
                         dos.writeBytes("Content-Disposition: form-data; name=\"email\"\r\n\r\n");
                         dos.writeBytes(userEmail + "\r\n");
 
+                        // El archivo de la imagen
                         dos.writeBytes("--" + boundary + "\r\n");
                         dos.writeBytes("Content-Disposition: form-data; name=\"foto\";filename=\"profile.jpg\"\r\n");
                         dos.writeBytes("Content-Type: image/jpeg\r\n\r\n");
 
+                        // Volcamos los bytes de la imagen directamente al stream de salida
                         FileInputStream fis = new FileInputStream(tempFile);
                         byte[] buffer = new byte[1024];
                         int bytesRead;
@@ -752,6 +742,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             }).start();
         }
     }
+
 
     private void eliminarFotoPerfil() {
         String userEmail = customPrefs.getString("user_email", "");

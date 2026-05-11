@@ -24,13 +24,14 @@ import com.example.unigo_das.activities.MainActivity;
 import com.example.unigo_das.adapters.CentroAdapter;
 import com.example.unigo_das.db.DataBaseHelper;
 import com.example.unigo_das.item.Centro;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder; // NUEVO IMPORT
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class SchoolFragment extends Fragment {
 
     private RecyclerView rvCentros;
     private CentroAdapter adapter;
     private List<Centro> listaCentros;
+    // Guardamos una copia intacta de la BD para poder filtrar sin tener que hacer queries contínuas a SQLite
     private List<Centro> listaOriginalCompletita;
     private SearchView searchView;
 
@@ -69,14 +70,17 @@ public class SchoolFragment extends Fragment {
             @Override
             public void onStarClick(Centro centro, int position) {
                 guardarFavorito(centro);
-                ordenarLista();
+                ordenarLista(); // Re-ordenamos para que el nuevo favorito suba arriba automáticamente
             }
         }, new CentroAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Centro centro) {
+                // Al hacer clic en un centro, lanzamos el diálogo de confirmación.
+                // Si el usuario acepta, delegamos la acción al MainActivity, que es quien controla el FragmentManager
+                // y puede inyectar los datos en el mapa sin romper la pila.
                 new MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.ruta_al_campus)
-                        .setIcon(R.drawable.ic_menu_school) // Añade el icono para hacerlo más visual
+                        .setIcon(R.drawable.ic_menu_school)
                         .setMessage(getString(R.string.quieres_abrir_el_mapa_para_ver_c_mo_llegar_a) + centro.getNombre() + "?")
                         .setPositiveButton(R.string.s_trazar_ruta, new DialogInterface.OnClickListener() {
                             @Override
@@ -149,6 +153,8 @@ public class SchoolFragment extends Fragment {
         return view;
     }
 
+    // Cargamos todos los centros de golpe desde SQLite y los cruzamos con los favoritos del usuario actual.
+    // Hacemos esto una sola vez  para optimizar memoria.
     private void cargarDatosDesdeBD() {
         listaOriginalCompletita = dbHelper.obtenerTodosLosCentros();
 
@@ -166,6 +172,8 @@ public class SchoolFragment extends Fragment {
         ordenarLista();
     }
 
+    // Metodo central del buscador. Combina el texto escrito con el botón de universidad pulsado.
+    // Filtramos siempre leyendo de 'listaOriginalCompletita' y machacamos 'listaCentros' con el resultado.
     private void aplicarFiltrosCombinados() {
         List<Centro> listaFiltrada = new ArrayList<>();
 
@@ -176,6 +184,7 @@ public class SchoolFragment extends Fragment {
                     (c.getDescripcion() != null && c.getDescripcion().toLowerCase().contains(busquedaActual.toLowerCase())) ||
                     c.getUniversidad().toLowerCase().contains(busquedaActual.toLowerCase());
 
+            // Solo añadimos si cumple tanto el botón de universidad como lo escrito en el buscador
             if (pasaFiltroUni && pasaFiltroTexto) {
                 listaFiltrada.add(c);
             }
@@ -190,6 +199,8 @@ public class SchoolFragment extends Fragment {
         }
     }
 
+    // Sincroniza la acción visual de la estrellita en el RecyclerView con la base de datos real.
+    // Usamos el ID de las SharedPreferences para asegurar que cada cuenta tenga su propia lista separada.
     private void guardarFavorito(Centro centro) {
         SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         int idUsuarioActual = prefs.getInt("user_id", 0);
@@ -201,6 +212,8 @@ public class SchoolFragment extends Fragment {
         }
     }
 
+    //  Prioridad a los centros marcados como favoritos .
+    // Si tienen el mismo estado (los dos con estrella, o los dos sin ella),  alfabéticamente.
     private void ordenarLista() {
         java.util.Collections.sort(listaCentros, new java.util.Comparator<Centro>() {
             @Override

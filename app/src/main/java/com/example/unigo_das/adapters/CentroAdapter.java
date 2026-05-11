@@ -231,15 +231,14 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
                 return R.drawable.foto_deusto;
 
             default:
-                // Devuelve una imagen gris por defecto si aún no tienes el plano de ese centro
-                // IMPORTANTE: Asegúrate de tener una imagen llamada ic_menu_school (o cámbialo por otro nombre válido)
+
                 return R.drawable.ic_menu_school;
         }
     }
 
     static class CentroViewHolder extends RecyclerView.ViewHolder {
         TextView tvNombre, tvUniUbi;
-        ImageView ivStar, ivLogo, ivExpand, ivMapaCentro; // Añadido ivMapaCentro
+        ImageView ivStar, ivLogo, ivExpand, ivMapaCentro;
         View layoutTransporte;
 
         CentroViewHolder(View itemView) {
@@ -251,7 +250,6 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             ivExpand = itemView.findViewById(R.id.ivExpand);
             layoutTransporte = itemView.findViewById(R.id.layoutTransporte);
 
-            // Enlazamos el nuevo ImageView y quitamos el TextView antiguo
             ivMapaCentro = itemView.findViewById(R.id.ivMapaCentro);
         }
     }

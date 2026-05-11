@@ -91,7 +91,7 @@ public class LanguageDialogFragment extends DialogFragment {
             prefs.edit().putString("language_" + userEmail, langCode).apply();
         }
 
-        // Notificar el cambio después de un pequeño delay
+        // Notificar el cambio después de un delay
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (isAdded() && listener != null) {
                 listener.onLanguageChanged();

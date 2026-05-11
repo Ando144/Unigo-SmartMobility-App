@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.core.os.LocaleListCompat;
+import androidx.lifecycle.Observer;
 import androidx.preference.PreferenceManager;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
@@ -25,8 +26,6 @@ import com.example.unigo_das.network.NetworkWorker;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import java.util.UUID;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -44,18 +43,50 @@ public class LoginActivity extends AppCompatActivity {
         btnRegister = findViewById(R.id.btnRegister);
         btnGuest = findViewById(R.id.btnGuest);
 
-        TextView btnLangEs = findViewById(R.id.btnLangEs);
-        TextView btnLangEu = findViewById(R.id.btnLangEu);
-        TextView btnLangEn = findViewById(R.id.btnLangEn);
-        TextView btnLangFr = findViewById(R.id.btnLangFr);
-        TextView btnLangDe = findViewById(R.id.btnLangDe);
-        TextView btnLangIt = findViewById(R.id.btnLangIt);
-        btnLangEs.setOnClickListener(v -> cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe, btnLangIt));
-        btnLangEu.setOnClickListener(v -> cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn, btnLangFr, btnLangDe, btnLangIt));
-        btnLangEn.setOnClickListener(v -> cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu, btnLangFr, btnLangDe, btnLangIt));
-        btnLangFr.setOnClickListener(v -> cambiarIdiomaLogin("fr", btnLangFr, btnLangEs, btnLangEu, btnLangEn, btnLangDe, btnLangIt));
-        btnLangDe.setOnClickListener(v -> cambiarIdiomaLogin("de", btnLangDe, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangIt));
-        btnLangIt.setOnClickListener(v -> cambiarIdiomaLogin("it", btnLangIt, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe));
+        final TextView btnLangEs = findViewById(R.id.btnLangEs);
+        final TextView btnLangEu = findViewById(R.id.btnLangEu);
+        final TextView btnLangEn = findViewById(R.id.btnLangEn);
+        final TextView btnLangFr = findViewById(R.id.btnLangFr);
+        final TextView btnLangDe = findViewById(R.id.btnLangDe);
+        final TextView btnLangIt = findViewById(R.id.btnLangIt);
+
+
+        btnLangEs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
+            }
+        });
+        btnLangEu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
+            }
+        });
+        btnLangEn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu, btnLangFr, btnLangDe, btnLangIt);
+            }
+        });
+        btnLangFr.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cambiarIdiomaLogin("fr", btnLangFr, btnLangEs, btnLangEu, btnLangEn, btnLangDe, btnLangIt);
+            }
+        });
+        btnLangDe.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cambiarIdiomaLogin("de", btnLangDe, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangIt);
+            }
+        });
+        btnLangIt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cambiarIdiomaLogin("it", btnLangIt, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe);
+            }
+        });
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -88,6 +119,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+
     private void ejecutarLogin(String email, String password) {
         Data inputData = new Data.Builder()
                 .putString("script", "login.php")
@@ -102,19 +134,24 @@ public class LoginActivity extends AppCompatActivity {
         WorkManager.getInstance(this).enqueue(loginRequest);
 
         WorkManager.getInstance(this).getWorkInfoByIdLiveData(loginRequest.getId())
-                .observe(this, workInfo -> {
-                    if (workInfo != null && workInfo.getState().isFinished()) {
-                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                            String response = workInfo.getOutputData().getString("response");
-                            procesarRespuestaLogin(response);
-                        } else {
-                            String errorResponse = workInfo.getOutputData().getString("response");
-                            procesarError(errorResponse);
+                .observe(this, new Observer<WorkInfo>() {
+                    @Override
+                    public void onChanged(WorkInfo workInfo) {
+                        if (workInfo != null && workInfo.getState().isFinished()) {
+                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                                String response = workInfo.getOutputData().getString("response");
+                                procesarRespuestaLogin(response);
+                            } else {
+                                String errorResponse = workInfo.getOutputData().getString("response");
+                                procesarError(errorResponse);
+                            }
                         }
                     }
                 });
     }
 
+    //Parsea la respuesta y vuelca toda la info del usuario en SharedPreferences
+    // para mantener la sesión abierta. También recupera los ajustes estéticos de esa persona en concreto.
     private void procesarRespuestaLogin(String jsonResponse) {
         try {
             JSONParser parser = new JSONParser();
@@ -127,6 +164,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
+
+                // Quitamos el modo invitado e inyectamos los datos clave de la sesión
                 editor.putString("user_email", email);
                 editor.putString("user_name", nombre);
                 editor.putBoolean("isGuest", false);
@@ -136,19 +175,21 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putInt("user_id", ((Long) json.get("id")).intValue());
                 }
 
-                // Guardar URL de la foto si existe
+                // Sincronizamos la URL de su foto de perfil en el servidor con el almacenamiento local
                 if (fotoUrl != null && !fotoUrl.isEmpty()) {
                     editor.putString("profile_photo_url_" + email, fotoUrl);
                 } else {
                     editor.remove("profile_photo_url_" + email);
                 }
 
+                // Rescatamos el idioma en el que el usuario dejó la app la última vez
                 String savedLang = prefs.getString("language_" + email, "es");
                 LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(savedLang);
                 AppCompatDelegate.setApplicationLocales(appLocales);
 
                 editor.apply();
 
+                // Recuperamos y aplicamos su modo oscuro preferido antes de saltar a la pantalla principal
                 aplicarTemaUsuario(email);
                 irAMainActivity();
             } else {
@@ -156,19 +197,19 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error: " + error, Toast.LENGTH_SHORT).show();
             }
         } catch (ParseException e) {
-            Toast.makeText(this, "Error al procesar respuesta del servidor", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_al_procesar_respuesta_del_servidor, Toast.LENGTH_SHORT).show();
         }
     }
 
+    // Cruza las preferencias de cuenta de este email con las preferencias globales del dispositivo
+    // para garantizar que si Rita la pollera entra con su cuenta, la app se ponga negra o blanca según lo dejó él.
     private void aplicarTemaUsuario(String email) {
         SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        // Obtener preferencia guardada para este usuario
         boolean isDarkMode = prefs.getBoolean("dark_mode_" + email,
                 defaultPrefs.getBoolean("modo_oscuro_activado", false));
 
-        // También actualizamos la preferencia general para mantener sincronización
         defaultPrefs.edit().putBoolean("modo_oscuro_activado", isDarkMode).apply();
 
         AppCompatDelegate.setDefaultNightMode(
@@ -182,18 +223,19 @@ public class LoginActivity extends AppCompatActivity {
                 JSONParser parser = new JSONParser();
                 JSONObject json = (JSONObject) parser.parse(errorResponse);
                 String error = (String) json.get("error");
-                Toast.makeText(this, error != null ? error : "Error en la conexión", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, error != null ? error : getString(R.string.error_en_la_conexi_n), Toast.LENGTH_SHORT).show();
             } catch (ParseException e) {
-                Toast.makeText(this, "Error de red o credenciales incorrectas", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.error_de_red_o_credenciales_incorrectas, Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, "Error de conexión con el servidor", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_de_conexi_n_con_el_servidor, Toast.LENGTH_SHORT).show();
         }
     }
 
     private void irAMainActivity() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
+        // Matamos la Activity de login para que al pulsar 'Atrás' el usuario no vuelva a ver el formulario
         finish();
     }
 
@@ -204,6 +246,7 @@ public class LoginActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    // Lógica para repintar la vista al momento seleccionando un nuevo Locale
     private void cambiarIdiomaLogin(String langCode, TextView activo, TextView... inactivos) {
         LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
         AppCompatDelegate.setApplicationLocales(appLocales);

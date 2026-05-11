@@ -40,8 +40,7 @@ public class ProfileHeaderPreference extends Preference {
                 String fotoUrl = prefs.getString("profile_photo_url_" + userEmail, null);
 
                 if (fotoUrl != null && !fotoUrl.isEmpty()) {
-                    // Cargar imagen desde URL usando una librería como Glide o Picasso
-                    // Si no tienes ninguna, puedes usar este método simple:
+
                     cargarImagenDesdeUrl(profileImage, fotoUrl);
                 } else {
                     profileImage.setImageResource(R.drawable.ic_account_circle);
@@ -51,7 +50,7 @@ public class ProfileHeaderPreference extends Preference {
     }
 
     private void cargarImagenDesdeUrl(ImageView imageView, String url) {
-        // Método simple sin librerías externas
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -63,7 +62,7 @@ public class ProfileHeaderPreference extends Preference {
                     InputStream input = connection.getInputStream();
                     final Bitmap bitmap = BitmapFactory.decodeStream(input);
 
-                    // Volver al hilo principal
+
                     ((android.app.Activity) getContext()).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

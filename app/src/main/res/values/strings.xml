@@ -288,6 +288,11 @@
     <string name="equipo_de_desarrollo">Equipo de Desarrollo</string>
     <string name="creado_por_jon_ander_duque_asier_faraig_y_andoni_ortiz_de_zarate">Creado por Jon Ander Duque, Asier Faraig y Andoni Ortiz de Zarate</string>
     <string name="versi_n_de_la_aplicaci_n">Versión de la aplicación</string>
+    <string name="fallo_cr_tico_respuesta_vac_a_del_servidor_php_crash">Fallo crítico: Respuesta vacía del servidor (PHP Crash)</string>
+    <string name="error_al_procesar_respuesta_del_servidor">Error al procesar respuesta del servidor</string>
+    <string name="error_en_la_conexi_n">Error en la conexión</string>
+    <string name="error_de_red_o_credenciales_incorrectas">Error de red o credenciales incorrectas</string>
+    <string name="error_de_conexi_n_con_el_servidor">Error de conexión con el servidor</string>
 
     <string-array name="nombres_transporte">
         <item>Transporte Público</item>

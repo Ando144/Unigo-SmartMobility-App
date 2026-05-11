@@ -317,6 +317,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     // No reiniciamos isCocheElectrico porque ahora es una preferencia persistente
                     timestampSalidaPersonalizado = 0;
 
+                    // Evitamos llamadas dobles a la API y restablecemos el favorito
+                    destinoActual = null;
+                    cargarAjustesMapa();
+
                     dibujarLineaHastaDestino(centroSeleccionado.getNombre(), centroSeleccionado.getLatitud(), centroSeleccionado.getLongitud(), currentTransportMode);
                 }
             }
@@ -341,7 +345,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    // --- NUEVO MÉTODO PARA APLICAR LAS PREFERENCIAS ---
+    // --- MÉTODO PARA APLICAR LAS PREFERENCIAS ---
     private void cargarAjustesMapa() {
         if (getContext() == null) return;
         android.content.SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext());
@@ -362,21 +366,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         this.isCocheElectrico = prefs.getBoolean("pref_coche_electrico", false);
 
         // 3. Transporte Favorito
-        String transporteFav = prefs.getString("pref_transporte_favorito", "publico");
-        RadioGroup rgModoTransporte = getView() != null ? getView().findViewById(R.id.rg_modo_transporte) : null;
+        // Solo sobreescribimos los botones si el mapa está limpio.
+        // Si destinoActual NO es null, significa que el usuario está viendo una ruta,
+        // así que respetamos la que tenga seleccionada.
+        if (destinoActual == null) {
+            String transporteFav = prefs.getString("pref_transporte_favorito", "publico");
+            RadioGroup rgModoTransporte = getView() != null ? getView().findViewById(R.id.rg_modo_transporte) : null;
 
-        switch (transporteFav) {
-            case "publico":
-                currentTransportMode = "transit";
-                if (rgModoTransporte != null) rgModoTransporte.check(R.id.rb_transporte_publico);
-                break;
-            case "bici":
-                currentTransportMode = "bicycling";
-                if (rgModoTransporte != null) rgModoTransporte.check(R.id.rb_bici);
-                break;
-            case "pie":
-                currentTransportMode = "walking";
-                break;
+            switch (transporteFav) {
+                case "publico":
+                    currentTransportMode = "transit";
+                    if (rgModoTransporte != null)
+                        rgModoTransporte.check(R.id.rb_transporte_publico);
+                    break;
+                case "bici":
+                    currentTransportMode = "bicycling";
+                    if (rgModoTransporte != null) rgModoTransporte.check(R.id.rb_bici);
+                    break;
+                case "pie":
+                    currentTransportMode = "walking";
+                    if (rgModoTransporte != null) rgModoTransporte.check(R.id.rb_andando);
+                    break;
+            }
         }
     }
 
@@ -875,6 +886,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         llListaInstrucciones.removeAllViews();
         destinoActual = null; tituloDestinoActual = null;
         timestampSalidaPersonalizado = 0;
+
+        // Al limpiar la pantalla, los botones vuelven a tu transporte favorito
+        cargarAjustesMapa();
+
         if (fabCapasTransporte != null) {
             fabCapasTransporte.setVisibility(View.VISIBLE);
         }

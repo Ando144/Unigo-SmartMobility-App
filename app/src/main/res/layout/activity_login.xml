@@ -7,32 +7,45 @@
     android:fitsSystemWindows="true"
     android:background="@color/bg_light">
 
-    <!-- Icono superior en Gris Oscuro -->
     <ImageView
         android:id="@+id/ivLogo"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="56dp"
-        android:src="@drawable/ic_logo_unigo"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/logo_unigo"
+        android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/bilbao_grey_dark" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
-    <!-- Título Principal en Rojo Bilbao -->
-    <TextView
-        android:id="@+id/tvTitle"
+    <LinearLayout
+        android:id="@+id/llTitleContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/login_title"
-        android:textColor="@color/bilbao_red"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        android:letterSpacing="0.05"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivLogo" />
+        app:layout_constraintTop_toBottomOf="@+id/ivLogo">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="U"
+            android:textColor="@color/bilbao_red"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NIGO"
+            android:textColor="@color/bilbao_grey_dark"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvSubtitle"
@@ -42,19 +55,19 @@
         android:text="@string/login_subtitle"
         android:textColor="@color/text_medium"
         android:textSize="16sp"
+        android:letterSpacing="0.02"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/llTitleContainer" />
 
-    <!-- Tarjeta Blanca para el formulario -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardForm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="32dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
         app:cardBackgroundColor="@color/white"
         app:strokeWidth="0dp"
         app:layout_constraintTop_toBottomOf="@+id/tvSubtitle"
@@ -66,10 +79,9 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Detalle de color superior (Acento rojo) -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="6dp"
+                android:layout_height="4dp"
                 android:background="@color/bilbao_red" />
 
             <LinearLayout
@@ -78,16 +90,15 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
-                <!-- Campo Email -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/login_email_hint"
-                    app:boxCornerRadiusBottomEnd="4dp"
-                    app:boxCornerRadiusBottomStart="4dp"
-                    app:boxCornerRadiusTopEnd="4dp"
-                    app:boxCornerRadiusTopStart="4dp">
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etEmail"
@@ -97,7 +108,6 @@
                         android:textColor="@color/text_dark"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Campo Contraseña -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
@@ -105,10 +115,10 @@
                     android:layout_marginTop="16dp"
                     android:hint="@string/login_password_hint"
                     app:endIconMode="password_toggle"
-                    app:boxCornerRadiusBottomEnd="4dp"
-                    app:boxCornerRadiusBottomStart="4dp"
-                    app:boxCornerRadiusTopEnd="4dp"
-                    app:boxCornerRadiusTopStart="4dp">
+                    app:boxCornerRadiusBottomEnd="8dp"
+                    app:boxCornerRadiusBottomStart="8dp"
+                    app:boxCornerRadiusTopEnd="8dp"
+                    app:boxCornerRadiusTopStart="8dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etPassword"
@@ -118,19 +128,18 @@
                         android:textColor="@color/text_dark"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Botón Login en Rojo Bilbao -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnLogin"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="28dp"
                     android:text="@string/login_button"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    app:cornerRadius="6dp"
+                    android:letterSpacing="0.03"
+                    app:cornerRadius="8dp"
                     app:backgroundTint="@color/bilbao_red" />
 
-                <!-- Botón Registro en Gris Oscuro (Estilo Menú Ayto) -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRegister"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -139,19 +148,19 @@
                     android:layout_marginTop="12dp"
                     android:text="@string/register_button"
                     android:textColor="@color/bilbao_grey_dark"
-                    app:strokeColor="@color/bilbao_grey_dark"
+                    android:letterSpacing="0.03"
+                    app:strokeColor="#BDBDBD"
                     app:strokeWidth="1dp"
-                    app:cornerRadius="6dp" />
+                    app:cornerRadius="8dp" />
 
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- SELECTOR DE IDIOMA MEJORADO -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:orientation="horizontal"
         android:gravity="center"
         android:background="@drawable/bg_language_selector"
@@ -210,15 +219,15 @@
             android:focusable="true" />
     </LinearLayout>
 
-    <!-- Botón Invitado abajo del todo -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnGuest"
         style="@style/Widget.MaterialComponents.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="32dp"
         android:text="@string/guest_button"
         android:textColor="@color/text_medium"
+        android:letterSpacing="0.02"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

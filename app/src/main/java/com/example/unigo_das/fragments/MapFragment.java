@@ -33,7 +33,6 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -72,6 +71,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.maps.android.data.kml.KmlLayer;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -107,6 +107,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private View cardInfoRutas;
     private LinearLayout llListaInstrucciones;
 
+    // UI para minimizar/expandir
+    private ImageView btnMinimizarRuta;
+    private View scrollInstrucciones;
+    private View headerRutas;
+    private boolean isTarjetaExpandida = true;
+
     private FloatingActionButton fabCapasTransporte;
     private List<Marker> marcadoresParadasActivos = new ArrayList<>();
     private int capaSeleccionadaIndex = 0;
@@ -121,12 +127,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     private LatLng destinoActual = null;
     private String tituloDestinoActual = null;
 
-    // Filtros de transporte público separados
+    // Filtros de transporte y preferencias
     private long timestampSalidaPersonalizado = 0;
     private boolean usarBus = true;
     private boolean usarMetro = true;
     private boolean usarTranvia = true;
     private boolean usarTren = true;
+    private boolean isCocheElectrico = false;
+    private KmlLayer capaBidegorris;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -180,6 +188,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         btnQuitarRuta = view.findViewById(R.id.btn_quitar_ruta);
         btnFiltrosTransporte = view.findViewById(R.id.btn_filtros_transporte);
 
+        btnMinimizarRuta = view.findViewById(R.id.btn_minimizar_ruta);
+        scrollInstrucciones = view.findViewById(R.id.scroll_instrucciones);
+        headerRutas = view.findViewById(R.id.header_rutas);
+
         btnQuitarRuta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -191,6 +203,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 mostrarFiltrosTransporte();
+            }
+        });
+
+        btnMinimizarRuta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alternarEstadoTarjeta();
+            }
+        });
+
+        headerRutas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isTarjetaExpandida) {
+                    alternarEstadoTarjeta();
+                }
             }
         });
 
@@ -267,14 +295,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 if (centroSeleccionado != null) {
                     cerrarPantallaBusqueda();
 
-                    // --- NUEVO: REINICIO DE FILTROS AL BUSCAR NUEVO DESTINO ---
-                    // Siempre que se busca un nuevo destino, volvemos a las opciones por defecto
-                    usarBus = true;
-                    usarMetro = true;
-                    usarTranvia = true;
-                    usarTren = true;
+                    // REINICIO DE FILTROS AL BUSCAR
+                    usarBus = true; usarMetro = true; usarTranvia = true; usarTren = true;
+                    isCocheElectrico = false;
                     timestampSalidaPersonalizado = 0;
-                    // -----------------------------------------------------------
 
                     dibujarLineaHastaDestino(centroSeleccionado.getNombre(), centroSeleccionado.getLatitud(), centroSeleccionado.getLongitud(), currentTransportMode);
                 }
@@ -315,6 +339,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         this.campusMap = googleMap;
         LatLng campusLocationEIB = new LatLng(43.265842, -2.940452);
         campusMap.moveCamera(CameraUpdateFactory.newLatLngZoom(campusLocationEIB, 15f));
+
+        campusMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if (cardInfoRutas.getVisibility() == View.VISIBLE && isTarjetaExpandida) {
+                    alternarEstadoTarjeta();
+                }
+            }
+        });
 
         if (getArguments() != null && getArguments().containsKey("destino_nombre")) {
             tituloPendiente = getArguments().getString("destino_nombre");
@@ -412,10 +445,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         builderUrl.appendQueryParameter("key", apiKey);
         builderUrl.appendQueryParameter("language", idiomaActual);
 
-        // Solicitar rutas alternativas para poder aplicar los filtros estrictamente
-        builderUrl.appendQueryParameter("alternatives", "true");
-
         if ("transit".equals(modoTransporte)) {
+            builderUrl.appendQueryParameter("alternatives", "true");
+
             if (timestampSalidaPersonalizado > 0) {
                 builderUrl.appendQueryParameter("departure_time", String.valueOf(timestampSalidaPersonalizado));
             } else {
@@ -431,6 +463,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             if (!modosPermitidos.isEmpty() && modosPermitidos.size() < 4) {
                 builderUrl.appendQueryParameter("transit_mode", android.text.TextUtils.join("|", modosPermitidos));
             }
+        } else {
+            builderUrl.appendQueryParameter("alternatives", "false");
         }
 
         final String directionsApiUrl = builderUrl.build().toString();
@@ -465,12 +499,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             final List<LatLng> puntosFinal = new ArrayList<>();
                             String precioTotalFinal = "Precio variable";
 
+                            double kmTotalesFinal = 0.0;
+                            int co2TotalRutaFinal = 0;
+
                             for (int r = 0; r < routesArray.length(); r++) {
                                 JSONObject route = routesArray.getJSONObject(r);
-
                                 List<SegmentoRuta> listaSegmentosTemp = new ArrayList<>();
                                 List<LatLng> puntosTemp = new ArrayList<>();
                                 boolean rutaCumpleFiltrosEstrictos = true;
+                                boolean usaVehiculoPublico = false;
+                                double kmTotalesTemp = 0.0;
+                                int co2TotalRutaTemp = 0;
 
                                 String precioTotalTemp = "Precio variable";
                                 if (route.has("fare")) {
@@ -492,8 +531,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                                         int metrosTramo = step.getJSONObject("distance").getInt("value");
                                         double kmTramo = metrosTramo / 1000.0;
+                                        kmTotalesTemp += kmTramo;
 
                                         if (!segmento.esCaminando && step.has("transit_details")) {
+                                            usaVehiculoPublico = true;
                                             JSONObject td = step.getJSONObject("transit_details");
                                             segmento.paradaOrigen = td.getJSONObject("departure_stop").getString("name");
                                             segmento.paradaDestino = td.getJSONObject("arrival_stop").getString("name");
@@ -521,19 +562,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                                             String vType = lineData.has("vehicle") && lineData.getJSONObject("vehicle").has("type") ? lineData.getJSONObject("vehicle").getString("type") : "";
 
-                                            // EL PORTERO: Comprobar si Google incluyó un medio no deseado
                                             if (vType.contains("BUS") && !usarBus) rutaCumpleFiltrosEstrictos = false;
                                             else if (vType.contains("SUBWAY") && !usarMetro) rutaCumpleFiltrosEstrictos = false;
                                             else if (vType.contains("TRAM") && !usarTranvia) rutaCumpleFiltrosEstrictos = false;
                                             else if ((vType.contains("TRAIN") || vType.contains("RAIL")) && !usarTren) rutaCumpleFiltrosEstrictos = false;
 
+                                            int co2Tramo = 0;
                                             if (vType.contains("BUS")) {
-                                                segmento.infoCO2 = (int)(kmTramo * 80) + "g CO2";
+                                                co2Tramo = (int)(kmTramo * 80);
                                                 segmento.colorCO2 = Color.parseColor("#1976D2");
                                             } else {
-                                                segmento.infoCO2 = (int)(kmTramo * 40) + "g CO2";
+                                                co2Tramo = (int)(kmTramo * 40);
                                                 segmento.colorCO2 = Color.parseColor("#00897B");
                                             }
+                                            segmento.infoCO2 = co2Tramo + "g CO2";
+                                            co2TotalRutaTemp += co2Tramo;
+
                                         } else {
                                             segmento.color = Color.GRAY;
                                             segmento.tituloInstruccion = "Andando";
@@ -552,6 +596,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                     sr.duracion = route.getJSONArray("legs").getJSONObject(0).getJSONObject("duration").getString("text");
                                     sr.infoCO2 = "0g CO2";
                                     sr.colorCO2 = Color.parseColor("#2E7D32");
+                                    int metrosTotales = route.getJSONArray("legs").getJSONObject(0).getJSONObject("distance").getInt("value");
+                                    kmTotalesTemp = metrosTotales / 1000.0;
+                                    co2TotalRutaTemp = 0;
                                     listaSegmentosTemp.add(sr);
                                 }
 
@@ -560,12 +607,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                     listaSegmentosFinal.addAll(listaSegmentosTemp);
                                     puntosFinal.addAll(puntosTemp);
                                     precioTotalFinal = precioTotalTemp;
+                                    kmTotalesFinal = kmTotalesTemp;
+                                    co2TotalRutaFinal = co2TotalRutaTemp;
                                     break;
                                 }
                             }
 
                             final boolean esRutaTotalmenteValida = rutaValidaEncontrada;
                             final String precioDefinitivo = precioTotalFinal;
+
+                            float[] resultadosDistancia = new float[1];
+                            Location.distanceBetween(origen.latitude, origen.longitude, destino.latitude, destino.longitude, resultadosDistancia);
+                            double kmLineaRecta = resultadosDistancia[0] / 1000.0;
+                            double kmCocheJustos = kmLineaRecta * 1.3;
+
+                            int co2CocheEstimado;
+                            if (isCocheElectrico) {
+                                co2CocheEstimado = 0;
+                            } else {
+                                co2CocheEstimado = (int) (kmCocheJustos * 143);
+                            }
+
+                            final int ahorroCO2Definitivo = Math.max(0, co2CocheEstimado - co2TotalRutaFinal);
+                            final boolean cocheEraElectrico = isCocheElectrico;
 
                             mainHandler.post(new Runnable() {
                                 @Override
@@ -576,8 +640,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                             AlertDialog.Builder errorBuilder = new AlertDialog.Builder(requireContext());
                                             errorBuilder.setTitle("Sin rutas exclusivas");
                                             errorBuilder.setMessage("No existe ninguna ruta viable utilizando exclusivamente los transportes seleccionados.\n\nPrueba a activar más medios de transporte.");
-
-                                            // --- NUEVO: Botón directo para arreglar los filtros ---
                                             errorBuilder.setPositiveButton("Cambiar filtros", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
@@ -585,8 +647,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                                 }
                                             });
                                             errorBuilder.setNegativeButton("Cancelar", null);
-                                            // --------------------------------------------------------
-
                                             errorBuilder.show();
 
                                             campusMap.clear();
@@ -607,23 +667,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                                 ssb.setSpan(new ForegroundColorSpan(seg.colorCO2), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                                                 ssb.setSpan(new StyleSpan(Typeface.BOLD), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                                                 tv.setText(ssb);
-
                                             } else if (!seg.esCaminando && "transit".equals(modoTransporte)) {
                                                 campusMap.addMarker(new MarkerOptions().position(seg.puntoInicio).title(seg.tituloInstruccion).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-
                                                 String base = seg.tituloInstruccion + " (" + seg.duracion + ") • ";
                                                 SpannableStringBuilder ssb = new SpannableStringBuilder(base + seg.infoCO2);
                                                 ssb.setSpan(new ForegroundColorSpan(seg.colorCO2), base.length(), ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
                                                 String infoExtra = "\n";
                                                 if (seg.horaSalida != null) infoExtra += seg.horaSalida + " - " + seg.horaLlegada + "\n";
                                                 infoExtra += "↳ Dirección: " + seg.direccion + "\n↳ Desde: " + seg.paradaOrigen + "\n↳ Hasta: " + seg.paradaDestino + " (" + seg.numParadas + " paradas)";
                                                 ssb.append(infoExtra);
-
                                                 tv.setText(ssb);
                                                 tv.setTextColor(seg.color);
                                                 tv.setTypeface(null, Typeface.BOLD);
-
                                             } else {
                                                 String base = ("bicycling".equals(modoTransporte) ? "Bici " : "Caminar ") + "(" + seg.duracion + ") • ";
                                                 SpannableStringBuilder ssb = new SpannableStringBuilder(base + seg.infoCO2);
@@ -636,25 +691,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         }
 
                                         if (!listaSegmentosFinal.isEmpty()) {
+                                            View separadorAhorro = new View(requireContext());
+                                            separadorAhorro.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
+                                            separadorAhorro.setBackgroundColor(Color.LTGRAY);
+                                            TextView tvAhorroCO2 = new TextView(requireContext());
+                                            if (cocheEraElectrico) {
+                                                tvAhorroCO2.setText("Usar el transporte público ayuda a descongestionar el tráfico, aunque tu coche eléctrico ya es una opción limpia.");
+                                                tvAhorroCO2.setTextColor(Color.parseColor("#2E7D32"));
+                                            } else {
+                                                tvAhorroCO2.setText("Has evitado " + ahorroCO2Definitivo + "g de CO2 respecto a un coche de combustión.");
+                                                tvAhorroCO2.setTextColor(Color.parseColor("#2E7D32"));
+                                            }
+                                            tvAhorroCO2.setTextSize(15f);
+                                            tvAhorroCO2.setPadding(0, 30, 0, 16);
+                                            tvAhorroCO2.setTypeface(null, Typeface.BOLD);
+                                            llListaInstrucciones.addView(separadorAhorro);
+                                            llListaInstrucciones.addView(tvAhorroCO2);
+
                                             if ("transit".equals(modoTransporte)) {
                                                 TextView tvPrecio = new TextView(requireContext());
                                                 tvPrecio.setText("Coste estimado: " + precioDefinitivo);
                                                 tvPrecio.setTextSize(16f);
-                                                tvPrecio.setPadding(0, 30, 0, 8);
+                                                tvPrecio.setPadding(0, 8, 0, 8);
                                                 tvPrecio.setTextColor(Color.parseColor("#3F51B5"));
                                                 tvPrecio.setTypeface(null, Typeface.BOLD);
-
                                                 TextView tvAvisoBarik = new TextView(requireContext());
                                                 tvAvisoBarik.setText("*El precio será considerablemente menor usando tarjeta Barik o abonos.");
                                                 tvAvisoBarik.setTextSize(12f);
                                                 tvAvisoBarik.setTextColor(Color.GRAY);
                                                 tvAvisoBarik.setPadding(0, 0, 0, 16);
-
-                                                View separador = new View(requireContext());
-                                                separador.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2));
-                                                separador.setBackgroundColor(Color.LTGRAY);
-
-                                                llListaInstrucciones.addView(separador);
                                                 llListaInstrucciones.addView(tvPrecio);
                                                 llListaInstrucciones.addView(tvAvisoBarik);
                                             }
@@ -662,9 +727,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                                         }
                                         if (!puntosFinal.isEmpty()) {
                                             LatLngBounds.Builder b = new LatLngBounds.Builder();
-                                            for (LatLng p : puntosFinal) {
-                                                b.include(p);
-                                            }
+                                            for (LatLng p : puntosFinal) { b.include(p); }
                                             campusMap.animateCamera(CameraUpdateFactory.newLatLngBounds(b.build(), 100));
                                         }
                                     }
@@ -672,11 +735,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             });
                         }
                     }
-                } catch (Exception e) {
-                    Log.e("UnigoDAS", e.getMessage());
-                } finally {
-                    if (connection != null) connection.disconnect();
-                }
+                } catch (Exception e) { Log.e("UnigoDAS", e.getMessage()); }
+                finally { if (connection != null) connection.disconnect(); }
             }
         });
     }
@@ -697,7 +757,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return poly;
     }
 
+    private void alternarEstadoTarjeta() {
+        if (isTarjetaExpandida) {
+            scrollInstrucciones.setVisibility(View.GONE);
+            btnMinimizarRuta.setImageResource(android.R.drawable.arrow_up_float);
+            isTarjetaExpandida = false;
+        } else {
+            scrollInstrucciones.setVisibility(View.VISIBLE);
+            btnMinimizarRuta.setImageResource(android.R.drawable.arrow_down_float);
+            isTarjetaExpandida = true;
+        }
+    }
+
     private void limpiarRutaActiva() {
+        if (capaBidegorris != null && capaBidegorris.isLayerOnMap()) {
+            capaBidegorris.removeLayerFromMap();
+        }
         if (campusMap != null) {
             campusMap.clear();
         }
@@ -706,21 +781,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             cardTransporte.setVisibility(View.GONE);
         }
         llListaInstrucciones.removeAllViews();
-        destinoActual = null;
-        tituloDestinoActual = null;
+        destinoActual = null; tituloDestinoActual = null;
         timestampSalidaPersonalizado = 0;
-
         if (fabCapasTransporte != null) {
             fabCapasTransporte.setVisibility(View.VISIBLE);
         }
         if (capaSeleccionadaIndex > 0) {
             redibujarCapaParadas(capaSeleccionadaIndex);
         }
+        if (!isTarjetaExpandida) {
+            alternarEstadoTarjeta();
+        }
     }
 
     private void mostrarMenuCapasParadas() {
-        String[] opciones = {"Ocultar paradas", "Bicicleta", "Bilbobus", "Euskotren", "Metro", "Renfe", "Tranvía"};
-
+        final String[] opciones = {"Ocultar paradas", "Bilbaobizi", "Bilbobus", "Bizkaibus", "Euskotren", "Metro", "Renfe", "Tranvía"};
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Mostrar paradas en el mapa");
         builder.setSingleChoiceItems(opciones, capaSeleccionadaIndex, new DialogInterface.OnClickListener() {
@@ -736,15 +811,44 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void redibujarCapaParadas(int index) {
         limpiarMarcadoresParadasLibres();
+
+        // 1. Apagamos la capa KML de bidegorris si estaba encendida previamente
+        if (capaBidegorris != null && capaBidegorris.isLayerOnMap()) {
+            capaBidegorris.removeLayerFromMap();
+        }
+
         if (index == 0) return;
 
-        String[] tiposDB = {"", "Bicicleta", "Bilbobus", "Euskotren", "Metro", "Renfe", "Tranvía"};
+        // Arreglamos el array para que coincida exactamente con las opciones de tu menú
+        String[] tiposDB = {"", "Bilbaobizi", "Bilbobus", "Bizkaibus", "Euskotren", "Metro", "Renfe", "Tranvía"};
         String tipoSeleccionado = tiposDB[index];
 
+        // 2. Si es Bilbaobizi, cargamos la capa KML de los bidegorris
+        if ("Bilbaobizi".equals(tipoSeleccionado)) {
+            if (campusMap != null) {
+                try {
+                    if (capaBidegorris == null) {
+                        capaBidegorris = new com.google.maps.android.data.kml.KmlLayer(campusMap, R.raw.bidegorris, requireContext());
+                    }
+                    capaBidegorris.addLayerToMap();
+                } catch (Exception e) {
+                    Log.e("UnigoDAS", "Error cargando el KML", e);
+                }
+            }
+            // IMPORTANTE: Ya no ponemos "return;" aquí para que siga y dibuje las paradas abajo
+        }
+
+        // 3. Dibujamos las chinchetas (Paradas)
         float colorPinche = BitmapDescriptorFactory.HUE_RED;
+        String tipoParaBaseDeDatos = tipoSeleccionado;
+
         switch (tipoSeleccionado) {
-            case "Bicicleta": colorPinche = BitmapDescriptorFactory.HUE_GREEN; break;
+            case "Bilbaobizi":
+                colorPinche = BitmapDescriptorFactory.HUE_ROSE;
+                tipoParaBaseDeDatos = "Bicicleta";
+                break;
             case "Bilbobus": colorPinche = BitmapDescriptorFactory.HUE_RED; break;
+            case "Bizkaibus": colorPinche = BitmapDescriptorFactory.HUE_GREEN; break;
             case "Euskotren": colorPinche = BitmapDescriptorFactory.HUE_BLUE; break;
             case "Metro": colorPinche = BitmapDescriptorFactory.HUE_ORANGE; break;
             case "Renfe": colorPinche = BitmapDescriptorFactory.HUE_MAGENTA; break;
@@ -752,7 +856,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
 
         DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
-        List<Parada> paradas = dbHelper.obtenerParadasPorTipo(tipoSeleccionado);
+        List<Parada> paradas = dbHelper.obtenerParadasPorTipo(tipoParaBaseDeDatos);
 
         if (paradas != null && !paradas.isEmpty() && campusMap != null) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -766,21 +870,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 marcadoresParadasActivos.add(m);
                 builder.include(pos);
             }
-            campusMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
+
+            // Si es Bilbaobizi hacemos zoom a toda Bizkaia, sino zoom a las paradas específicas
+            if ("Bilbaobizi".equals(tipoSeleccionado)) {
+                LatLng centroBizkaia = new LatLng(43.263, -2.935);
+                campusMap.animateCamera(CameraUpdateFactory.newLatLngZoom(centroBizkaia, 11f));
+            } else {
+                campusMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 150));
+            }
         }
     }
 
     private void limpiarMarcadoresParadasLibres() {
-        for (Marker m : marcadoresParadasActivos) {
-            m.remove();
-        }
+        for (Marker m : marcadoresParadasActivos) { m.remove(); }
         marcadoresParadasActivos.clear();
     }
 
     private void mostrarFiltrosTransporte() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("Opciones de Transporte Público");
-
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(60, 40, 60, 20);
@@ -789,30 +897,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         tvTiempo.setText("Salida (Máx. 14 días):");
         tvTiempo.setTypeface(null, Typeface.BOLD);
         tvTiempo.setTextColor(Color.DKGRAY);
-        tvTiempo.setPadding(0, 0, 0, 16);
         layout.addView(tvTiempo);
 
         LinearLayout layoutFechaHora = new LinearLayout(requireContext());
         layoutFechaHora.setOrientation(LinearLayout.HORIZONTAL);
         layoutFechaHora.setWeightSum(2f);
-
         final Button btnFecha = new Button(requireContext());
         LinearLayout.LayoutParams pF = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        pF.setMarginEnd(8);
-        btnFecha.setLayoutParams(pF);
-
+        pF.setMarginEnd(8); btnFecha.setLayoutParams(pF);
         final Button btnHora = new Button(requireContext());
         LinearLayout.LayoutParams pH = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        pH.setMarginStart(8);
-        btnHora.setLayoutParams(pH);
+        pH.setMarginStart(8); btnHora.setLayoutParams(pH);
 
         final java.text.SimpleDateFormat formatoFecha = new java.text.SimpleDateFormat("dd MMM", Locale.getDefault());
         final java.text.SimpleDateFormat formatoHora = new java.text.SimpleDateFormat("HH:mm", Locale.getDefault());
         final Calendar cSel = Calendar.getInstance();
 
         if (timestampSalidaPersonalizado == 0) {
-            btnFecha.setText("Hoy");
-            btnHora.setText("Ahora");
+            btnFecha.setText("Hoy"); btnHora.setText("Ahora");
         } else {
             cSel.setTimeInMillis(timestampSalidaPersonalizado * 1000L);
             btnFecha.setText(formatoFecha.format(cSel.getTime()));
@@ -820,116 +922,70 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
 
         btnFecha.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            @Override public void onClick(View v) {
                 DatePickerDialog dp = new DatePickerDialog(requireContext(), new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        cSel.set(year, month, dayOfMonth);
-                        btnFecha.setText(formatoFecha.format(cSel.getTime()));
-                        if (btnHora.getText().toString().equals("Ahora")) {
-                            btnHora.setText(formatoHora.format(cSel.getTime()));
-                        }
+                    @Override public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        cSel.set(year, month, dayOfMonth); btnFecha.setText(formatoFecha.format(cSel.getTime()));
                     }
                 }, cSel.get(Calendar.YEAR), cSel.get(Calendar.MONTH), cSel.get(Calendar.DAY_OF_MONTH));
-                dp.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
-                dp.getDatePicker().setMaxDate(System.currentTimeMillis() + (14L * 24L * 60L * 60L * 1000L));
-                dp.show();
+                dp.getDatePicker().setMinDate(System.currentTimeMillis() - 1000); dp.show();
             }
         });
 
         btnHora.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            @Override public void onClick(View v) {
                 TimePickerDialog tp = new TimePickerDialog(requireContext(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        cSel.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        cSel.set(Calendar.MINUTE, minute);
-                        cSel.set(Calendar.SECOND, 0);
-                        Calendar ahora = Calendar.getInstance();
-                        if (cSel.get(Calendar.YEAR) == ahora.get(Calendar.YEAR) &&
-                                cSel.get(Calendar.DAY_OF_YEAR) == ahora.get(Calendar.DAY_OF_YEAR) &&
-                                cSel.before(ahora)) {
-                            cSel.add(Calendar.DAY_OF_YEAR, 1);
-                            btnFecha.setText(formatoFecha.format(cSel.getTime()));
-                        }
+                    @Override public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        cSel.set(Calendar.HOUR_OF_DAY, hourOfDay); cSel.set(Calendar.MINUTE, minute);
                         btnHora.setText(formatoHora.format(cSel.getTime()));
-                        if (btnFecha.getText().toString().equals("Hoy")) {
-                            btnFecha.setText(formatoFecha.format(cSel.getTime()));
-                        }
                     }
-                }, cSel.get(Calendar.HOUR_OF_DAY), cSel.get(Calendar.MINUTE), true);
-                tp.show();
+                }, cSel.get(Calendar.HOUR_OF_DAY), cSel.get(Calendar.MINUTE), true); tp.show();
             }
         });
 
-        layoutFechaHora.addView(btnFecha);
-        layoutFechaHora.addView(btnHora);
+        layoutFechaHora.addView(btnFecha); layoutFechaHora.addView(btnHora);
         layout.addView(layoutFechaHora);
 
         TextView tvMedios = new TextView(requireContext());
         tvMedios.setText("\nMedios preferidos:");
         tvMedios.setTypeface(null, Typeface.BOLD);
-        tvMedios.setTextColor(Color.DKGRAY);
         layout.addView(tvMedios);
 
-        final CheckBox cbBus = new CheckBox(requireContext());
-        cbBus.setText("Autobús (Bilbobus/Bizkaibus)");
-        cbBus.setChecked(usarBus);
+        final CheckBox cbBus = new CheckBox(requireContext()); cbBus.setText("Autobús"); cbBus.setChecked(usarBus);
         layout.addView(cbBus);
-
-        final CheckBox cbMetro = new CheckBox(requireContext());
-        cbMetro.setText("Metro Bilbao");
-        cbMetro.setChecked(usarMetro);
+        final CheckBox cbMetro = new CheckBox(requireContext()); cbMetro.setText("Metro"); cbMetro.setChecked(usarMetro);
         layout.addView(cbMetro);
-
-        final CheckBox cbTranvia = new CheckBox(requireContext());
-        cbTranvia.setText("Tranvía");
-        cbTranvia.setChecked(usarTranvia);
+        final CheckBox cbTranvia = new CheckBox(requireContext()); cbTranvia.setText("Tranvía"); cbTranvia.setChecked(usarTranvia);
         layout.addView(cbTranvia);
-
-        final CheckBox cbTren = new CheckBox(requireContext());
-        cbTren.setText("Tren (Euskotren/Renfe)");
-        cbTren.setChecked(usarTren);
+        final CheckBox cbTren = new CheckBox(requireContext()); cbTren.setText("Tren"); cbTren.setChecked(usarTren);
         layout.addView(cbTren);
 
+        View separador = new View(requireContext());
+        LinearLayout.LayoutParams paramsSep = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2);
+        paramsSep.setMargins(0, 16, 0, 16); separador.setLayoutParams(paramsSep);
+        separador.setBackgroundColor(Color.LTGRAY); layout.addView(separador);
+
+        final CheckBox cbCocheElec = new CheckBox(requireContext());
+        cbCocheElec.setText("Mi coche es eléctrico"); cbCocheElec.setChecked(isCocheElectrico);
+        layout.addView(cbCocheElec);
+
         builder.setView(layout);
-        builder.setPositiveButton("Aplicar y Buscar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                usarBus = cbBus.isChecked();
-                usarMetro = cbMetro.isChecked();
-                usarTranvia = cbTranvia.isChecked();
-                usarTren = cbTren.isChecked();
-
-                if (!usarBus && !usarMetro && !usarTranvia && !usarTren) {
-                    usarBus = true; usarMetro = true; usarTranvia = true; usarTren = true;
-                }
-
-                if (!btnFecha.getText().toString().equals("Hoy") || !btnHora.getText().toString().equals("Ahora")) {
-                    timestampSalidaPersonalizado = cSel.getTimeInMillis() / 1000L;
-                } else {
-                    timestampSalidaPersonalizado = 0;
-                }
-                if (destinoActual != null && "transit".equals(currentTransportMode)) {
-                    dibujarLineaHastaDestino(tituloDestinoActual, destinoActual.latitude, destinoActual.longitude, currentTransportMode);
-                }
+        builder.setPositiveButton("Aplicar", new DialogInterface.OnClickListener() {
+            @Override public void onClick(DialogInterface dialog, int which) {
+                usarBus = cbBus.isChecked(); usarMetro = cbMetro.isChecked();
+                usarTranvia = cbTranvia.isChecked(); usarTren = cbTren.isChecked();
+                isCocheElectrico = cbCocheElec.isChecked();
+                if (!btnFecha.getText().toString().equals("Hoy")) timestampSalidaPersonalizado = cSel.getTimeInMillis() / 1000L;
+                if (destinoActual != null) dibujarLineaHastaDestino(tituloDestinoActual, destinoActual.latitude, destinoActual.longitude, currentTransportMode);
             }
         });
-
         builder.setNeutralButton("Restablecer", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
+            @Override public void onClick(DialogInterface dialog, int which) {
+                usarBus = true; usarMetro = true; usarTranvia = true; usarTren = true; isCocheElectrico = false;
                 timestampSalidaPersonalizado = 0;
-                usarBus = true; usarMetro = true; usarTranvia = true; usarTren = true;
-                if (destinoActual != null && "transit".equals(currentTransportMode)) {
-                    dibujarLineaHastaDestino(tituloDestinoActual, destinoActual.latitude, destinoActual.longitude, currentTransportMode);
-                }
+                if (destinoActual != null) dibujarLineaHastaDestino(tituloDestinoActual, destinoActual.latitude, destinoActual.longitude, currentTransportMode);
             }
         });
-
-        builder.setNegativeButton("Cancelar", null);
         builder.show();
     }
 
@@ -941,101 +997,48 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        searchViewReal = null;
-        campusMap = null;
+        searchViewReal = null; campusMap = null;
     }
 
     private class BuscadorMapaAdapter extends BaseAdapter implements Filterable {
         private Context context;
         private List<Centro> listaOriginal;
         private List<Centro> listaFiltrada;
-        private CentroFilter filtro;
-
         public BuscadorMapaAdapter(Context context, List<Centro> lista) {
-            this.context = context;
-            this.listaOriginal = new ArrayList<>(lista);
-            this.listaFiltrada = new ArrayList<>(lista);
+            this.context = context; this.listaOriginal = new ArrayList<>(lista); this.listaFiltrada = new ArrayList<>(lista);
         }
-
-        @Override
-        public int getCount() {
-            return listaFiltrada.size();
-        }
-
-        @Override
-        public Centro getItem(int position) {
-            return listaFiltrada.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false);
-            }
+        @Override public int getCount() { return listaFiltrada.size(); }
+        @Override public Centro getItem(int position) { return listaFiltrada.get(position); }
+        @Override public long getItemId(int position) { return position; }
+        @Override public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) { convertView = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_1, parent, false); }
             ((TextView) convertView.findViewById(android.R.id.text1)).setText(getItem(position).getNombre());
             return convertView;
         }
-
-        @Override
-        public Filter getFilter() {
-            if (filtro == null) {
-                filtro = new CentroFilter();
-            }
-            return filtro;
-        }
-
-        private class CentroFilter extends Filter {
-            @Override
-            protected FilterResults performFiltering(CharSequence constraint) {
-                FilterResults results = new FilterResults();
-                List<Centro> filtrados = new ArrayList<>();
-                if (constraint == null || constraint.length() == 0) {
-                    filtrados.addAll(listaOriginal);
-                } else {
-                    String query = constraint.toString().toLowerCase().trim();
-                    for (Centro c : listaOriginal) {
-                        if (c.getNombre().toLowerCase().contains(query) ||
-                                (c.getDescripcion() != null && c.getDescripcion().toLowerCase().contains(query)) ||
-                                c.getUniversidad().toLowerCase().contains(query)) {
-                            filtrados.add(c);
-                        }
+        @Override public Filter getFilter() {
+            return new Filter() {
+                @Override protected FilterResults performFiltering(CharSequence constraint) {
+                    FilterResults results = new FilterResults();
+                    List<Centro> filtrados = new ArrayList<>();
+                    if (constraint == null || constraint.length() == 0) { filtrados.addAll(listaOriginal); }
+                    else {
+                        String query = constraint.toString().toLowerCase().trim();
+                        for (Centro c : listaOriginal) { if (c.getNombre().toLowerCase().contains(query)) filtrados.add(c); }
                     }
+                    results.values = filtrados; results.count = filtrados.size();
+                    return results;
                 }
-                results.values = filtrados;
-                results.count = filtrados.size();
-                return results;
-            }
-
-            @Override
-            protected void publishResults(CharSequence constraint, FilterResults results) {
-                listaFiltrada.clear();
-                if (results.values != null) {
-                    listaFiltrada.addAll((List<Centro>) results.values);
+                @Override protected void publishResults(CharSequence constraint, FilterResults results) {
+                    listaFiltrada.clear(); if (results.values != null) { listaFiltrada.addAll((List<Centro>) results.values); }
+                    notifyDataSetChanged();
                 }
-                notifyDataSetChanged();
-            }
+            };
         }
     }
 
     private static class SegmentoRuta {
-        List<LatLng> puntos;
-        int color;
-        boolean esCaminando;
-        String tituloInstruccion;
-        LatLng puntoInicio;
-        String duracion;
-        String paradaOrigen;
-        String paradaDestino;
-        String direccion;
-        String numParadas;
-        String horaSalida;
-        String horaLlegada;
-        String infoCO2;
-        int colorCO2;
+        List<LatLng> puntos; int color; boolean esCaminando; String tituloInstruccion; LatLng puntoInicio;
+        String duracion; String paradaOrigen; String paradaDestino; String direccion; String numParadas;
+        String horaSalida; String horaLlegada; String infoCO2; int colorCO2;
     }
 }

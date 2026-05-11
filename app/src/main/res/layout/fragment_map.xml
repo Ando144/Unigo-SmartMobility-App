@@ -7,14 +7,12 @@
     android:layout_height="match_parent"
     tools:context=".fragments.MapFragment">
 
-    <!-- 1. EL MAPA (Al fondo) -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map_container"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 2. EL BUSCADOR FALSO (Flotando en el mapa) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_buscador_falso"
         android:layout_width="match_parent"
@@ -28,7 +26,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- 1. El buscador estético (al fondo) -->
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/search_view_falso"
                 android:layout_width="match_parent"
@@ -43,7 +40,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
-            <!-- 2. El "cristal" transparente que copia el tamaño exacto del buscador -->
             <View
                 android:id="@+id/capa_click_buscador"
                 android:layout_width="0dp"
@@ -60,7 +56,6 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 3. TARJETA DE INFORMACIÓN DE RUTAS (Oculta al inicio, flota sobre el selector) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_info_rutas"
         android:layout_width="0dp"
@@ -79,15 +74,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="#FAFAFA"
+            android:animateLayoutChanges="true">
 
-            <!-- Cabecera con título y botón de cerrar -->
             <RelativeLayout
+                android:id="@+id/header_rutas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="12dp"
-                android:background="#FAFAFA">
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
 
                 <ImageView
                     android:id="@+id/btn_filtros_transporte"
@@ -99,7 +98,7 @@
                     android:src="@android:drawable/ic_menu_preferences"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="#757575"
-                    android:visibility="gone"/> <!-- Oculto por defecto -->
+                    android:visibility="gone"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -108,6 +107,18 @@
                     android:textStyle="bold"
                     android:textColor="#333333"
                     android:layout_centerInParent="true"/>
+
+                <ImageView
+                    android:id="@+id/btn_minimizar_ruta"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:padding="6dp"
+                    android:layout_toStartOf="@+id/btn_quitar_ruta"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="8dp"
+                    android:src="@android:drawable/arrow_down_float"
+                    android:background="@android:color/transparent"
+                    app:tint="#757575"/>
 
                 <ImageView
                     android:id="@+id/btn_quitar_ruta"
@@ -126,8 +137,8 @@
                 android:layout_height="1dp"
                 android:background="#EEEEEE"/>
 
-            <!-- El ScrollView que ya tenías -->
             <androidx.core.widget.NestedScrollView
+                android:id="@+id/scroll_instrucciones"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -142,7 +153,6 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- 4. SELECTOR DE TRANSPORTE (Flotando en la parte inferior) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_transporte"
         android:layout_width="wrap_content"
@@ -185,7 +195,6 @@
         </RadioGroup>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- BOTÓN DE CAPAS DE TRANSPORTE (Arriba a la derecha, debajo del buscador) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_capas_transporte"
         android:layout_width="wrap_content"
@@ -199,8 +208,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/card_buscador_falso" />
 
-    <!-- 5. LA PANTALLA COMPLETA DE BÚSQUEDA (Oculta al inicio) -->
-    <!-- Mantenemos la elevación a 10dp para que cubra el mapa y las tarjetas -->
     <LinearLayout
         android:id="@+id/pantalla_busqueda_completa"
         android:layout_width="match_parent"

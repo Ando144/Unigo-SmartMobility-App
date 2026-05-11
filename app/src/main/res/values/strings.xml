@@ -81,6 +81,55 @@
 
     <!-- Mapa Strings -->
     <string name="map_title">Mapa</string>
+    <string name="precio_variable">"Precio variable"</string>
+    <string name="billete_ocasional">Billete ocasional</string>
+    <string name="coste_estimado">Coste estimado</string>
+    <string name="coste_estimado_aviso">El precio será considerablemente menor usando tarjeta Barik o abonos.</string>
+
+    <string name="destino_final">Destino final</string>
+
+    <string name="caminar">Caminar</string>
+
+    <string name="bici">Bici</string>
+
+    <string name="direccion">Dirección</string>
+    <string name="desde">Desde</string>
+    <string name="hasta">Hasta</string>
+    <string name="paradas">paradas</string>
+
+    <string name="coche_electrico_contaminacion">Usar el transporte público ayuda a descongestionar el tráfico, aunque tu coche eléctrico ya es una opción limpia.</string>
+
+    <string name="has_evitado">Has evitado</string>
+    <string name="co2_respecto_combustion">g de CO2 respecto a un coche de combustión.</string>
+
+    <string name="ruta_no_valida_titulo">Sin rutas exclusivas</string>
+    <string name="ruta_no_valida_mensaje">No existe ninguna ruta viable utilizando exclusivamente los transportes seleccionados.\n\nPrueba a activar más medios de transporte.</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="cambiar_filtros">Cambiar filtros</string>
+
+    <string name="filtros_ruta_titulo">Filtros de Ruta</string>
+    <string name="salida_dias_max">Salida (Máx. 14 días)</string>
+    <string name="hoy">Hoy</string>
+    <string name="ahora">Ahora</string>
+    <string name="medios_preferidos">Medios preferidos</string>
+    <string name="autobus">Autobús</string>
+    <string name="tren">Tren</string>
+    <string name="mi_coche_es_electrico">Mi coche es eléctrico</string>
+    <string name="aplicar">Aplicar</string>
+    <string name="restablecer">Restablecer</string>
+
+    <string name="mostrar_paradas_titulo">Red de Transporte</string>
+    <string name="ocultar_paradas">Ocultar paradas</string>
+    <string name="tranvia">Tranvía</string>
+    <string name="cerrar">Cerrar</string>
+
+
+    <string name="xml_buscar_centro_facultad">Buscar centro o facultad...</string>
+    <string name="xml_detalles_del_trayecto">Detalles del Trayecto</string>
+    <string name="xml_a_pie">A pie</string>
+    <string name="xml_bici">Bici</string>
+    <string name="xml_publico">Público</string>
+    <string name="xml_donde_quieres_ir">¿A dónde quieres ir?</string>
 
     <!-- Login & Register Strings -->
     <string name="login_title">UNIGO</string>

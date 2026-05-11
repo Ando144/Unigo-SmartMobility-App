@@ -32,7 +32,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:iconifiedByDefault="false"
-                app:queryHint="Buscar centro o facultad..."
+                app:queryHint="@string/xml_buscar_centro_facultad"
                 app:queryBackground="@android:color/transparent"
                 android:focusable="false"
                 android:clickable="false"
@@ -108,7 +108,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Detalles del Trayecto"
+                    android:text="@string/xml_detalles_del_trayecto"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.02"
@@ -180,7 +180,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="A pie"
+                android:text="@string/xml_a_pie"
                 android:textColor="?attr/colorOnSurface"/>
 
             <RadioButton
@@ -188,7 +188,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Bici"
+                android:text="@string/xml_bici"
                 android:textColor="?attr/colorOnSurface"/>
 
             <RadioButton
@@ -196,7 +196,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="Público"
+                android:text="@string/xml_publico"
                 android:textColor="?attr/colorOnSurface"/>
         </RadioGroup>
     </com.google.android.material.card.MaterialCardView>
@@ -250,7 +250,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:iconifiedByDefault="false"
-                app:queryHint="¿A dónde quieres ir?"
+                app:queryHint="@string/xml_donde_quieres_ir"
                 app:queryBackground="@android:color/transparent"
                 app:searchIcon="@null" />
         </LinearLayout>

@@ -71,6 +71,56 @@
     <string name="centro_deusto_salud">Osasun Zientzien Fakultatea</string>
     <string name="centro_deusto_sociales_comunicacion">Gizarte eta Komunikazio Zientzien Fakultatea</string>
 
+    <!-- Mapa Strings -->
+    <string name="precio_variable">"Prezio aldakorra"</string>
+    <string name="billete_ocasional">Noizbehinkako txartela</string>
+    <string name="coste_estimado">Kostu zenbatetsia</string>
+    <string name="coste_estimado_aviso">Prezioa nabarmen txikiagoa izango da Barik txartela edo abonuak erabiliz gero.</string>
+
+    <string name="destino_final">Azken helmuga</string>
+
+    <string name="caminar">Oinez</string>
+
+    <string name="bici">Bizikleta</string>
+
+    <string name="direccion">Norabidea</string>
+    <string name="desde">Nondik</string>
+    <string name="hasta">Nora</string>
+    <string name="paradas">geltokiak</string>
+
+    <string name="coche_electrico_contaminacion">Garraio publikoa erabiltzeak trafikoa arintzen laguntzen du, nahiz eta zure auto elektrikoa aukera garbia izan jada.</string>
+
+    <string name="has_evitado">Saihestu duzu:</string>
+    <string name="co2_respecto_combustion">g CO2 errekuntza-auto baten aldean.</string>
+
+    <string name="ruta_no_valida_titulo">Ibilbide esklusiborik ez</string>
+    <string name="ruta_no_valida_mensaje">Ez dago bide bideragarririk soilik hautatutako garraiobideak erabiliz.\n\nSaia zaitez garraiobide gehiago aktibatzen.</string>
+    <string name="cancelar">Utzi</string>
+    <string name="cambiar_filtros">Iragazkiak aldatu</string>
+
+    <string name="filtros_ruta_titulo">Ibilbidearen iragazkiak</string>
+    <string name="salida_dias_max">Irteera (Geh. 14 egun)</string>
+    <string name="hoy">Gaur</string>
+    <string name="ahora">Orain</string>
+    <string name="medios_preferidos">Garraiobide gogokoenak</string>
+    <string name="autobus">Autobusa</string>
+    <string name="tren">Trena</string>
+    <string name="mi_coche_es_electrico">Nire autoa elektrikoa da</string>
+    <string name="aplicar">Aplikatu</string>
+    <string name="restablecer">Berrezarri</string>
+
+    <string name="mostrar_paradas_titulo">Garraio-sarea</string>
+    <string name="ocultar_paradas">Geltokiak ezkutatu</string>
+    <string name="tranvia">Tranbia</string>
+    <string name="cerrar">Itxi</string>
+
+    <string name="xml_buscar_centro_facultad">Bilatu zentroa edo fakultatea...</string>
+    <string name="xml_detalles_del_trayecto">Ibilbidearen xehetasunak</string>
+    <string name="xml_a_pie">Oinez</string>
+    <string name="xml_bici">Bizikleta</string>
+    <string name="xml_publico">Publikoa</string>
+    <string name="xml_donde_quieres_ir">Nora joan nahi duzu?</string>
+
     <!-- Login & Register Strings -->
     <string name="login_title">UNIGO</string>
     <string name="login_subtitle">Zure campusa, zure ibilbidea.</string>

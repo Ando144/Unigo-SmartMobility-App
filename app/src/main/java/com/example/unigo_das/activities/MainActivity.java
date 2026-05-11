@@ -40,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
         // Aplicar el modo oscuro ANTES de super.onCreate
         aplicarModoOscuro();
 
+        // Actualizamos la base de datos con el nuevo idioma ANTES de que
+        // super.onCreate restaure los fragmentos y estos lean la base de datos vieja.
+        inicializarCampus();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

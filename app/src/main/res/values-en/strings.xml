@@ -71,6 +71,56 @@
     <string name="centro_deusto_salud">Faculty of Health Sciences</string>
     <string name="centro_deusto_sociales_comunicacion">Faculty of Social Sciences and Communication</string>
 
+    <!-- Map Strings -->
+    <string name="precio_variable">"Variable price"</string>
+    <string name="billete_ocasional">Single ticket</string>
+    <string name="coste_estimado">Estimated cost</string>
+    <string name="coste_estimado_aviso">The price will be considerably lower using a Barik card or passes.</string>
+
+    <string name="destino_final">Final destination</string>
+
+    <string name="caminar">Walk</string>
+
+    <string name="bici">Bike</string>
+
+    <string name="direccion">Direction</string>
+    <string name="desde">From</string>
+    <string name="hasta">To</string>
+    <string name="paradas">stops</string>
+
+    <string name="coche_electrico_contaminacion">Using public transport helps ease traffic congestion, although your electric car is already a clean option.</string>
+
+    <string name="has_evitado">You have avoided</string>
+    <string name="co2_respecto_combustion">g of CO2 compared to a combustion car.</string>
+
+    <string name="ruta_no_valida_titulo">No exclusive routes</string>
+    <string name="ruta_no_valida_mensaje">There is no viable route using exclusively the selected transport methods.\n\nTry enabling more transport modes.</string>
+    <string name="cancelar">Cancel</string>
+    <string name="cambiar_filtros">Change filters</string>
+
+    <string name="filtros_ruta_titulo">Route Filters</string>
+    <string name="salida_dias_max">Departure (Max. 14 days)</string>
+    <string name="hoy">Today</string>
+    <string name="ahora">Now</string>
+    <string name="medios_preferidos">Preferred transport</string>
+    <string name="autobus">Bus</string>
+    <string name="tren">Train</string>
+    <string name="mi_coche_es_electrico">My car is electric</string>
+    <string name="aplicar">Apply</string>
+    <string name="restablecer">Reset</string>
+
+    <string name="mostrar_paradas_titulo">Transport Network</string>
+    <string name="ocultar_paradas">Hide stops</string>
+    <string name="tranvia">Tram</string>
+    <string name="cerrar">Close</string>
+
+    <string name="xml_buscar_centro_facultad">Search center or faculty...</string>
+    <string name="xml_detalles_del_trayecto">Route Details</string>
+    <string name="xml_a_pie">On foot</string>
+    <string name="xml_bici">Bike</string>
+    <string name="xml_publico">Public transit</string>
+    <string name="xml_donde_quieres_ir">Where do you want to go?</string>
+
     <!-- Login & Register Strings -->
     <string name="login_title">UNIGO</string>
     <string name="login_subtitle">Your campus, your route.</string>

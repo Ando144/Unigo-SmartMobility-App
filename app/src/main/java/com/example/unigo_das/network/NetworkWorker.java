@@ -66,7 +66,11 @@ public class NetworkWorker extends Worker {
             }
 
         } catch (Exception e) {
-            responseStr = "{\"error\": \"Error de conexión\"}";
+            // Fix F5: the message is read from strings.xml (same Spanish text, now translated).
+            // JSONObject escapes the text, so any translation produces valid JSON.
+            JSONObject error = new JSONObject();
+            error.put("error", getApplicationContext().getString(com.example.unigo_das.R.string.network_error));
+            responseStr = error.toJSONString();
         } finally {
             if (conn != null) conn.disconnect();
         }

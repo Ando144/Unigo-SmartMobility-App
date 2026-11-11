@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Colores de Ruta (Modo Oscuro) -->
+    <!-- Route colours (dark mode) -->
     <color name="route_header_bg">#1E1E1E</color>
     <color name="route_header_text">#FFFFFF</color>
     <color name="route_text_primary">#EEEEEE</color>
@@ -8,7 +8,7 @@
     <color name="route_price_text">#9FA8DA</color>
     <color name="route_transit_fallback">#64B5F6</color>
 
-    <!-- Colores CO2 (Oscuro - Tonalidades más claras para legibilidad) -->
+    <!-- CO2 colours (dark - lighter tones for readability) -->
     <color name="co2_walking_color">#81C784</color>
     <color name="co2_transit_color">#64B5F6</color>
 

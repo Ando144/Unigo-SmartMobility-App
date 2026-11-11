@@ -43,11 +43,11 @@
     <string name="error_generic">Ha ocurrido un error</string>
     <string name="server_error">Error del servidor</string>
 
-    <!-- Clima Strings -->
-    <string name="seccion_clima_de_euskadi">Sección: Clima de Euskadi</string>
+    <!-- Weather strings -->
+    <string name="basque_weather_section">Sección: Clima de Euskadi</string>
     <string name="weather_title">Clima</string>
 
-    <!-- Centros Strings -->
+    <!-- Campus strings -->
     <string name="centres_title">Centros</string>
     <string name="search_centre">Buscar centro (e.g. Deusto, Leioa...)</string>
     <string name="all">Todas</string>
@@ -62,90 +62,90 @@
     <string name="cycle_path">Carril bici</string>
     <string name="cycle_path_joined">Carril bici conectado</string>
 
-    <!-- Centros Universitarios EHU -->
-    <string name="centro_ehu_ingenieria_bilbao">Escuela de Ingeniería de Bilbao, Edificio principal</string>
-    <string name="centro_ehu_ingenieria_bilbao1">Escuela de Ingeniería de Bilbao, Edificio I</string>
-    <string name="centro_ehu_ingenieria_bilbao2">Escuela de Ingeniería de Bilbao, Edificio II</string>
-    <string name="centro_ehu_ingenieria_bilbao3">Escuela de Ingeniería de Bilbao, Nautica</string>
+    <!-- EHU university campuses -->
+    <string name="campus_ehu_engineering_bilbao">Escuela de Ingeniería de Bilbao, Edificio principal</string>
+    <string name="campus_ehu_engineering_bilbao1">Escuela de Ingeniería de Bilbao, Edificio I</string>
+    <string name="campus_ehu_engineering_bilbao2">Escuela de Ingeniería de Bilbao, Edificio II</string>
+    <string name="campus_ehu_engineering_bilbao3">Escuela de Ingeniería de Bilbao, Nautica</string>
 
 
-    <string name="centro_ehu_bellas_artes">Facultad de Bellas Artes</string>
-    <string name="centro_ehu_ciencia_tecnologia">Facultad de Ciencia y Tecnología</string>
-    <string name="centro_ehu_ciencias_sociales_comunicacion">Facultad de Ciencias Sociales y Comunicación</string>
-    <string name="centro_ehu_derecho">Facultad de Derecho. Sección bizkaia</string>
-    <string name="centro_ehu_economia_empresa">Facultad de Economía y Empresa</string>
-    <string name="centro_ehu_economia_empresa_elcano">Facultad de Economía y Empresa. Sección Elkano</string>
-    <string name="centro_ehu_educacion_bilbao">Facultad de Educación de Bilbao</string>
-    <string name="centro_ehu_medicina_enfermeria">Facultad de Medicina y Enfermería</string>
-    <string name="centro_ehu_unidad_docente_medicina">Unidad Docente Fac. Med. y Enfermería</string>
-    <string name="centro_ehu_aulas_experiencia">Aulas de la Experiencia</string>
+    <string name="campus_ehu_fine_arts">Facultad de Bellas Artes</string>
+    <string name="campus_ehu_science_technology">Facultad de Ciencia y Tecnología</string>
+    <string name="campus_ehu_social_communication_sciences">Facultad de Ciencias Sociales y Comunicación</string>
+    <string name="campus_ehu_law">Facultad de Derecho. Sección bizkaia</string>
+    <string name="campus_ehu_economics_business">Facultad de Economía y Empresa</string>
+    <string name="campus_ehu_economics_business_elcano">Facultad de Economía y Empresa. Sección Elkano</string>
+    <string name="campus_ehu_education_bilbao">Facultad de Educación de Bilbao</string>
+    <string name="campus_ehu_medicine_nursing">Facultad de Medicina y Enfermería</string>
+    <string name="campus_ehu_medical_teaching_unit">Unidad Docente Fac. Med. y Enfermería</string>
+    <string name="campus_ehu_experience_classrooms">Aulas de la Experiencia</string>
 
-    <!-- Centros Universitarios Mondragon Unibertsitatea -->
-    <string name="centro_mu_bbf_empresariales">Bilbao Berrikuntza Faktoria (BBF): Empresariales</string>
-    <string name="centro_mu_bbf_leinn">Bilbao Berrikuntza Faktoria (BBF): LEINN</string>
-    <string name="centro_mu_as_politecnica">As Fabrik: Escuela Politécnica Superior</string>
-    <string name="centro_mu_as_humanidades">As Fabrik: Fac. Humanidades y Ciencias Edu.</string>
+    <!-- Mondragon Unibertsitatea university campuses -->
+    <string name="campus_mu_bbf_business">Bilbao Berrikuntza Faktoria (BBF): Empresariales</string>
+    <string name="campus_mu_bbf_leinn">Bilbao Berrikuntza Faktoria (BBF): LEINN</string>
+    <string name="campus_mu_as_polytechnic">As Fabrik: Escuela Politécnica Superior</string>
+    <string name="campus_mu_as_humanities">As Fabrik: Fac. Humanidades y Ciencias Edu.</string>
 
-    <!-- Centros Universitarios Deusto -->
-    <string name="centro_deusto_business">Deustu Business School</string>
-    <string name="centro_deusto_derecho">Facultad de Derecho</string>
-    <string name="centro_deusto_sociales_humanas">Facultad de Ciencias Sociales y Humanas</string>
-    <string name="centro_deusto_ingenieria">Facultad de Ingeniería</string>
-    <string name="centro_deusto_educacion_deporte">Facultad de Educación y Deporte</string>
-    <string name="centro_deusto_salud">Facultad de Ciencias de la Salud</string>
-    <string name="centro_deusto_sociales_comunicacion">Facultad de Ciencias Sociales y Comunicación</string>
+    <!-- Deusto university campuses -->
+    <string name="campus_deusto_business">Deustu Business School</string>
+    <string name="campus_deusto_law">Facultad de Derecho</string>
+    <string name="campus_deusto_social_human_sciences">Facultad de Ciencias Sociales y Humanas</string>
+    <string name="campus_deusto_engineering">Facultad de Ingeniería</string>
+    <string name="campus_deusto_education_sport">Facultad de Educación y Deporte</string>
+    <string name="campus_deusto_health">Facultad de Ciencias de la Salud</string>
+    <string name="campus_deusto_social_communication">Facultad de Ciencias Sociales y Comunicación</string>
 
-    <!-- Mapa Strings -->
+    <!-- Map strings -->
     <string name="map_title">Mapa</string>
-    <string name="precio_variable">"Precio variable"</string>
-    <string name="billete_ocasional">Billete ocasional</string>
-    <string name="coste_estimado">Coste estimado</string>
-    <string name="coste_estimado_aviso">El precio será considerablemente menor usando tarjeta Barik o abonos.</string>
+    <string name="variable_price">"Precio variable"</string>
+    <string name="single_ticket">Billete ocasional</string>
+    <string name="estimated_cost">Coste estimado</string>
+    <string name="estimated_cost_notice">El precio será considerablemente menor usando tarjeta Barik o abonos.</string>
 
-    <string name="destino_final">Destino final</string>
+    <string name="final_destination">Destino final</string>
 
-    <string name="caminar">Caminar</string>
+    <string name="walk">Caminar</string>
 
-    <string name="bici">Bici</string>
+    <string name="bike">Bici</string>
 
-    <string name="direccion">Dirección</string>
-    <string name="desde">Desde</string>
-    <string name="hasta">Hasta</string>
-    <string name="paradas">paradas</string>
+    <string name="direction">Dirección</string>
+    <string name="from">Desde</string>
+    <string name="to">Hasta</string>
+    <string name="stops">paradas</string>
 
-    <string name="coche_electrico_contaminacion">Usar el transporte público ayuda a descongestionar el tráfico, aunque tu coche eléctrico ya es una opción limpia.</string>
+    <string name="electric_car_emissions">Usar el transporte público ayuda a descongestionar el tráfico, aunque tu coche eléctrico ya es una opción limpia.</string>
 
-    <string name="has_evitado">Has evitado</string>
-    <string name="co2_respecto_combustion">g de CO2 respecto a un coche de combustión.</string>
+    <string name="you_avoided">Has evitado</string>
+    <string name="co2_vs_combustion_car">g de CO2 respecto a un coche de combustión.</string>
 
-    <string name="ruta_no_valida_titulo">Sin rutas exclusivas</string>
-    <string name="ruta_no_valida_mensaje">No existe ninguna ruta viable utilizando exclusivamente los transportes seleccionados.\n\nPrueba a activar más medios de transporte.</string>
-    <string name="cancelar">Cancelar</string>
-    <string name="cambiar_filtros">Cambiar filtros</string>
+    <string name="invalid_route_title">Sin rutas exclusivas</string>
+    <string name="invalid_route_message">No existe ninguna ruta viable utilizando exclusivamente los transportes seleccionados.\n\nPrueba a activar más medios de transporte.</string>
+    <string name="cancel">Cancelar</string>
+    <string name="change_filters">Cambiar filtros</string>
 
-    <string name="filtros_ruta_titulo">Filtros de Ruta</string>
-    <string name="salida_dias_max">Salida (Máx. 14 días)</string>
-    <string name="hoy">Hoy</string>
-    <string name="ahora">Ahora</string>
-    <string name="medios_preferidos">Medios preferidos</string>
-    <string name="autobus">Autobús</string>
-    <string name="tren">Tren</string>
-    <string name="mi_coche_es_electrico">Mi coche es eléctrico</string>
-    <string name="aplicar">Aplicar</string>
-    <string name="restablecer">Restablecer</string>
+    <string name="route_filters_title">Filtros de Ruta</string>
+    <string name="departure_max_days">Salida (Máx. 14 días)</string>
+    <string name="today">Hoy</string>
+    <string name="now">Ahora</string>
+    <string name="preferred_modes">Medios preferidos</string>
+    <string name="bus_option">Autobús</string>
+    <string name="train">Tren</string>
+    <string name="my_car_is_electric">Mi coche es eléctrico</string>
+    <string name="apply">Aplicar</string>
+    <string name="reset">Restablecer</string>
 
-    <string name="mostrar_paradas_titulo">Red de Transporte</string>
-    <string name="ocultar_paradas">Ocultar paradas</string>
-    <string name="tranvia">Tranvía</string>
-    <string name="cerrar">Cerrar</string>
+    <string name="show_stops_title">Red de Transporte</string>
+    <string name="hide_stops">Ocultar paradas</string>
+    <string name="tram_option">Tranvía</string>
+    <string name="close">Cerrar</string>
 
 
-    <string name="xml_buscar_centro_facultad">Buscar centro o facultad...</string>
-    <string name="xml_detalles_del_trayecto">Detalles del Trayecto</string>
-    <string name="xml_a_pie">A pie</string>
-    <string name="xml_bici">Bici</string>
-    <string name="xml_publico">Público</string>
-    <string name="xml_donde_quieres_ir">¿A dónde quieres ir?</string>
+    <string name="xml_search_campus_faculty">Buscar centro o facultad...</string>
+    <string name="xml_trip_details">Detalles del Trayecto</string>
+    <string name="xml_on_foot">A pie</string>
+    <string name="xml_bike">Bici</string>
+    <string name="xml_public">Público</string>
+    <string name="xml_where_to_go">¿A dónde quieres ir?</string>
 
     <!-- Login & Register Strings -->
     <string name="login_title">UNIGO</string>
@@ -181,136 +181,149 @@
     <string name="no_data_short">N/D</string>
     <string name="no_data_long">Sin datos</string>
     <string name="error_api">Error</string>
-    <string name="aire">AIRE</string>
-    <string name="polen">POLEN</string>
-    <string name="tu_ubicaci_n">Tu ubicación</string>
-    <string name="tu_ubicaci_n2">Tu ubicación</string>
-    <string name="desconocido">Desconocido</string>
-    <string name="cielo_despejado">Cielo despejado</string>
-    <string name="mayormente_despejado">Mayormente despejado</string>
-    <string name="parcialmente_nublado">Parcialmente nublado</string>
-    <string name="totalmente_nublado">Totalmente nublado</string>
-    <string name="niebla_densa">Niebla densa</string>
-    <string name="llovizna">Llovizna</string>
-    <string name="llovizna_helada">Llovizna helada</string>
-    <string name="lluvia_ligera">Lluvia ligera</string>
-    <string name="lluvia_moderada">Lluvia moderada</string>
-    <string name="lluvia_fuerte">Lluvia fuerte</string>
-    <string name="lluvia_helada">Lluvia helada</string>
-    <string name="nieve_ligera">Nieve ligera</string>
-    <string name="nieve_moderada">Nieve moderada</string>
-    <string name="nevada_fuerte">Nevada fuerte</string>
-    <string name="granizo_suave">Granizo suave</string>
-    <string name="chubascos_ligeros">Chubascos ligeros</string>
-    <string name="chubascos_moderados">Chubascos moderados</string>
-    <string name="chubascos_violentos">Chubascos violentos</string>
-    <string name="chubascos_de_nieve">Chubascos de nieve</string>
-    <string name="tormenta_el_ctrica">Tormenta eléctrica</string>
-    <string name="tormenta_con_granizo">Tormenta con granizo</string>
-    <string name="a_n_no_has_guardado_ning_n_campus_en_favoritos">Aún no has guardado ningún campus en favoritos.</string>
-    <string name="bajo">Bajo</string>
-    <string name="moderado">Moderado</string>
-    <string name="alto">Alto</string>
-    <string name="muy_alto">Muy Alto</string>
-    <string name="extremo">Extremo</string>
-    <string name="detectando_ubicaci_n">Detectando ubicación...</string>
-    <string name="cargando">Cargando...</string>
-    <string name="calidad_aire">CALIDAD AIRE</string>
-    <string name="ver_mapa">Ver mapa</string>
-    <string name="polen2">NIVEL DE POLEN</string>
-    <string name="ver_mapa2">Ver mapa</string>
-    <string name="ndice_uv_maximo">ÍNDICE UV MAXIMO</string>
-    <string name="cargando2">Cargando...</string>
-    <string name="horas_de_luz">HORAS DE LUZ</string>
-    <string name="clima_en_tus_campus_favoritos">Clima en tus Campus Favoritos</string>
-    <string name="pron_stico_euskalmet">Pronóstico Euskalmet</string>
-    <string name="cargando_informaci_n_oficial">Cargando información oficial...</string>
-    <string name="radar_de_precipitaciones_en_vivo">Radar de Precipitaciones en Vivo</string>
-    <string name="ruta_al_campus">Ruta al campus</string>
-    <string name="quieres_abrir_el_mapa_para_ver_c_mo_llegar_a">"¿Quieres abrir el mapa para ver cómo llegar a "</string>
-    <string name="s_trazar_ruta">Sí, trazar ruta</string>
-    <string name="cancelar2">Cancelar</string>
-    <string name="clima_en_bilbao">Clima en Bilbao (</string>
-    <string name="hace_fr_o_abr_gate_bien">"Hace frío, ¡abrígate bien! "</string>
-    <string name="d_a_caluroso">"Día caluroso. "</string>
-    <string name="cielo_despejado2">"Cielo despejado. "</string>
-    <string name="ojo_hay_niebla_precauci_n_si_vas_en_coche_o_bici">"¡Ojo! Hay niebla, precaución si vas en coche o bici. "</string>
-    <string name="atenci_n_riesgo_de_nevadas">"¡Atención! Riesgo de nevadas. "</string>
-    <string name="alerta_por_tormentas_el_ctricas">"Alerta por tormentas eléctricas. "</string>
-    <string name="lluvia_fuerte_hoy">Lluvia fuerte hoy (</string>
-    <string name="mm_imprescindible_paraguas">"mm). Imprescindible paraguas. "</string>
-    <string name="se_esperan_algunos_chubascos">Se esperan algunos chubascos (</string>
-    <string name="no_se_esperan_lluvias">"No se esperan lluvias. "</string>
-    <string name="precauci_n_rachas_de_viento_de">"Precaución: Rachas de viento de "</string>
-    <string name="protecci_n_solar_necesaria_uv">"Protección solar necesaria (UV: "</string>
-    <string name="unigo_clima_del_campus">UniGo: Clima del Campus</string>
-    <string name="abre_la_app_para_consultar_la_previsi_n_detallada_antes_de_salir">Abre la app para consultar la previsión detallada antes de salir.</string>
-    <string name="unigo_clima_del_campus2">UniGo: Clima del Campus</string>
-    <string name="con_ctate_a_internet_para_ver_el_pron_stico_de_hoy">Conéctate a internet para ver el pronóstico de hoy.</string>
-    <string name="alertas_de_clima">Alertas de Clima</string>
-    <string name="avisos_diarios_sobre_el_entorno">Avisos diarios sobre el entorno</string>
-    <string name="transporte_favorito">Transporte favorito</string>
-    <string name="cancelar3">Cancelar</string>
-    <string name="estilo_de_mapa">Estilo de mapa</string>
-    <string name="cancelar4">Cancelar</string>
-    <string name="fuentes_de_datos">Fuentes de Datos</string>
-    <string name="esta_aplicaci_n_utiliza_datos_abiertos_proporcionados_por_euskalmet_open_meteo_open_data_euskadi_bizkaibus_euskotren_y_metro_bilbao_geobilbao_agradecemos_su_labor_en_la_apertura_de_datos_para_esta_aplicaci_n">Esta aplicación utiliza datos abiertos proporcionados por:\n\n• Euskalmet\n• Open Meteo\n• Open Data Euskadi\n• Bizkaibus\n• Euskotren y Metro Bilbao\n• GeoBilbao\n\nAgradecemos su labor en la apertura de datos para esta aplicación.</string>
-    <string name="aceptar">Aceptar</string>
-    <string name="aviso_programado_para_las">"Aviso programado para las "</string>
-    <string name="seleccionar_idioma">Seleccionar Idioma</string>
-    <string name="cancelar5">Cancelar</string>
-    <string name="confirmar_foto_de_perfil">Confirmar foto de perfil</string>
-    <string name="aceptar3">Aceptar</string>
-    <string name="cancelar6">Cancelar</string>
-    <string name="subiendo_foto">Subiendo foto...</string>
-    <string name="foto_actualizada">Foto actualizada</string>
-    <string name="error_al_subir_foto">Error al subir foto</string>
-    <string name="error_de_conexi_n">Error de conexión</string>
-    <string name="eliminar_foto">Eliminar foto</string>
-    <string name="est_s_seguro_de_que_quieres_eliminar_tu_foto_de_perfil">¿Estás seguro de que quieres eliminar tu foto de perfil?</string>
-    <string name="eliminar">Eliminar</string>
-    <string name="cancelar7">Cancelar</string>
-    <string name="rutas_y_transporte">Rutas y Transporte</string>
-    <string name="transporte_favorito2">Transporte favorito</string>
-    <string name="medio_de_transporte_por_defecto">Medio de transporte por defecto</string>
-    <string name="veh_culo_el_ctrico">Vehículo eléctrico</string>
-    <string name="priorizar_rutas_con_puntos_de_recarga"> </string>
-    <string name="alertas_y_clima">Alertas y Clima</string>
-    <string name="notificaciones_de_salud_y_clima">Notificaciones de salud y clima</string>
-    <string name="recibir_avisos_diarios_sobre_polen_lluvia_y_uv">Recibir avisos diarios sobre polen, lluvia y UV</string>
-    <string name="hora_del_aviso_diario">Hora del aviso diario</string>
-    <string name="visualizaci_n_del_mapa">Visualización del Mapa</string>
-    <string name="estilo_de_mapa2">Estilo de mapa</string>
+    <string name="air">AIRE</string>
+    <string name="pollen">POLEN</string>
+    <string name="your_location">Tu ubicación</string>
+    <string name="your_location2">Tu ubicación</string>
+    <string name="unknown">Desconocido</string>
+    <string name="clear_sky">Cielo despejado</string>
+    <string name="mostly_clear">Mayormente despejado</string>
+    <string name="partly_cloudy">Parcialmente nublado</string>
+    <string name="overcast">Totalmente nublado</string>
+    <string name="dense_fog">Niebla densa</string>
+    <string name="drizzle">Llovizna</string>
+    <string name="freezing_drizzle">Llovizna helada</string>
+    <string name="light_rain">Lluvia ligera</string>
+    <string name="moderate_rain">Lluvia moderada</string>
+    <string name="heavy_rain">Lluvia fuerte</string>
+    <string name="freezing_rain">Lluvia helada</string>
+    <string name="light_snow">Nieve ligera</string>
+    <string name="moderate_snow">Nieve moderada</string>
+    <string name="heavy_snow">Nevada fuerte</string>
+    <string name="light_hail">Granizo suave</string>
+    <string name="light_showers">Chubascos ligeros</string>
+    <string name="moderate_showers">Chubascos moderados</string>
+    <string name="violent_showers">Chubascos violentos</string>
+    <string name="snow_showers">Chubascos de nieve</string>
+    <string name="thunderstorm">Tormenta eléctrica</string>
+    <string name="thunderstorm_with_hail">Tormenta con granizo</string>
+    <string name="no_favorite_campuses_yet">Aún no has guardado ningún campus en favoritos.</string>
+    <string name="uv_low">Bajo</string>
+    <string name="uv_moderate">Moderado</string>
+    <string name="uv_high">Alto</string>
+    <string name="uv_very_high">Muy Alto</string>
+    <string name="uv_extreme">Extremo</string>
+    <string name="detecting_location">Detectando ubicación...</string>
+    <string name="loading">Cargando...</string>
+    <string name="air_quality">CALIDAD AIRE</string>
+    <string name="view_map">Ver mapa</string>
+    <string name="pollen2">NIVEL DE POLEN</string>
+    <string name="view_map2">Ver mapa</string>
+    <string name="max_uv_index">ÍNDICE UV MAXIMO</string>
+    <string name="loading2">Cargando...</string>
+    <string name="daylight_hours">HORAS DE LUZ</string>
+    <string name="weather_at_favorite_campuses">Clima en tus Campus Favoritos</string>
+    <string name="euskalmet_forecast">Pronóstico Euskalmet</string>
+    <string name="loading_official_info">Cargando información oficial...</string>
+    <string name="live_precipitation_radar">Radar de Precipitaciones en Vivo</string>
+    <string name="route_to_campus">Ruta al campus</string>
+    <string name="open_map_to_route_question">"¿Quieres abrir el mapa para ver cómo llegar a "</string>
+    <string name="yes_draw_route">Sí, trazar ruta</string>
+    <string name="cancel2">Cancelar</string>
+    <string name="weather_in_bilbao">Clima en Bilbao (</string>
+    <string name="cold_wrap_up">"Hace frío, ¡abrígate bien! "</string>
+    <string name="hot_day">"Día caluroso. "</string>
+    <string name="clear_sky2">"Cielo despejado. "</string>
+    <string name="fog_warning">"¡Ojo! Hay niebla, precaución si vas en coche o bici. "</string>
+    <string name="snow_risk_warning">"¡Atención! Riesgo de nevadas. "</string>
+    <string name="thunderstorm_alert">"Alerta por tormentas eléctricas. "</string>
+    <string name="heavy_rain_today">Lluvia fuerte hoy (</string>
+    <string name="mm_umbrella_needed">"mm). Imprescindible paraguas. "</string>
+    <string name="some_showers_expected">Se esperan algunos chubascos (</string>
+    <string name="no_rain_expected">"No se esperan lluvias. "</string>
+    <string name="wind_gusts_warning">"Precaución: Rachas de viento de "</string>
+    <string name="sun_protection_needed_uv">"Protección solar necesaria (UV: "</string>
+    <string name="unigo_campus_weather">UniGo: Clima del Campus</string>
+    <string name="open_app_for_detailed_forecast">Abre la app para consultar la previsión detallada antes de salir.</string>
+    <string name="unigo_campus_weather2">UniGo: Clima del Campus</string>
+    <string name="connect_to_see_forecast">Conéctate a internet para ver el pronóstico de hoy.</string>
+    <string name="weather_alerts">Alertas de Clima</string>
+    <string name="daily_environment_alerts">Avisos diarios sobre el entorno</string>
+    <string name="favorite_transport">Transporte favorito</string>
+    <string name="cancel3">Cancelar</string>
+    <string name="map_style">Estilo de mapa</string>
+    <string name="cancel4">Cancelar</string>
+    <string name="data_sources">Fuentes de Datos</string>
+    <string name="data_sources_acknowledgement">Esta aplicación utiliza datos abiertos proporcionados por:\n\n• Euskalmet\n• Open Meteo\n• Open Data Euskadi\n• Bizkaibus\n• Euskotren y Metro Bilbao\n• GeoBilbao\n\nAgradecemos su labor en la apertura de datos para esta aplicación.</string>
+    <string name="accept">Aceptar</string>
+    <string name="alert_scheduled_for">"Aviso programado para las "</string>
+    <string name="choose_language">Seleccionar Idioma</string>
+    <string name="cancel5">Cancelar</string>
+    <string name="confirm_profile_photo">Confirmar foto de perfil</string>
+    <string name="accept3">Aceptar</string>
+    <string name="cancel6">Cancelar</string>
+    <string name="uploading_photo">Subiendo foto...</string>
+    <string name="photo_updated">Foto actualizada</string>
+    <string name="photo_upload_error">Error al subir foto</string>
+    <string name="connection_error">Error de conexión</string>
+    <string name="delete_photo">Eliminar foto</string>
+    <string name="confirm_delete_photo_message">¿Estás seguro de que quieres eliminar tu foto de perfil?</string>
+    <string name="delete">Eliminar</string>
+    <string name="cancel7">Cancelar</string>
+    <string name="routes_and_transport">Rutas y Transporte</string>
+    <string name="favorite_transport2">Transporte favorito</string>
+    <string name="default_transport_mode">Medio de transporte por defecto</string>
+    <string name="electric_vehicle">Vehículo eléctrico</string>
+    <string name="prioritize_charging_routes"> </string>
+    <string name="alerts_and_weather">Alertas y Clima</string>
+    <string name="health_weather_notifications">Notificaciones de salud y clima</string>
+    <string name="daily_pollen_rain_uv_alerts">Recibir avisos diarios sobre polen, lluvia y UV</string>
+    <string name="daily_alert_time">Hora del aviso diario</string>
+    <string name="map_display">Visualización del Mapa</string>
+    <string name="map_style2">Estilo de mapa</string>
     <string name="normal">Normal</string>
-    <string name="informaci_n">Información</string>
-    <string name="fuentes_de_datos_open_data">Fuentes de Datos (Open Data)</string>
-    <string name="agradecimientos_a_las_entidades_colaboradoras">Agradecimientos a las entidades colaboradoras</string>
-    <string name="equipo_de_desarrollo">Equipo de Desarrollo</string>
-    <string name="creado_por_jon_ander_duque_asier_faraig_y_andoni_ortiz_de_zarate">Creado por Jon Ander Duque, Asier Faraig y Andoni Ortiz de Zarate</string>
-    <string name="versi_n_de_la_aplicaci_n">Versión de la aplicación</string>
-    <string name="fallo_cr_tico_respuesta_vac_a_del_servidor_php_crash">Fallo crítico: Respuesta vacía del servidor (PHP Crash)</string>
-    <string name="error_al_procesar_respuesta_del_servidor">Error al procesar respuesta del servidor</string>
-    <string name="error_en_la_conexi_n">Error en la conexión</string>
-    <string name="error_de_red_o_credenciales_incorrectas">Error de red o credenciales incorrectas</string>
-    <string name="error_de_conexi_n_con_el_servidor">Error de conexión con el servidor</string>
+    <string name="information">Información</string>
+    <string name="open_data_sources">Fuentes de Datos (Open Data)</string>
+    <string name="thanks_to_partner_organizations">Agradecimientos a las entidades colaboradoras</string>
+    <string name="development_team">Equipo de Desarrollo</string>
+    <string name="created_by_authors">Creado por Jon Ander Duque, Asier Faraig y Andoni Ortiz de Zarate</string>
+    <string name="app_version">Versión de la aplicación</string>
+    <string name="empty_server_response_error">Fallo crítico: Respuesta vacía del servidor (PHP Crash)</string>
+    <string name="server_response_parse_error">Error al procesar respuesta del servidor</string>
+    <string name="connection_failed">Error en la conexión</string>
+    <string name="network_or_credentials_error">Error de red o credenciales incorrectas</string>
+    <string name="server_connection_error">Error de conexión con el servidor</string>
 
-    <string-array name="nombres_transporte">
+    <string-array name="transport_names">
         <item>Transporte Público</item>
         <item>Bicicleta</item>
         <item>A pie</item>
     </string-array>
-    <string-array name="valores_transporte">
+    <string-array name="transport_values">
         <item>publico</item>
         <item>bici</item>
         <item>pie</item>
     </string-array>
 
-    <string-array name="nombres_tipo_mapa">
+    <string-array name="map_type_names">
         <item>Normal</item>
         <item>Satélite</item>
         <item>Relieve</item>
         <item>Híbrido</item>
     </string-array>
-    <string-array name="valores_tipo_mapa">
+    <string-array name="map_type_values">
         <item>1</item> <item>2</item> <item>3</item> <item>4</item> </string-array>
+
+    <!-- Added with the English translation: texts that were hardcoded in Java (fix F5) and the "Low" air quality level (fix F6) -->
+    <string name="login_fill_fields">Por favor, llena los campos</string>
+    <string name="register_fill_fields">Por favor, completa todos los campos</string>
+    <string name="user_registered">¡Usuario registrado!</string>
+    <string name="generic_failure">Fallo</string>
+    <string name="server_error_with_response">ERROR SERVIDOR: %1$s</string>
+    <string name="euskalmet_connection_error">Error conectando con Euskalmet.</string>
+    <string name="data_parse_error">Error analizando datos.</string>
+    <string name="translating_forecast">Traduciendo pronóstico...</string>
+    <string name="network_error_short">Err Red</string>
+    <string name="temperature_error">Error</string>
+    <string name="air_low">Baja</string>
 </resources>

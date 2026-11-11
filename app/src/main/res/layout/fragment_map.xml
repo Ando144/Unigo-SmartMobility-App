@@ -14,7 +14,7 @@
         android:layout_height="match_parent" />
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_buscador_falso"
+        android:id="@+id/card_fake_search_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
@@ -28,11 +28,11 @@
             android:layout_height="wrap_content">
 
             <androidx.appcompat.widget.SearchView
-                android:id="@+id/search_view_falso"
+                android:id="@+id/search_view_fake"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:iconifiedByDefault="false"
-                app:queryHint="@string/xml_buscar_centro_facultad"
+                app:queryHint="@string/xml_search_campus_faculty"
                 app:queryBackground="@android:color/transparent"
                 android:focusable="false"
                 android:clickable="false"
@@ -42,24 +42,24 @@
                 app:layout_constraintEnd_toEndOf="parent"/>
 
             <View
-                android:id="@+id/capa_click_buscador"
+                android:id="@+id/search_click_layer"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?attr/selectableItemBackground"
-                app:layout_constraintTop_toTopOf="@+id/search_view_falso"
-                app:layout_constraintBottom_toBottomOf="@+id/search_view_falso"
-                app:layout_constraintStart_toStartOf="@+id/search_view_falso"
-                app:layout_constraintEnd_toEndOf="@+id/search_view_falso" />
+                app:layout_constraintTop_toTopOf="@+id/search_view_fake"
+                app:layout_constraintBottom_toBottomOf="@+id/search_view_fake"
+                app:layout_constraintStart_toStartOf="@+id/search_view_fake"
+                app:layout_constraintEnd_toEndOf="@+id/search_view_fake" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 3. TARJETA DE INFORMACIÓN DE RUTAS (Oculta al inicio, flota sobre el selector) -->
+    <!-- 3. ROUTE INFORMATION CARD (hidden at start, floats above the selector) -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_info_rutas"
+        android:id="@+id/card_route_info"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
@@ -71,7 +71,7 @@
         app:cardBackgroundColor="?attr/colorSurface"
         app:layout_constrainedHeight="true"
         app:layout_constraintHeight_max="350dp"
-        app:layout_constraintBottom_toTopOf="@+id/card_transporte"
+        app:layout_constraintBottom_toTopOf="@+id/card_transport"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -83,7 +83,7 @@
             android:animateLayoutChanges="true">
 
             <RelativeLayout
-                android:id="@+id/header_rutas"
+                android:id="@+id/routes_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="16dp"
@@ -94,7 +94,7 @@
                 android:foreground="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:id="@+id/btn_filtros_transporte"
+                    android:id="@+id/btn_transit_filters"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:padding="6dp"
@@ -108,7 +108,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/xml_detalles_del_trayecto"
+                    android:text="@string/xml_trip_details"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.02"
@@ -116,10 +116,10 @@
                     android:layout_centerInParent="true"/>
 
                 <ImageView
-                    android:id="@+id/btn_minimizar_ruta"
+                    android:id="@+id/btn_minimize_route"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:layout_toStartOf="@+id/btn_quitar_ruta"
+                    android:layout_toStartOf="@+id/btn_clear_route"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="8dp"
                     android:src="@drawable/ic_expand_more"
@@ -127,7 +127,7 @@
                     android:background="?attr/selectableItemBackgroundBorderless" />
 
                 <ImageView
-                    android:id="@+id/btn_quitar_ruta"
+                    android:id="@+id/btn_clear_route"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:padding="6dp"
@@ -139,12 +139,12 @@
             </RelativeLayout>
 
             <androidx.core.widget.NestedScrollView
-                android:id="@+id/scroll_instrucciones"
+                android:id="@+id/scroll_instructions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <LinearLayout
-                    android:id="@+id/ll_lista_instrucciones"
+                    android:id="@+id/ll_instruction_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -154,9 +154,9 @@
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-    <!-- 4. SELECTOR DE TRANSPORTE -->
+    <!-- 4. TRANSPORT SELECTOR -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_transporte"
+        android:id="@+id/card_transport"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
@@ -168,7 +168,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <RadioGroup
-            android:id="@+id/rg_modo_transporte"
+            android:id="@+id/rg_transport_mode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -176,48 +176,48 @@
             android:paddingVertical="8dp">
 
             <RadioButton
-                android:id="@+id/rb_andando"
+                android:id="@+id/rb_walking"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="@string/xml_a_pie"
+                android:text="@string/xml_on_foot"
                 android:textColor="?attr/colorOnSurface"/>
 
             <RadioButton
-                android:id="@+id/rb_bici"
+                android:id="@+id/rb_bike"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="@string/xml_bici"
+                android:text="@string/xml_bike"
                 android:textColor="?attr/colorOnSurface"/>
 
             <RadioButton
-                android:id="@+id/rb_transporte_publico"
+                android:id="@+id/rb_public_transport"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="@string/xml_publico"
+                android:text="@string/xml_public"
                 android:textColor="?attr/colorOnSurface"/>
         </RadioGroup>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- BOTÓN DE CAPAS DE TRANSPORTE -->
+    <!-- TRANSIT LAYERS BUTTON -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_capas_transporte"
+        android:id="@+id/fab_transit_layers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
-        android:src="@drawable/ic_transporte"
+        android:src="@drawable/ic_transport"
         app:tint="#FFFFFF"
         app:backgroundTint="#757575"
         app:fabSize="mini"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/card_buscador_falso" />
+        app:layout_constraintTop_toBottomOf="@+id/card_fake_search_bar" />
 
-    <!-- 5. LA PANTALLA COMPLETA DE BÚSQUEDA -->
+    <!-- 5. FULL SEARCH SCREEN -->
     <LinearLayout
-        android:id="@+id/pantalla_busqueda_completa"
+        android:id="@+id/full_search_screen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -228,7 +228,7 @@
         android:focusable="true">
 
         <LinearLayout
-            android:id="@+id/header_busqueda"
+            android:id="@+id/search_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -237,7 +237,7 @@
             android:background="?attr/colorSurface">
 
             <ImageView
-                android:id="@+id/btn_cerrar_busqueda"
+                android:id="@+id/btn_close_search"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:padding="8dp"
@@ -250,7 +250,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:iconifiedByDefault="false"
-                app:queryHint="@string/xml_donde_quieres_ir"
+                app:queryHint="@string/xml_where_to_go"
                 app:queryBackground="@android:color/transparent"
                 app:searchIcon="@null" />
         </LinearLayout>

@@ -29,14 +29,14 @@ import org.json.simple.parser.ParseException;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private TextInputEditText etNombreReg, etEmailReg, etPasswordReg;
+    private TextInputEditText etNameReg, etEmailReg, etPasswordReg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        etNombreReg = findViewById(R.id.etNombreReg);
+        etNameReg = findViewById(R.id.etNameReg);
         etEmailReg = findViewById(R.id.etEmailReg);
         etPasswordReg = findViewById(R.id.etPasswordReg);
         MaterialButton btnDoRegister = findViewById(R.id.btnDoRegister);
@@ -49,55 +49,55 @@ public class RegisterActivity extends AppCompatActivity {
         final TextView btnLangDe = findViewById(R.id.btnLangDe);
         final TextView btnLangIt = findViewById(R.id.btnLangIt);
 
-        // Selector de idiomas manual para la pantalla de registro
+        // Manual language selector for the registration screen
         btnLangEs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
+                changeLoginLanguage("es", btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
             }
         });
         btnLangEu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
+                changeLoginLanguage("eu", btnLangEu, btnLangEs, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
             }
         });
         btnLangEn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu, btnLangFr, btnLangDe, btnLangIt);
+                changeLoginLanguage("en", btnLangEn, btnLangEs, btnLangEu, btnLangFr, btnLangDe, btnLangIt);
             }
         });
         btnLangFr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("fr", btnLangFr, btnLangEs, btnLangEu, btnLangEn, btnLangDe, btnLangIt);
+                changeLoginLanguage("fr", btnLangFr, btnLangEs, btnLangEu, btnLangEn, btnLangDe, btnLangIt);
             }
         });
         btnLangDe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("de", btnLangDe, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangIt);
+                changeLoginLanguage("de", btnLangDe, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangIt);
             }
         });
         btnLangIt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("it", btnLangIt, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe);
+                changeLoginLanguage("it", btnLangIt, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe);
             }
         });
 
         btnDoRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String nombre = etNombreReg.getText() != null ? etNombreReg.getText().toString().trim() : "";
+                String name = etNameReg.getText() != null ? etNameReg.getText().toString().trim() : "";
                 String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
                 String pass = etPasswordReg.getText() != null ? etPasswordReg.getText().toString().trim() : "";
 
-                if (!nombre.isEmpty() && !email.isEmpty() && !pass.isEmpty()) {
-                    ejecutarRegistro(nombre, email, pass);
+                if (!name.isEmpty() && !email.isEmpty() && !pass.isEmpty()) {
+                    performRegistration(name, email, pass);
                 } else {
-                    Toast.makeText(RegisterActivity.this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, R.string.register_fill_fields, Toast.LENGTH_SHORT).show(); // Fix F5: text moved to strings.xml so it is translated to the 6 languages
                 }
             }
         });
@@ -111,7 +111,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
 
-    private void ejecutarRegistro(String username, String email, String password) {
+    private void performRegistration(String username, String email, String password) {
         Data inputData = new Data.Builder()
                 .putString("script", "registro.php")
                 .putString("username", username)
@@ -125,8 +125,8 @@ public class RegisterActivity extends AppCompatActivity {
 
         WorkManager.getInstance(this).enqueue(registerRequest);
 
-        // Enganchamos un Observer al LiveData del WorkManager para enterarnos en el momento exacto
-        // en que el Worker termina su trabajo en segundo plano y devuelve los datos del servidor.
+        // Attach an Observer to the WorkManager LiveData to know the exact moment
+        // when the Worker finishes its background work and returns the server data.
         WorkManager.getInstance(this).getWorkInfoByIdLiveData(registerRequest.getId())
                 .observe(this, new Observer<WorkInfo>() {
                     @Override
@@ -134,80 +134,80 @@ public class RegisterActivity extends AppCompatActivity {
                         if (workInfo != null && workInfo.getState().isFinished()) {
                             String response = workInfo.getOutputData().getString("response");
                             if (response != null && !response.isEmpty()) {
-                                procesarRespuestaServidor(response);
+                                handleServerResponse(response);
                             } else {
-                                Toast.makeText(RegisterActivity.this, R.string.fallo_cr_tico_respuesta_vac_a_del_servidor_php_crash, Toast.LENGTH_LONG).show();
+                                Toast.makeText(RegisterActivity.this, R.string.empty_server_response_error, Toast.LENGTH_LONG).show();
                             }
                         }
                     }
                 });
     }
 
-    // Parseo manual de la respuesta del script PHP.
-    // Usamos json-simple para trocear el string y comprobar si la inserción en MySQL fue exitosa.
-    private void procesarRespuestaServidor(String jsonResponse) {
+    // Manual parsing of the PHP script response.
+    // json-simple is used to parse the string and check whether the MySQL insert succeeded.
+    private void handleServerResponse(String jsonResponse) {
         try {
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject) parser.parse(jsonResponse);
 
-            // Si el backend devuelve success = true, asumimos que el usuario ya existe en la BD.
+            // If the backend returns success = true, we assume the user now exists in the DB.
             if (json.containsKey("success") && (Boolean) json.get("success")) {
                 String email = etEmailReg.getText() != null ? etEmailReg.getText().toString().trim() : "";
-                String nombre = etNombreReg.getText() != null ? etNombreReg.getText().toString().trim() : "";
+                String name = etNameReg.getText() != null ? etNameReg.getText().toString().trim() : "";
 
-                Toast.makeText(this, "¡Usuario registrado!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.user_registered, Toast.LENGTH_SHORT).show(); // Fix F5: text moved to strings.xml so it is translated to the 6 languages
 
-                // Persistimos la sesión en local para que el usuario no tenga que loguearse al reabrir la app
-                marcarEstadoUsuario(email, nombre);
+                // Persist the session locally so the user does not have to log in again when reopening the app
+                saveUserState(email, name);
                 if (json.containsKey("id")) {
                     SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
                     prefs.edit().putInt("user_id", ((Long) json.get("id")).intValue()).apply();
                 }
 
-                irAMainActivity();
+                goToMainActivity();
             } else {
-                // Capturamos el error exacto que escupe PHP (ej: "El correo ya está en uso")
+                // Show the exact error returned by PHP (e.g. "The email is already in use")
                 String error = (String) json.get("error");
-                Toast.makeText(this, "Error: " + (error != null ? error : "Fallo"), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Error: " + (error != null ? error : getString(R.string.generic_failure)), Toast.LENGTH_LONG).show(); // Fix F5: text moved to strings.xml so it is translated to the 6 languages
             }
         } catch (ParseException e) {
-            Toast.makeText(this, "ERROR SERVIDOR: " + jsonResponse, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.server_error_with_response, jsonResponse), Toast.LENGTH_LONG).show(); // Fix F5: text moved to strings.xml so it is translated to the 6 languages
         }
     }
 
-    // Centralizamos la escritura en SharedPreferences.
-    // Quitamos la flag de isGuest para que la app sepa que tiene que renderizar las opciones de usuario registrado.
-    private void marcarEstadoUsuario(String email, String nombre) {
+    // Centralised writing to SharedPreferences.
+    // Clear the isGuest flag so the app knows it must show the options of a registered user.
+    private void saveUserState(String email, String name) {
         SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("isGuest", false);
         editor.putString("user_email", email);
-        editor.putString("user_name", nombre);
+        editor.putString("user_name", name);
         editor.apply();
     }
 
-    //  Al ir a la pantalla principal, destruimos toda la pila de navegación .
-    // Si no hacemos esto, el usuario podría darle al botón "Atrás" de Android en el menú principal
-    // y volvería absurdamente a esta pantalla de registro estando ya logueado.
-    private void irAMainActivity() {
+    // When going to the main screen, the whole navigation stack is destroyed.
+    // Otherwise the user could press Android's "Back" button on the main menu
+    // and return to this registration screen while already logged in.
+    private void goToMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
 
-    // Delega el cambio de idioma al AppCompatDelegate, lo cual forzará a la Activity a recrearse
-    // y recargar los strings.xml que tocan al nuevo Locale seleccionado.
-    private void cambiarIdiomaLogin(String langCode, TextView activo, TextView... inactivos) {
+    // Delegates the language change to AppCompatDelegate, which recreates the Activity
+    // and reloads the strings.xml of the newly selected Locale.
+    private void changeLoginLanguage(String langCode, TextView activeButton, TextView... inactiveButtons) {
         LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
         AppCompatDelegate.setApplicationLocales(appLocales);
-        marcarIdiomaActivo(activo, inactivos);
+        highlightActiveLanguage(activeButton, inactiveButtons);
     }
 
-    private void marcarIdiomaActivo(TextView activo, TextView... inactivos) {
-        activo.setBackgroundColor(ContextCompat.getColor(this, R.color.bilbao_red));
-        activo.setTextColor(ContextCompat.getColor(this, R.color.white));
-        for (TextView tv : inactivos) {
+    private void highlightActiveLanguage(TextView activeButton, TextView... inactiveButtons) {
+        activeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.bilbao_red));
+        activeButton.setTextColor(ContextCompat.getColor(this, R.color.white));
+        for (TextView tv : inactiveButtons) {
             tv.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
             tv.setTextColor(ContextCompat.getColor(this, R.color.white));
         }

@@ -14,10 +14,10 @@ public class UnigoApplication extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        aplicarTemaGuardado();
+        applySavedTheme();
     }
 
-    public static void aplicarTemaGuardado() {
+    public static void applySavedTheme() {
         SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         SharedPreferences unigoPrefs = getContext().getSharedPreferences("UnigoPrefs", MODE_PRIVATE);
         String userEmail = unigoPrefs.getString("user_email", null);

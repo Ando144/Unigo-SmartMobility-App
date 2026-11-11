@@ -16,14 +16,14 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- PARTE SUPERIOR (Siempre visible) -->
+        <!-- TOP PART (always visible) -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp">
 
             <ImageView
-                android:id="@+id/ivLogoCentro"
+                android:id="@+id/ivCampusLogo"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_centerVertical="true"
@@ -32,13 +32,13 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/ivLogoCentro"
+                android:layout_toEndOf="@id/ivCampusLogo"
                 android:layout_toStartOf="@id/ivExpand"
                 android:layout_marginStart="16dp"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvNombreCentro"
+                    android:id="@+id/tvCampusTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="?attr/colorOnSurface"
@@ -46,14 +46,14 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvUniUbi"
+                    android:id="@+id/tvUniLocation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="14sp" />
             </LinearLayout>
 
-            <!-- Botón de expandir -->
+            <!-- Expand button -->
             <ImageView
                 android:id="@+id/ivExpand"
                 android:layout_width="32dp"
@@ -64,7 +64,7 @@
                 android:src="@drawable/ic_expand_more"
                 app:tint="?attr/colorOnSurfaceVariant" />
 
-            <!-- Estrella -->
+            <!-- Star -->
             <ImageView
                 android:id="@+id/ivStar"
                 android:layout_width="32dp"
@@ -73,9 +73,9 @@
                 android:layout_centerVertical="true" />
         </RelativeLayout>
 
-        <!-- PARTE INFERIOR (Desplegable - Oculta por defecto) -->
+        <!-- BOTTOM PART (expandable - hidden by default) -->
         <LinearLayout
-            android:id="@+id/layoutTransporte"
+            android:id="@+id/layoutTransport"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorSurfaceVariant"
@@ -83,7 +83,7 @@
             android:visibility="gone">
 
             <ImageView
-                android:id="@+id/ivMapaCentro"
+                android:id="@+id/ivCampusPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:scaleType="centerCrop"

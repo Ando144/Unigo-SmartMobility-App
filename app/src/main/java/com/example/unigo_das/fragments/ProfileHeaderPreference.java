@@ -37,11 +37,11 @@ public class ProfileHeaderPreference extends Preference {
                 profileImage.setImageResource(R.drawable.ic_account_circle);
             } else {
                 String userEmail = prefs.getString("user_email", "");
-                String fotoUrl = prefs.getString("profile_photo_url_" + userEmail, null);
+                String photoUrl = prefs.getString("profile_photo_url_" + userEmail, null);
 
-                if (fotoUrl != null && !fotoUrl.isEmpty()) {
+                if (photoUrl != null && !photoUrl.isEmpty()) {
 
-                    cargarImagenDesdeUrl(profileImage, fotoUrl);
+                    loadImageFromUrl(profileImage, photoUrl);
                 } else {
                     profileImage.setImageResource(R.drawable.ic_account_circle);
                 }
@@ -49,7 +49,7 @@ public class ProfileHeaderPreference extends Preference {
         }
     }
 
-    private void cargarImagenDesdeUrl(ImageView imageView, String url) {
+    private void loadImageFromUrl(ImageView imageView, String url) {
 
         new Thread(new Runnable() {
             @Override
@@ -63,7 +63,11 @@ public class ProfileHeaderPreference extends Preference {
                     final Bitmap bitmap = BitmapFactory.decodeStream(input);
 
 
-                    ((android.app.Activity) getContext()).runOnUiThread(new Runnable() {
+                    // Fix F4: in a PreferenceFragmentCompat the Preference context is a
+                    // ContextThemeWrapper, not the Activity, so the old cast threw a
+                    // ClassCastException (hidden by the catch) and the photo was never shown.
+                    // View.post() runs the update on the UI thread with any context.
+                    imageView.post(new Runnable() {
                         @Override
                         public void run() {
                             imageView.setImageBitmap(bitmap);
@@ -76,7 +80,7 @@ public class ProfileHeaderPreference extends Preference {
         }).start();
     }
 
-    private Bitmap decodificarBase64(String base64Str) {
+    private Bitmap decodeBase64(String base64Str) {
         try {
             byte[] decodedBytes = Base64.decode(base64Str, Base64.DEFAULT);
             return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);

@@ -48,20 +48,20 @@ public class ProfileDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
-                            mostrarConfirmacionEliminar();
+                            showDeleteConfirmation();
                         } else {
-                            abrirGaleria();
+                            openGallery();
                         }
                     }
                 });
         return builder.create();
     }
 
-    private void mostrarConfirmacionEliminar() {
+    private void showDeleteConfirmation() {
         new AlertDialog.Builder(requireActivity())
-                .setTitle(R.string.eliminar_foto)
-                .setMessage(R.string.est_s_seguro_de_que_quieres_eliminar_tu_foto_de_perfil)
-                .setPositiveButton(R.string.eliminar, new DialogInterface.OnClickListener() {
+                .setTitle(R.string.delete_photo)
+                .setMessage(R.string.confirm_delete_photo_message)
+                .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (listener != null) {
@@ -69,11 +69,11 @@ public class ProfileDialogFragment extends DialogFragment {
                         }
                     }
                 })
-                .setNegativeButton(R.string.cancelar7, null)
+                .setNegativeButton(R.string.cancel7, null)
                 .show();
     }
 
-    private void abrirGaleria() {
+    private void openGallery() {
         if (imageSelectedListener != null) {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             imageSelectedListener.onImageSelected(intent);

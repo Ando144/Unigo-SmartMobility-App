@@ -1,17 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.Unigodas" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Color principal: Rojo Bilbao -->
+        <!-- Primary colour: Bilbao red -->
         <item name="colorPrimary">@color/bilbao_red</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorPrimaryContainer">@color/bilbao_red_dark</item>
         <item name="colorOnPrimaryContainer">@color/white</item>
 
-        <!-- Color secundario: Gris oscuro Bilbao -->
+        <!-- Secondary colour: Bilbao dark grey -->
         <item name="colorSecondary">@color/bilbao_grey_dark</item>
         <item name="colorOnSecondary">@color/white</item>
 
-        <!-- Fondos y superficies (Modo Claro) -->
+        <!-- Backgrounds and surfaces (light mode) -->
         <item name="android:colorBackground">@color/bg_light</item>
         <item name="colorSurface">@color/white</item>
         <item name="colorOnSurface">@color/text_dark</item>
@@ -23,7 +23,7 @@
 
     <style name="Theme.Unigodas" parent="Base.Theme.Unigodas" />
 
-    <!-- Tema forzado en modo claro para Login y Registro -->
+    <!-- Theme forced to light mode for Login and Register -->
     <style name="Theme.Unigodas.AlwaysLight" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/bilbao_red</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -38,7 +38,7 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    <style name="TemaVentanaFlotante" parent="Theme.MaterialComponents.Light.Dialog">
+    <style name="FloatingWindowTheme" parent="Theme.MaterialComponents.Light.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>

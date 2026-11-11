@@ -21,26 +21,26 @@ import java.util.List;
 
 import com.example.unigo_das.R;
 import com.example.unigo_das.activities.MainActivity;
-import com.example.unigo_das.adapters.CentroAdapter;
+import com.example.unigo_das.adapters.CampusAdapter;
 import com.example.unigo_das.db.DataBaseHelper;
-import com.example.unigo_das.item.Centro;
+import com.example.unigo_das.item.Campus;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class SchoolFragment extends Fragment {
 
-    private RecyclerView rvCentros;
-    private CentroAdapter adapter;
-    private List<Centro> listaCentros;
-    // Guardamos una copia intacta de la BD para poder filtrar sin tener que hacer queries contínuas a SQLite
-    private List<Centro> listaOriginalCompletita;
+    private RecyclerView rvCampuses;
+    private CampusAdapter adapter;
+    private List<Campus> campusItems;
+    // Keep an untouched copy of the DB data so we can filter without repeated SQLite queries
+    private List<Campus> fullOriginalList;
     private SearchView searchView;
 
-    private android.widget.Button btnFiltroTodas, btnFiltroEHU, btnFiltroDeusto, btnFiltroMondragon;
+    private android.widget.Button btnFilterAll, btnFilterEhu, btnFilterDeusto, btnFilterMondragon;
 
     private DataBaseHelper dbHelper;
 
-    private String filtroUniversidadActual = "Todas";
-    private String busquedaActual = "";
+    private String currentUniversityFilter = "Todas";
+    private String currentSearch = "";
 
     @Nullable
     @Override
@@ -57,84 +57,84 @@ public class SchoolFragment extends Fragment {
             }
         });
 
-        rvCentros = view.findViewById(R.id.rvCentros);
-        searchView = view.findViewById(R.id.searchViewCentros);
+        rvCampuses = view.findViewById(R.id.rvCampuses);
+        searchView = view.findViewById(R.id.searchViewCampuses);
 
         dbHelper = new DataBaseHelper(requireContext());
 
-        cargarDatosDesdeBD();
+        loadDataFromDb();
 
-        rvCentros.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvCampuses.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new CentroAdapter(listaCentros, new CentroAdapter.OnStarClickListener() {
+        adapter = new CampusAdapter(campusItems, new CampusAdapter.OnStarClickListener() {
             @Override
-            public void onStarClick(Centro centro, int position) {
-                guardarFavorito(centro);
-                ordenarLista(); // Re-ordenamos para que el nuevo favorito suba arriba automáticamente
+            public void onStarClick(Campus campus, int position) {
+                saveFavorite(campus);
+                sortList(); // Sort again so the new favourite moves to the top automatically
             }
-        }, new CentroAdapter.OnItemClickListener() {
+        }, new CampusAdapter.OnItemClickListener() {
             @Override
-            public void onItemClick(Centro centro) {
-                // Al hacer clic en un centro, lanzamos el diálogo de confirmación.
-                // Si el usuario acepta, delegamos la acción al MainActivity, que es quien controla el FragmentManager
-                // y puede inyectar los datos en el mapa sin romper la pila.
+            public void onItemClick(Campus campus) {
+                // When a campus is tapped, show the confirmation dialog.
+                // If the user accepts, the action is delegated to MainActivity, which controls the FragmentManager
+                // and can pass the data to the map without breaking the back stack.
                 new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.ruta_al_campus)
+                        .setTitle(R.string.route_to_campus)
                         .setIcon(R.drawable.ic_menu_school)
-                        .setMessage(getString(R.string.quieres_abrir_el_mapa_para_ver_c_mo_llegar_a) + centro.getNombre() + "?")
-                        .setPositiveButton(R.string.s_trazar_ruta, new DialogInterface.OnClickListener() {
+                        .setMessage(getString(R.string.open_map_to_route_question) + campus.getName() + "?")
+                        .setPositiveButton(R.string.yes_draw_route, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ((MainActivity) requireActivity())
-                                        .irRutaEnMapa(centro.getNombre(), centro.getLatitud(), centro.getLongitud());
+                                        .showRouteOnMap(campus.getName(), campus.getLatitude(), campus.getLongitude());
                             }
                         })
-                        .setNegativeButton(R.string.cancelar2, null)
+                        .setNegativeButton(R.string.cancel2, null)
                         .show();
             }
         });
-        rvCentros.setAdapter(adapter);
+        rvCampuses.setAdapter(adapter);
 
-        btnFiltroTodas = view.findViewById(R.id.btnFiltroTodas);
-        btnFiltroEHU = view.findViewById(R.id.btnFiltroEHU);
-        btnFiltroDeusto = view.findViewById(R.id.btnFiltroDeusto);
-        btnFiltroMondragon = view.findViewById(R.id.btnFiltroMondragon);
+        btnFilterAll = view.findViewById(R.id.btnFilterAll);
+        btnFilterEhu = view.findViewById(R.id.btnFilterEhu);
+        btnFilterDeusto = view.findViewById(R.id.btnFilterDeusto);
+        btnFilterMondragon = view.findViewById(R.id.btnFilterMondragon);
 
-        actualizarBotonActivo(btnFiltroTodas);
+        updateActiveButton(btnFilterAll);
 
-        btnFiltroTodas.setOnClickListener(new View.OnClickListener() {
+        btnFilterAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                filtroUniversidadActual = "Todas";
-                aplicarFiltrosCombinados();
-                actualizarBotonActivo(btnFiltroTodas);
+                currentUniversityFilter = "Todas";
+                applyCombinedFilters();
+                updateActiveButton(btnFilterAll);
             }
         });
 
-        btnFiltroEHU.setOnClickListener(new View.OnClickListener() {
+        btnFilterEhu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                filtroUniversidadActual = "UPV/EHU";
-                aplicarFiltrosCombinados();
-                actualizarBotonActivo(btnFiltroEHU);
+                currentUniversityFilter = "UPV/EHU";
+                applyCombinedFilters();
+                updateActiveButton(btnFilterEhu);
             }
         });
 
-        btnFiltroDeusto.setOnClickListener(new View.OnClickListener() {
+        btnFilterDeusto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                filtroUniversidadActual = "Deusto";
-                aplicarFiltrosCombinados();
-                actualizarBotonActivo(btnFiltroDeusto);
+                currentUniversityFilter = "Deusto";
+                applyCombinedFilters();
+                updateActiveButton(btnFilterDeusto);
             }
         });
 
-        btnFiltroMondragon.setOnClickListener(new View.OnClickListener() {
+        btnFilterMondragon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                filtroUniversidadActual = "Mondragon";
-                aplicarFiltrosCombinados();
-                actualizarBotonActivo(btnFiltroMondragon);
+                currentUniversityFilter = "Mondragon";
+                applyCombinedFilters();
+                updateActiveButton(btnFilterMondragon);
             }
         });
 
@@ -144,8 +144,8 @@ public class SchoolFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                busquedaActual = newText;
-                aplicarFiltrosCombinados();
+                currentSearch = newText;
+                applyCombinedFilters();
                 return false;
             }
         });
@@ -153,74 +153,74 @@ public class SchoolFragment extends Fragment {
         return view;
     }
 
-    // Cargamos todos los centros de golpe desde SQLite y los cruzamos con los favoritos del usuario actual.
-    // Hacemos esto una sola vez  para optimizar memoria.
-    private void cargarDatosDesdeBD() {
-        listaOriginalCompletita = dbHelper.obtenerTodosLosCentros();
+    // Load all the campuses from SQLite at once and combine them with the current user's favourites.
+    // This is done only once to save memory.
+    private void loadDataFromDb() {
+        fullOriginalList = dbHelper.getAllCampuses();
 
         SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        int idUsuarioActual = prefs.getInt("user_id", 0);
-        List<String> favs = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
+        int currentUserId = prefs.getInt("user_id", 0);
+        List<String> favs = dbHelper.getUserFavoriteIds(currentUserId);
 
-        for (Centro c : listaOriginalCompletita) {
+        for (Campus c : fullOriginalList) {
             if (favs.contains(c.getId())) {
                 c.setStarred(true);
             }
         }
 
-        listaCentros = new ArrayList<>(listaOriginalCompletita);
-        ordenarLista();
+        campusItems = new ArrayList<>(fullOriginalList);
+        sortList();
     }
 
-    // Metodo central del buscador. Combina el texto escrito con el botón de universidad pulsado.
-    // Filtramos siempre leyendo de 'listaOriginalCompletita' y machacamos 'listaCentros' con el resultado.
-    private void aplicarFiltrosCombinados() {
-        List<Centro> listaFiltrada = new ArrayList<>();
+    // Main search method. Combines the typed text with the selected university button.
+    // Always filter from 'fullOriginalList' and overwrite 'campusItems' with the result.
+    private void applyCombinedFilters() {
+        List<Campus> filteredCampuses = new ArrayList<>();
 
-        for (Centro c : listaOriginalCompletita) {
-            boolean pasaFiltroUni = filtroUniversidadActual.equals("Todas") || c.getUniversidad().equals(filtroUniversidadActual);
+        for (Campus c : fullOriginalList) {
+            boolean passesUniFilter = currentUniversityFilter.equals("Todas") || c.getUniversity().equals(currentUniversityFilter);
 
-            boolean pasaFiltroTexto = c.getNombre().toLowerCase().contains(busquedaActual.toLowerCase()) ||
-                    (c.getDescripcion() != null && c.getDescripcion().toLowerCase().contains(busquedaActual.toLowerCase())) ||
-                    c.getUniversidad().toLowerCase().contains(busquedaActual.toLowerCase());
+            boolean passesTextFilter = c.getName().toLowerCase().contains(currentSearch.toLowerCase()) ||
+                    (c.getDescription() != null && c.getDescription().toLowerCase().contains(currentSearch.toLowerCase())) ||
+                    c.getUniversity().toLowerCase().contains(currentSearch.toLowerCase());
 
-            // Solo añadimos si cumple tanto el botón de universidad como lo escrito en el buscador
-            if (pasaFiltroUni && pasaFiltroTexto) {
-                listaFiltrada.add(c);
+            // Only add it if it matches both the university button and the search text
+            if (passesUniFilter && passesTextFilter) {
+                filteredCampuses.add(c);
             }
         }
 
-        listaCentros.clear();
-        listaCentros.addAll(listaFiltrada);
-        ordenarLista();
+        campusItems.clear();
+        campusItems.addAll(filteredCampuses);
+        sortList();
 
         if (adapter != null) {
-            adapter.actualizarListaCompleta(listaCentros);
+            adapter.updateFullList(campusItems);
         }
     }
 
-    // Sincroniza la acción visual de la estrellita en el RecyclerView con la base de datos real.
-    // Usamos el ID de las SharedPreferences para asegurar que cada cuenta tenga su propia lista separada.
-    private void guardarFavorito(Centro centro) {
+    // Syncs the visual star in the RecyclerView with the real database.
+    // The ID from SharedPreferences is used so that each account has its own separate list.
+    private void saveFavorite(Campus campus) {
         SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        int idUsuarioActual = prefs.getInt("user_id", 0);
+        int currentUserId = prefs.getInt("user_id", 0);
 
-        if (centro.isStarred()) {
-            dbHelper.anadirFavorito(idUsuarioActual, centro.getId());
+        if (campus.isStarred()) {
+            dbHelper.addFavorite(currentUserId, campus.getId());
         } else {
-            dbHelper.borrarFavorito(idUsuarioActual, centro.getId());
+            dbHelper.removeFavorite(currentUserId, campus.getId());
         }
     }
 
-    //  Prioridad a los centros marcados como favoritos .
-    // Si tienen el mismo estado (los dos con estrella, o los dos sin ella),  alfabéticamente.
-    private void ordenarLista() {
-        java.util.Collections.sort(listaCentros, new java.util.Comparator<Centro>() {
+    // Favourite campuses go first.
+    // If both have the same state (both starred, or both not), sort alphabetically.
+    private void sortList() {
+        java.util.Collections.sort(campusItems, new java.util.Comparator<Campus>() {
             @Override
-            public int compare(Centro c1, Centro c2) {
+            public int compare(Campus c1, Campus c2) {
                 if (c1.isStarred() && !c2.isStarred()) return -1;
                 if (!c1.isStarred() && c2.isStarred()) return 1;
-                return c1.getNombre().compareTo(c2.getNombre());
+                return c1.getName().compareTo(c2.getName());
             }
         });
 
@@ -229,14 +229,14 @@ public class SchoolFragment extends Fragment {
         }
     }
 
-    private void actualizarBotonActivo(android.widget.Button btnActivo) {
-        int colorGris = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bilbao_grey_dark);
-        btnFiltroTodas.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGris));
-        btnFiltroEHU.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGris));
-        btnFiltroDeusto.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGris));
-        btnFiltroMondragon.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorGris));
+    private void updateActiveButton(android.widget.Button btnActive) {
+        int greyColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bilbao_grey_dark);
+        btnFilterAll.setBackgroundTintList(android.content.res.ColorStateList.valueOf(greyColor));
+        btnFilterEhu.setBackgroundTintList(android.content.res.ColorStateList.valueOf(greyColor));
+        btnFilterDeusto.setBackgroundTintList(android.content.res.ColorStateList.valueOf(greyColor));
+        btnFilterMondragon.setBackgroundTintList(android.content.res.ColorStateList.valueOf(greyColor));
 
-        int colorRojo = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bilbao_red);
-        btnActivo.setBackgroundTintList(android.content.res.ColorStateList.valueOf(colorRojo));
+        int redColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bilbao_red);
+        btnActive.setBackgroundTintList(android.content.res.ColorStateList.valueOf(redColor));
     }
 }

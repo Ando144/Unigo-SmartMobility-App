@@ -70,7 +70,7 @@ public class LanguageDialogFragment extends DialogFragment {
                         String selectedLang = languageCodes[which];
                         dismiss();
 
-                        // Solo hacer algo si el idioma es diferente
+                        // Only act if the language is different
                         if (!selectedLang.equals(currentLang)) {
                             updateLanguage(selectedLang);
                         }
@@ -84,14 +84,14 @@ public class LanguageDialogFragment extends DialogFragment {
         LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
         AppCompatDelegate.setApplicationLocales(appLocales);
 
-        // Guardar preferencia por usuario
+        // Save the preference per user
         SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         String userEmail = prefs.getString("user_email", "");
         if (!userEmail.isEmpty()) {
             prefs.edit().putString("language_" + userEmail, langCode).apply();
         }
 
-        // Notificar el cambio después de un delay
+        // Notify the change after a delay
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (isAdded() && listener != null) {
                 listener.onLanguageChanged();

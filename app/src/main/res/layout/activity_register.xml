@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true"
     android:background="@color/bg_light">
 
-    <!-- Icono superior -->
+    <!-- Top icon -->
     <ImageView
         android:id="@+id/ivLogoRegister"
         android:layout_width="56dp"
@@ -19,7 +19,7 @@
         app:srcCompat="@drawable/ic_person_add"
         app:tint="@color/bilbao_grey_dark" />
 
-    <!-- Título en Rojo Bilbao -->
+    <!-- Title in Bilbao red -->
     <TextView
         android:id="@+id/tvTitleRegister"
         android:layout_width="wrap_content"
@@ -46,7 +46,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitleRegister" />
 
-    <!-- Tarjeta del Formulario -->
+    <!-- Form card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardForm"
         android:layout_width="match_parent"
@@ -66,7 +66,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Detalle de color superior (Acento rojo) -->
+            <!-- Top colour detail (red accent) -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="6dp"
@@ -78,7 +78,7 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
-                <!-- Campo Nombre -->
+                <!-- Name field -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
@@ -90,14 +90,14 @@
                     app:boxCornerRadiusTopStart="4dp">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etNombreReg"
+                        android:id="@+id/etNameReg"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textPersonName"
                         android:textColor="@color/text_dark"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Campo Email -->
+                <!-- Email field -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
@@ -117,7 +117,7 @@
                         android:textColor="@color/text_dark"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Campo Contraseña -->
+                <!-- Password field -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
@@ -138,7 +138,7 @@
                         android:textColor="@color/text_dark"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Botón Registrarse -->
+                <!-- Register button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnDoRegister"
                     android:layout_width="match_parent"
@@ -154,7 +154,7 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- SELECTOR DE IDIOMA MEJORADO -->
+    <!-- IMPROVED LANGUAGE SELECTOR -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -271,7 +271,7 @@
             android:focusable="true" />
     </LinearLayout>
 
-    <!-- Botón volver al Login -->
+    <!-- Back to Login button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnBackToLogin"
         style="@style/Widget.MaterialComponents.Button.TextButton"

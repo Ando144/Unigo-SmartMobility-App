@@ -31,7 +31,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.unigo_das.R;
 import com.example.unigo_das.db.DataBaseHelper;
-import com.example.unigo_das.item.Centro;
+import com.example.unigo_das.item.Campus;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -58,60 +58,64 @@ import java.util.Locale;
 
 public class WeatherFragment extends Fragment {
 
-    private ImageView ivIconoClimaPrincipal;
-    private TextView tvTemperaturaPrincipal;
-    private TextView tvPronosticoBilbao;
-    private TextView tvUbicacionPrincipal;
-    private TextView tvDescripcionClima;
-    private WebView wvRadarLluvia;
+    private ImageView ivMainWeatherIcon;
+    private TextView tvMainTemperature;
+    private TextView tvBilbaoForecast;
+    private TextView tvMainLocation;
+    private TextView tvWeatherDescription;
+    private WebView wvRainRadar;
     private FusedLocationProviderClient fusedLocationClient;
 
     private com.android.volley.RequestQueue requestQueue;
+
+    // Fix F9: a single background thread for the Geocoder, closed in onDestroy()
+    private final java.util.concurrent.ExecutorService geocoderExecutor = java.util.concurrent.Executors.newSingleThreadExecutor();
+    private final android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_weather, container, false);
 
-        ivIconoClimaPrincipal = view.findViewById(R.id.ivIconoClimaPrincipal);
-        tvTemperaturaPrincipal = view.findViewById(R.id.tvTemperaturaPrincipal);
-        tvPronosticoBilbao = view.findViewById(R.id.tvPronosticoBilbao);
-        tvUbicacionPrincipal = view.findViewById(R.id.tvUbicacionPrincipal);
-        tvDescripcionClima = view.findViewById(R.id.tvDescripcionClima);
-        wvRadarLluvia = view.findViewById(R.id.wvRadarLluvia);
+        ivMainWeatherIcon = view.findViewById(R.id.ivMainWeatherIcon);
+        tvMainTemperature = view.findViewById(R.id.tvMainTemperature);
+        tvBilbaoForecast = view.findViewById(R.id.tvBilbaoForecast);
+        tvMainLocation = view.findViewById(R.id.tvMainLocation);
+        tvWeatherDescription = view.findViewById(R.id.tvWeatherDescription);
+        wvRainRadar = view.findViewById(R.id.wvRainRadar);
 
         requestQueue = Volley.newRequestQueue(requireContext());
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
-        androidx.cardview.widget.CardView cvMapaAire = view.findViewById(R.id.cvMapaAire);
-        androidx.cardview.widget.CardView cvMapaPolen = view.findViewById(R.id.cvMapaPolen);
+        androidx.cardview.widget.CardView cvAirMap = view.findViewById(R.id.cvAirMap);
+        androidx.cardview.widget.CardView cvPollenMap = view.findViewById(R.id.cvPollenMap);
 
-        cvMapaAire.setOnClickListener(new View.OnClickListener() {
+        cvAirMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                abrirPantallaMapaCalor(getString(R.string.aire));
+                openHeatmapScreen(com.example.unigo_das.activities.HeatmapActivity.MAP_TYPE_AIR);
             }
         });
 
-        cvMapaPolen.setOnClickListener(new View.OnClickListener() {
+        cvPollenMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                abrirPantallaMapaCalor(getString(R.string.polen));
+                openHeatmapScreen(com.example.unigo_das.activities.HeatmapActivity.MAP_TYPE_POLLEN);
             }
         });
 
-        // Le damos esquinas redondeadas al radar por código para que encaje con el diseño de las tarjetas
-        wvRadarLluvia.setOutlineProvider(new android.view.ViewOutlineProvider() {
+        // Round the radar corners in code so it matches the card design
+        wvRainRadar.setOutlineProvider(new android.view.ViewOutlineProvider() {
             @Override
             public void getOutline(android.view.View view, android.graphics.Outline outline) {
                 outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 40f);
             }
         });
-        wvRadarLluvia.setClipToOutline(true);
+        wvRainRadar.setClipToOutline(true);
 
-        // Solucionamos el problema del scroll. Al tocar el WebView, le decimos al padre (el ScrollView)
-        // que no intercepte el toque, así podemos mover el mapa libremente sin que la pantalla suba o baje.
-        wvRadarLluvia.setOnTouchListener(new View.OnTouchListener() {
+        // Fixes the scroll problem: when the WebView is touched, the parent (the ScrollView)
+        // is told not to intercept the touch, so the map can be moved without scrolling the screen.
+        wvRainRadar.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 v.getParent().requestDisallowInterceptTouchEvent(true);
@@ -119,27 +123,27 @@ public class WeatherFragment extends Fragment {
             }
         });
 
-        cargarRadarRainViewer();
-        obtenerUbicacionYClima();
-        obtenerPronosticoOpenData();
+        loadRainViewerRadar();
+        fetchLocationAndWeather();
+        fetchOpenDataForecast();
 
         return view;
     }
 
-    private void abrirPantallaMapaCalor(String tipoMapa) {
+    private void openHeatmapScreen(String mapType) {
         android.content.Intent intent = new android.content.Intent(requireContext(), com.example.unigo_das.activities.HeatmapActivity.class);
-        intent.putExtra("TIPO_MAPA", tipoMapa);
+        intent.putExtra(com.example.unigo_das.activities.HeatmapActivity.EXTRA_MAP_TYPE, mapType);
         startActivity(intent);
     }
 
-    // Metodo principal que coordina los datos del clima
-    private void obtenerUbicacionYClima() {
+    // Main method that coordinates the weather data
+    private void fetchLocationAndWeather() {
         if (!isAdded() || getContext() == null) return;
 
-        // Si no nos han dado permisos de ubicación, cargamos Bilbao por defecto
-        // para que la pantalla no se quede en blanco.
+        // Without location permission, Bilbao is loaded by default
+        // so the screen is not left empty.
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            actualizarClimaConNombre(43.26, -2.94, "Bilbao");
+            updateWeatherWithName(43.26, -2.94, "Bilbao");
             return;
         }
 
@@ -148,44 +152,59 @@ public class WeatherFragment extends Fragment {
             public void onSuccess(Location location) {
                 if (!isAdded() || getContext() == null) return;
                 if (location != null) {
-                    String nombreCiudad = obtenerNombreCiudad(location.getLatitude(), location.getLongitude());
-                    actualizarClimaConNombre(location.getLatitude(), location.getLongitude(), nombreCiudad);
+                    // Fix F9: Geocoder.getFromLocation() blocks (it can use the network), so it now runs
+                    // on a background thread instead of the main thread (risk of "App not responding").
+                    final double lat = location.getLatitude();
+                    final double lon = location.getLongitude();
+                    final Context appContext = requireContext().getApplicationContext();
+                    geocoderExecutor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            final String city = lookUpCityName(appContext, lat, lon);
+                            mainHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!isAdded() || getContext() == null) return;
+                                    updateWeatherWithName(lat, lon, city != null ? city : getString(R.string.your_location2));
+                                }
+                            });
+                        }
+                    });
                 } else {
-                    actualizarClimaConNombre(43.26, -2.94, "Bilbao");
+                    updateWeatherWithName(43.26, -2.94, "Bilbao");
                 }
             }
         });
     }
 
-    private String obtenerNombreCiudad(double lat, double lon) {
-        if (!isAdded() || getContext() == null) return getString(R.string.tu_ubicaci_n);
-
-        Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+    // Returns the city of the coordinates, or null if it cannot be found.
+    // It runs on a background thread, so it only uses the application context (fix F9).
+    private static String lookUpCityName(Context appContext, double lat, double lon) {
+        Geocoder geocoder = new Geocoder(appContext, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
             if (addresses != null && !addresses.isEmpty()) {
-                String city = addresses.get(0).getLocality();
-                return (city != null) ? city : getString(R.string.tu_ubicaci_n2);
+                return addresses.get(0).getLocality();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "Tu ubicación";
+        return null;
     }
 
-    private void actualizarClimaConNombre(double lat, double lon, String nombre) {
-        if (tvUbicacionPrincipal != null) {
-            tvUbicacionPrincipal.setText(nombre);
+    private void updateWeatherWithName(double lat, double lon, String name) {
+        if (tvMainLocation != null) {
+            tvMainLocation.setText(name);
         }
-        obtenerClimaPorCoordenadas(lat, lon, ivIconoClimaPrincipal, tvTemperaturaPrincipal);
+        fetchWeatherByCoordinates(lat, lon, ivMainWeatherIcon, tvMainTemperature);
 
-        obtenerCalidadAire(lat, lon);
-        obtenerNivelPolen(lat, lon);
+        fetchAirQuality(lat, lon);
+        fetchPollenLevel(lat, lon);
     }
 
-    // A diferencia de OpenMeteo, la API de Google requiere que le pasemos las coordenadas
-    // en formato JSON dentro de una petición POST, por eso preparamos el 'body' primero.
-    private void obtenerCalidadAire(double lat, double lon) {
+    // Unlike OpenMeteo, the Google API requires the coordinates
+    // as JSON inside a POST request, which is why the 'body' is prepared first.
+    private void fetchAirQuality(double lat, double lon) {
         String url = "https://airquality.googleapis.com/v1/currentConditions:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY;
 
         try {
@@ -196,27 +215,27 @@ public class WeatherFragment extends Fragment {
             body.put("location", location);
             body.put("languageCode", "en");
 
-            JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.POST, url, body,
+            JsonObjectRequest apiRequest = new JsonObjectRequest(Request.Method.POST, url, body,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            // Muy importante comprobar isAdded() en los callbacks  para que la app
-                            // no pete si el usuario ya ha cambiado de pestaña cuando llega la respuesta.
+                            // It is very important to check isAdded() in the callbacks so the app
+                            // does not crash if the user has already changed tab when the response arrives.
                             if (!isAdded() || getView() == null) return;
                             try {
-                                String categoriaIngles = response.getJSONArray("indexes")
+                                String categoryEnglish = response.getJSONArray("indexes")
                                         .getJSONObject(0)
                                         .getString("category");
 
-                                String categoriaTraducida = traducirCalidadAire(categoriaIngles);
+                                String translatedCategory = translateAirQuality(categoryEnglish);
 
-                                TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
-                                if (tvIndiceAire != null) {
-                                    tvIndiceAire.setText(categoriaTraducida);
+                                TextView tvAirIndex = getView().findViewById(R.id.tvAirIndex);
+                                if (tvAirIndex != null) {
+                                    tvAirIndex.setText(translatedCategory);
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                TextView tv = getView().findViewById(R.id.tvIndiceAire);
+                                TextView tv = getView().findViewById(R.id.tvAirIndex);
                                 if (tv != null) tv.setText(getString(R.string.error_api));
                             }
                         }
@@ -225,40 +244,40 @@ public class WeatherFragment extends Fragment {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             if (isAdded() && getView() != null) {
-                                TextView tvIndiceAire = getView().findViewById(R.id.tvIndiceAire);
-                                if (tvIndiceAire != null) tvIndiceAire.setText(getString(R.string.no_data_short));
+                                TextView tvAirIndex = getView().findViewById(R.id.tvAirIndex);
+                                if (tvAirIndex != null) tvAirIndex.setText(getString(R.string.no_data_short));
                             }
                         }
                     }
             );
-            requestQueue.add(peticion);
+            requestQueue.add(apiRequest);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    // Petición GET  a la API del polen de Google
-    private void obtenerNivelPolen(double lat, double lon) {
+    // GET request to the Google Pollen API
+    private void fetchPollenLevel(double lat, double lon) {
         String url = "https://pollen.googleapis.com/v1/forecast:lookup?key=" + com.example.unigo_das.BuildConfig.DIRECTIONS_API_KEY +
                 "&location.latitude=" + lat +
                 "&location.longitude=" + lon +
                 "&days=1&languageCode=en";
 
-        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest apiRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         if (!isAdded() || getView() == null) return;
                         try {
                             if (!response.has("dailyInfo") || response.getJSONArray("dailyInfo").length() == 0) {
-                                actualizarTextoPolen(getString(R.string.no_data_long));
+                                updatePollenText(getString(R.string.no_data_long));
                                 return;
                             }
 
-                            // Google devuelve varios tipos de polen (hierba, árboles, maleza).
-                            // Recorremos el array y nos quedamos con el valor más alto para avisar al usuario.
+                            // Google returns several pollen types (grass, trees, weeds).
+                            // Iterate over the array and keep the highest value to warn the user.
                             JSONObject daily = response.getJSONArray("dailyInfo").getJSONObject(0);
-                            String nivelMaximo = "None";
+                            String maxLevel = "None";
 
                             if (daily.has("pollenTypeInfo")) {
                                 org.json.JSONArray types = daily.getJSONArray("pollenTypeInfo");
@@ -271,17 +290,17 @@ public class WeatherFragment extends Fragment {
                                         int val = indexInfo.optInt("value", 0);
                                         if (val >= maxVal) {
                                             maxVal = val;
-                                            nivelMaximo = indexInfo.optString("category", "None");
+                                            maxLevel = indexInfo.optString("category", "None");
                                         }
                                     }
                                 }
                             }
 
-                            actualizarTextoPolen(traducirPolen(nivelMaximo));
+                            updatePollenText(translatePollen(maxLevel));
 
                         } catch (Exception e) {
                             e.printStackTrace();
-                            actualizarTextoPolen(getString(R.string.no_data_short));
+                            updatePollenText(getString(R.string.no_data_short));
                         }
                     }
                 },
@@ -289,29 +308,31 @@ public class WeatherFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if (isAdded()) {
-                            actualizarTextoPolen(getString(R.string.no_data_short));
+                            updatePollenText(getString(R.string.no_data_short));
                         }
                     }
                 }
         );
-        requestQueue.add(peticion);
+        requestQueue.add(apiRequest);
     }
 
-    private void actualizarTextoPolen(String texto) {
+    private void updatePollenText(String text) {
         if (getView() != null) {
-            TextView tv = getView().findViewById(R.id.tvIndicePolen);
-            if (tv != null) tv.setText(texto);
+            TextView tv = getView().findViewById(R.id.tvPollenIndex);
+            if (tv != null) tv.setText(text);
         }
     }
 
-    private String traducirCalidadAire(String categoriaEn) {
-        if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
+    private String translateAirQuality(String categoryEn) {
+        if (categoryEn == null || !isAdded()) return getString(R.string.no_data_short);
 
-        String cat = categoriaEn.toLowerCase().trim();
+        String cat = categoryEn.toLowerCase().trim();
 
         if (cat.contains("excellent")) return getString(R.string.air_excellent);
         if (cat.contains("good")) return getString(R.string.air_good);
         if (cat.contains("moderate")) return getString(R.string.air_moderate);
+        // Fix F6: Google's Universal AQI also returns "Low air quality", which showed as "unknown"
+        if (cat.contains("low")) return getString(R.string.air_low);
         if (cat.contains("poor") && !cat.contains("very")) return getString(R.string.air_poor);
         if (cat.contains("very poor")) return getString(R.string.air_very_poor);
         if (cat.contains("severe")) return getString(R.string.air_severe);
@@ -319,10 +340,10 @@ public class WeatherFragment extends Fragment {
         return getString(R.string.air_unknown);
     }
 
-    private String traducirPolen(String categoriaEn) {
-        if (categoriaEn == null || !isAdded()) return getString(R.string.no_data_short);
+    private String translatePollen(String categoryEn) {
+        if (categoryEn == null || !isAdded()) return getString(R.string.no_data_short);
 
-        String cat = categoriaEn.toLowerCase().trim();
+        String cat = categoryEn.toLowerCase().trim();
 
         if (cat.contains("none")) return getString(R.string.pollen_none);
         if (cat.contains("very low")) return getString(R.string.pollen_very_low);
@@ -338,20 +359,26 @@ public class WeatherFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (getView() != null && isAdded()) cargarClimaFavoritos(getView());
+        if (getView() != null && isAdded()) loadFavoritesWeather(getView());
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        geocoderExecutor.shutdown(); // Fix F9
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         if (!hidden && getView() != null && isAdded()) {
-            cargarClimaFavoritos(getView());
+            loadFavoritesWeather(getView());
         }
     }
 
-    // Cargamos el mapa de radar mediante un iframe en el WebView
-    private void cargarRadarRainViewer() {
-        WebSettings settings = wvRadarLluvia.getSettings();
+    // Load the radar map in the WebView
+    private void loadRainViewerRadar() {
+        WebSettings settings = wvRainRadar.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setLoadWithOverviewMode(true);
@@ -360,71 +387,71 @@ public class WeatherFragment extends Fragment {
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
 
-        // Interceptamos las URLs para evitar que si el usuario clica en un logo o enlace del mapa,
-        // se abra el navegador del móvil y lo saque de la aplicación.
-        wvRadarLluvia.setWebViewClient(new WebViewClient() {
+        // Intercept URLs so that, if the user taps a logo or link on the map,
+        // the phone browser does not open and take them out of the app.
+        wvRainRadar.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, android.webkit.WebResourceRequest request) {
-                String urlDestino = request.getUrl().toString();
-                return !urlDestino.contains("rainviewer.com/map.html");
+                String targetUrl = request.getUrl().toString();
+                return !targetUrl.contains("rainviewer.com/map.html");
             }
         });
-        wvRadarLluvia.loadUrl("https://www.rainviewer.com/map.html?loc=43.26,-2.93,8&oFa=0&oC=1&oU=0&oCS=1&oF=0&oAP=1&c=1&o=83&lm=0&layer=radar&sm=1&sn=1");
+        wvRainRadar.loadUrl("https://www.rainviewer.com/map.html?loc=43.26,-2.93,8&oFa=0&oC=1&oU=0&oCS=1&oF=0&oAP=1&c=1&o=83&lm=0&layer=radar&sm=1&sn=1");
     }
 
-    // Petición a OpenData Euskadi. Como devuelven XML puro en vez de JSON, usamos StringRequest
-    private void obtenerPronosticoOpenData() {
+    // Request to OpenData Euskadi. It returns plain XML instead of JSON, so a StringRequest is used
+    private void fetchOpenDataForecast() {
         String urlXmlOpenData = "https://opendata.euskadi.eus/contenidos/prevision_tiempo/met_forecast_zone/opendata/met_forecast_zone.xml";
 
-        StringRequest peticion = new StringRequest(Request.Method.GET, urlXmlOpenData,
+        StringRequest apiRequest = new StringRequest(Request.Method.GET, urlXmlOpenData,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        if (isAdded()) procesarXmlOpenData(response);
+                        if (isAdded()) parseOpenDataXml(response);
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error conectando con Euskalmet.");
+                        if (isAdded() && tvBilbaoForecast != null) tvBilbaoForecast.setText(R.string.euskalmet_connection_error); // Fix F5: text moved to strings.xml so it is translated to the 6 languages
                     }
                 }
         );
-        requestQueue.add(peticion);
+        requestQueue.add(apiRequest);
     }
 
-    // Parseo manual del documento XML de Euskalmet
-    private void procesarXmlOpenData(String xml) {
+    // Manual parsing of the Euskalmet XML document
+    private void parseOpenDataXml(String xml) {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(xml));
             Document doc = builder.parse(is);
 
-            // Buscamos directamente el areaId 8 que corresponde a la zona Gran Bilbao
+            // Look directly for areaId 8, which is the Greater Bilbao zone
             NodeList areas = doc.getElementsByTagName("areaForecast");
             for (int i = 0; i < areas.getLength(); i++) {
                 Element area = (Element) areas.item(i);
                 if (area.getAttribute("areaId").equals("8")) {
                     NodeList periods = area.getElementsByTagName("periodData");
 
-                    // Nos interesa solo el pronóstico del hoy
+                    // Only today's forecast is needed
                     for (int j = 0; j < periods.getLength(); j++) {
                         Element period = (Element) periods.item(j);
                         if (period.getAttribute("periodDay").equals("today")) {
                             NodeList descriptions = period.getElementsByTagName("forecastDescription");
                             if (descriptions.getLength() > 0) {
                                 Element descElement = (Element) descriptions.item(0);
-                                String idioma = java.util.Locale.getDefault().getLanguage();
+                                String language = java.util.Locale.getDefault().getLanguage();
 
-                                // Euskalmet solo provee textos en CAstellano y Euskera.
-                                // Si el usuario tiene la app en Inglés, llamamos a ML Kit para traducirlo al vuelo.
-                                if (idioma.equals("es") || idioma.equals("eu")) {
-                                    String textoNativo = descElement.getElementsByTagName(idioma).item(0).getTextContent().trim();
-                                    if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoNativo);
+                                // Euskalmet only provides texts in Spanish and Basque.
+                                // If the app is in another language, ML Kit is used to translate it on the fly.
+                                if (language.equals("es") || language.equals("eu")) {
+                                    String nativeText = descElement.getElementsByTagName(language).item(0).getTextContent().trim();
+                                    if (tvBilbaoForecast != null) tvBilbaoForecast.setText(nativeText);
                                 } else {
-                                    String textoEspanol = descElement.getElementsByTagName("es").item(0).getTextContent().trim();
-                                    traducirConIA(textoEspanol, idioma);
+                                    String spanishText = descElement.getElementsByTagName("es").item(0).getTextContent().trim();
+                                    translateWithMlKit(spanishText, language);
                                 }
                                 return;
                             }
@@ -434,37 +461,37 @@ public class WeatherFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Error analizando datos.");
+            if (isAdded() && tvBilbaoForecast != null) tvBilbaoForecast.setText(R.string.data_parse_error); // Fix F5: text moved to strings.xml so it is translated to the 6 languages
         }
     }
 
-    // Utiliza los modelos de Google ML Kit locales para traducir textos offline
-    private void traducirConIA(String textoEspanol, String idiomaDestino) {
+    // Uses the local Google ML Kit models to translate texts offline
+    private void translateWithMlKit(String spanishText, String targetLanguage) {
         if (!isAdded()) return;
-        String mlKitLang = TranslateLanguage.fromLanguageTag(idiomaDestino);
+        String mlKitLang = TranslateLanguage.fromLanguageTag(targetLanguage);
         if (mlKitLang == null) {
-            if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
+            if (tvBilbaoForecast != null) tvBilbaoForecast.setText(spanishText);
             return;
         }
-        if (tvPronosticoBilbao != null) tvPronosticoBilbao.setText("Traduciendo pronóstico...");
+        if (tvBilbaoForecast != null) tvBilbaoForecast.setText(R.string.translating_forecast); // Fix F5: text moved to strings.xml so it is translated to the 6 languages
 
         TranslatorOptions options = new TranslatorOptions.Builder()
                 .setSourceLanguage(TranslateLanguage.SPANISH)
                 .setTargetLanguage(mlKitLang)
                 .build();
-        final Translator traductor = Translation.getClient(options);
+        final Translator translator = Translation.getClient(options);
         DownloadConditions conditions = new DownloadConditions.Builder().build();
 
-        // Si es la primera vez que se usa, descarga el paquete de idioma
-        traductor.downloadModelIfNeeded(conditions)
+        // The first time it is used, the language package is downloaded
+        translator.downloadModelIfNeeded(conditions)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        traductor.translate(textoEspanol)
+                        translator.translate(spanishText)
                                 .addOnSuccessListener(new OnSuccessListener<String>() {
                                     @Override
-                                    public void onSuccess(String textoTraducido) {
-                                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoTraducido);
+                                    public void onSuccess(String translatedText) {
+                                        if (isAdded() && tvBilbaoForecast != null) tvBilbaoForecast.setText(translatedText);
                                     }
                                 });
                     }
@@ -472,130 +499,130 @@ public class WeatherFragment extends Fragment {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        // si falla la descarga o traducción, mostramos la versión en español original
-                        if (isAdded() && tvPronosticoBilbao != null) tvPronosticoBilbao.setText(textoEspanol);
+                        // If the download or translation fails, show the original Spanish version
+                        if (isAdded() && tvBilbaoForecast != null) tvBilbaoForecast.setText(spanishText);
                     }
                 });
     }
 
-    private void asignarIconoYTexto(int code, ImageView iv) {
-        String desc = getString(R.string.desconocido);
-        int resId = R.drawable.ic_clima_nubes;
+    private void setIconAndText(int code, ImageView iv) {
+        String desc = getString(R.string.unknown);
+        int resId = R.drawable.ic_weather_clouds;
 
-        if (code == 0) desc = getString(R.string.cielo_despejado);
-        else if (code == 1) desc = getString(R.string.mayormente_despejado);
-        else if (code == 2) desc = getString(R.string.parcialmente_nublado);
-        else if (code == 3) desc = getString(R.string.totalmente_nublado);
-        else if (code == 45 || code == 48) desc = getString(R.string.niebla_densa);
-        else if (code == 51 || code == 53 || code == 55) desc = getString(R.string.llovizna);
-        else if (code == 56 || code == 57) desc = getString(R.string.llovizna_helada);
-        else if (code == 61) desc = getString(R.string.lluvia_ligera);
-        else if (code == 63) desc = getString(R.string.lluvia_moderada);
-        else if (code == 65) desc = getString(R.string.lluvia_fuerte);
-        else if (code == 66 || code == 67) desc = getString(R.string.lluvia_helada);
-        else if (code == 71) desc = getString(R.string.nieve_ligera);
-        else if (code == 73) desc = getString(R.string.nieve_moderada);
-        else if (code == 75) desc = getString(R.string.nevada_fuerte);
-        else if (code == 77) desc = getString(R.string.granizo_suave);
-        else if (code == 80) desc = getString(R.string.chubascos_ligeros);
-        else if (code == 81) desc = getString(R.string.chubascos_moderados);
-        else if (code == 82) desc = getString(R.string.chubascos_violentos);
-        else if (code == 85 || code == 86) desc = getString(R.string.chubascos_de_nieve);
-        else if (code == 95) desc = getString(R.string.tormenta_el_ctrica);
-        else if (code == 96 || code == 99) desc = getString(R.string.tormenta_con_granizo);
+        if (code == 0) desc = getString(R.string.clear_sky);
+        else if (code == 1) desc = getString(R.string.mostly_clear);
+        else if (code == 2) desc = getString(R.string.partly_cloudy);
+        else if (code == 3) desc = getString(R.string.overcast);
+        else if (code == 45 || code == 48) desc = getString(R.string.dense_fog);
+        else if (code == 51 || code == 53 || code == 55) desc = getString(R.string.drizzle);
+        else if (code == 56 || code == 57) desc = getString(R.string.freezing_drizzle);
+        else if (code == 61) desc = getString(R.string.light_rain);
+        else if (code == 63) desc = getString(R.string.moderate_rain);
+        else if (code == 65) desc = getString(R.string.heavy_rain);
+        else if (code == 66 || code == 67) desc = getString(R.string.freezing_rain);
+        else if (code == 71) desc = getString(R.string.light_snow);
+        else if (code == 73) desc = getString(R.string.moderate_snow);
+        else if (code == 75) desc = getString(R.string.heavy_snow);
+        else if (code == 77) desc = getString(R.string.light_hail);
+        else if (code == 80) desc = getString(R.string.light_showers);
+        else if (code == 81) desc = getString(R.string.moderate_showers);
+        else if (code == 82) desc = getString(R.string.violent_showers);
+        else if (code == 85 || code == 86) desc = getString(R.string.snow_showers);
+        else if (code == 95) desc = getString(R.string.thunderstorm);
+        else if (code == 96 || code == 99) desc = getString(R.string.thunderstorm_with_hail);
 
         if (code == 0) {
-            resId = R.drawable.ic_clima_sol;
+            resId = R.drawable.ic_weather_sun;
         } else if (code >= 1 && code <= 3) {
-            resId = R.drawable.ic_clima_nubes;
+            resId = R.drawable.ic_weather_clouds;
         } else if (code >= 45 && code <= 48) {
-            resId = R.drawable.ic_clima_niebla;
+            resId = R.drawable.ic_weather_fog;
         } else if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) {
-            resId = R.drawable.ic_clima_lluvia;
+            resId = R.drawable.ic_weather_rain;
         } else if ((code >= 71 && code <= 77) || code == 85 || code == 86) {
-            resId = R.drawable.ic_clima_nieve;
+            resId = R.drawable.ic_weather_snow;
         } else if (code >= 95 && code <= 99) {
-            resId = R.drawable.ic_clima_tormenta;
+            resId = R.drawable.ic_weather_storm;
         }
 
         iv.setImageResource(resId);
 
-        // Si es el icono principal le damos el color rojo , sino lo dejamos con su color por defecto
-        if (iv == ivIconoClimaPrincipal) {
-            if (tvDescripcionClima != null) tvDescripcionClima.setText(desc);
+        // The main icon is tinted red; the others keep their default colour
+        if (iv == ivMainWeatherIcon) {
+            if (tvWeatherDescription != null) tvWeatherDescription.setText(desc);
             iv.setColorFilter(android.graphics.Color.parseColor("#D32F2F"));
         } else {
             iv.setColorFilter(null);
         }
     }
 
-    // Lee la BD local para saber qué campus están en favoritos e crea las tarjetas
-    private void cargarClimaFavoritos(View view) {
+    // Reads the local DB to know which campuses are favourites and creates the cards
+    private void loadFavoritesWeather(View view) {
         if (!isAdded()) return;
-        android.widget.GridLayout contenedor = view.findViewById(R.id.glFavoritosContainer);
-        if (contenedor == null) return;
+        android.widget.GridLayout favoritesContainer = view.findViewById(R.id.glFavoritesContainer);
+        if (favoritesContainer == null) return;
 
-        // Vaciamos el contenedor primero para evitar que se dupliquen las tarjetas si volvemos a esta pantalla
-        contenedor.removeAllViews();
+        // Empty the container first so the cards are not duplicated when returning to this screen
+        favoritesContainer.removeAllViews();
 
         DataBaseHelper dbHelper = new DataBaseHelper(requireContext());
         SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
-        int idUsuarioActual = prefs.getInt("user_id", 0);
+        int currentUserId = prefs.getInt("user_id", 0);
 
-        List<String> favoritos = dbHelper.obtenerIdsFavoritosUsuario(idUsuarioActual);
+        List<String> favorites = dbHelper.getUserFavoriteIds(currentUserId);
 
-        if (favoritos.isEmpty()) {
-            TextView tvVacio = new TextView(requireContext());
-            tvVacio.setText(R.string.a_n_no_has_guardado_ning_n_campus_en_favoritos);
-            tvVacio.setPadding(16, 16, 16, 16);
-            contenedor.addView(tvVacio);
+        if (favorites.isEmpty()) {
+            TextView tvEmpty = new TextView(requireContext());
+            tvEmpty.setText(R.string.no_favorite_campuses_yet);
+            tvEmpty.setPadding(16, 16, 16, 16);
+            favoritesContainer.addView(tvEmpty);
             return;
         }
 
-        for (String idCampus : favoritos) {
-            Centro centro = dbHelper.obtenerCentroPorId(idCampus);
+        for (String idCampus : favorites) {
+            Campus campus = dbHelper.getCampusById(idCampus);
 
-            if (centro != null) {
-                // Inflamos el layout de la tarjeta a mano para cada centro guardado
-                View tarjeta = getLayoutInflater().inflate(R.layout.item_clima_favorito, contenedor, false);
-                TextView tvNombre = tarjeta.findViewById(R.id.tvNombreCampus);
-                TextView tvTemp = tarjeta.findViewById(R.id.tvTempCampus);
-                TextView tvUni = tarjeta.findViewById(R.id.tvUniCampus);
+            if (campus != null) {
+                // Inflate the card layout manually for each saved campus
+                View card = getLayoutInflater().inflate(R.layout.item_favorite_weather, favoritesContainer, false);
+                TextView tvCampusName = card.findViewById(R.id.tvCampusName);
+                TextView tvTemp = card.findViewById(R.id.tvTempCampus);
+                TextView tvUni = card.findViewById(R.id.tvUniCampus);
 
-                tvNombre.setText(centro.getNombre());
-                tvUni.setText(centro.getUniversidad());
+                tvCampusName.setText(campus.getName());
+                tvUni.setText(campus.getUniversity());
 
-                if (centro.getUniversidad().equals("UPV/EHU")) {
+                if (campus.getUniversity().equals("UPV/EHU")) {
                     tvUni.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.university_tag_color_ehu));
-                } else if (centro.getUniversidad().equals("Mondragon")) {
+                } else if (campus.getUniversity().equals("Mondragon")) {
                     tvUni.setTextColor(android.graphics.Color.parseColor("#008a96"));
                 } else {
                     tvUni.setTextColor(android.graphics.Color.parseColor("#1976D2"));
                 }
 
-                // Llamada individual a la API para cada tarjeta
-                obtenerClimaConCola(centro.getLatitud(), centro.getLongitud(), tvTemp);
+                // One API call per card
+                fetchTemperatureQueued(campus.getLatitude(), campus.getLongitude(), tvTemp);
 
                 android.widget.GridLayout.LayoutParams params = new android.widget.GridLayout.LayoutParams();
                 params.columnSpec = android.widget.GridLayout.spec(android.widget.GridLayout.UNDEFINED, 1.0f);
                 params.width = 0;
                 params.setMargins(10, 10, 10, 20);
 
-                tarjeta.setLayoutParams(params);
-                contenedor.addView(tarjeta);
+                card.setLayoutParams(params);
+                favoritesContainer.addView(card);
             }
         }
     }
 
-    // Petición  a OpenMeteo: pedimos temperatura actual, UV máximo diario y horas de sol todo de golpe
-    private void obtenerClimaPorCoordenadas(double latitud, double longitud, final ImageView ivIcono, final TextView tvTemp) {
-        String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitud +
-                "&longitude=" + longitud +
+    // Request to OpenMeteo: current temperature, daily max UV and sunrise/sunset in a single call
+    private void fetchWeatherByCoordinates(double latitude, double longitude, final ImageView ivIcon, final TextView tvTemp) {
+        String urlOpenMeteo = "https://api.open-meteo.com/v1/forecast?latitude=" + latitude +
+                "&longitude=" + longitude +
                 "&current_weather=true" +
                 "&daily=uv_index_max,sunrise,sunset" +
                 "&timezone=auto";
 
-        JsonObjectRequest peticion = new JsonObjectRequest(Request.Method.GET, urlOpenMeteo, null,
+        JsonObjectRequest apiRequest = new JsonObjectRequest(Request.Method.GET, urlOpenMeteo, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -603,10 +630,10 @@ public class WeatherFragment extends Fragment {
                         try {
                             if (response.has("current_weather")) {
                                 JSONObject currentWeather = response.getJSONObject("current_weather");
-                                double temperatura = currentWeather.optDouble("temperature", 0.0);
-                                int codigoClima = currentWeather.optInt("weathercode", 0);
-                                if (tvTemp != null) tvTemp.setText(temperatura + " ºC");
-                                if (ivIcono != null) asignarIconoYTexto(codigoClima, ivIcono);
+                                double temperature = currentWeather.optDouble("temperature", 0.0);
+                                int weatherCode = currentWeather.optInt("weathercode", 0);
+                                if (tvTemp != null) tvTemp.setText(temperature + " ºC");
+                                if (ivIcon != null) setIconAndText(weatherCode, ivIcon);
                             }
 
                             if (response.has("daily")) {
@@ -614,23 +641,23 @@ public class WeatherFragment extends Fragment {
 
                                 if (dailyParams.has("uv_index_max")) {
                                     double uvIndex = dailyParams.getJSONArray("uv_index_max").optDouble(0, 0.0);
-                                    actualizarTarjetaUV(uvIndex);
+                                    updateUvCard(uvIndex);
                                 }
 
                                 if (dailyParams.has("sunrise") && dailyParams.has("sunset")) {
-                                    String amanecerIso = dailyParams.getJSONArray("sunrise").optString(0, "");
-                                    String anochecerIso = dailyParams.getJSONArray("sunset").optString(0, "");
+                                    String sunriseIso = dailyParams.getJSONArray("sunrise").optString(0, "");
+                                    String sunsetIso = dailyParams.getJSONArray("sunset").optString(0, "");
 
-                                    // Limpiamos la fecha que nos manda la API para quedarnos únicamente con la hora y los minutos
-                                    if (amanecerIso.length() >= 16 && anochecerIso.length() >= 16) {
-                                        String amanecer = amanecerIso.substring(11, 16);
-                                        String anochecer = anochecerIso.substring(11, 16);
+                                    // Strip the date sent by the API and keep only the hour and minutes
+                                    if (sunriseIso.length() >= 16 && sunsetIso.length() >= 16) {
+                                        String sunrise = sunriseIso.substring(11, 16);
+                                        String sunset = sunsetIso.substring(11, 16);
 
-                                        TextView tvAmanecer = getView().findViewById(R.id.tvAmanecer);
-                                        TextView tvAnochecer = getView().findViewById(R.id.tvAnochecer);
+                                        TextView tvSunrise = getView().findViewById(R.id.tvSunrise);
+                                        TextView tvSunset = getView().findViewById(R.id.tvSunset);
 
-                                        if (tvAmanecer != null) tvAmanecer.setText("🌅 " + amanecer);
-                                        if (tvAnochecer != null) tvAnochecer.setText("🌙 " + anochecer);
+                                        if (tvSunrise != null) tvSunrise.setText("🌅 " + sunrise);
+                                        if (tvSunset != null) tvSunset.setText("🌙 " + sunset);
                                     }
                                 }
                             }
@@ -643,45 +670,45 @@ public class WeatherFragment extends Fragment {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                        if (isAdded() && tvTemp != null) tvTemp.setText(R.string.network_error_short);
                     }
                 }
         );
-        requestQueue.add(peticion);
+        requestQueue.add(apiRequest);
     }
 
-    private void actualizarTarjetaUV(double uvIndex) {
+    private void updateUvCard(double uvIndex) {
         if (getView() == null) return;
 
-        TextView tvValorUV = getView().findViewById(R.id.tvValorUV);
+        TextView tvUvValue = getView().findViewById(R.id.tvUvValue);
         TextView tvDescUV = getView().findViewById(R.id.tvDescUV);
 
-        if (tvValorUV == null || tvDescUV == null) return;
+        if (tvUvValue == null || tvDescUV == null) return;
 
-        tvValorUV.setText(String.valueOf(Math.round(uvIndex)));
+        tvUvValue.setText(String.valueOf(Math.round(uvIndex)));
 
-        String idioma = java.util.Locale.getDefault().getLanguage();
-        String descripcion;
+        String language = java.util.Locale.getDefault().getLanguage();
+        String description;
 
         if (uvIndex < 3) {
-            descripcion = getString(R.string.bajo);
+            description = getString(R.string.uv_low);
         } else if (uvIndex < 6) {
-            descripcion = getString(R.string.moderado);
+            description = getString(R.string.uv_moderate);
         } else if (uvIndex < 8) {
-            descripcion = getString(R.string.alto);
-            tvValorUV.setTextColor(android.graphics.Color.parseColor("#F57C00"));
+            description = getString(R.string.uv_high);
+            tvUvValue.setTextColor(android.graphics.Color.parseColor("#F57C00"));
         } else if (uvIndex < 11) {
-            descripcion = getString(R.string.muy_alto);
-            tvValorUV.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+            description = getString(R.string.uv_very_high);
+            tvUvValue.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
         } else {
-            descripcion = getString(R.string.extremo);
-            tvValorUV.setTextColor(android.graphics.Color.parseColor("#7B1FA2"));
+            description = getString(R.string.uv_extreme);
+            tvUvValue.setTextColor(android.graphics.Color.parseColor("#7B1FA2"));
         }
 
-        tvDescUV.setText(descripcion);
+        tvDescUV.setText(description);
     }
 
-    private void obtenerClimaConCola(double lat, double lon, final TextView tvTemp) {
+    private void fetchTemperatureQueued(double lat, double lon, final TextView tvTemp) {
         String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true";
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
@@ -691,14 +718,14 @@ public class WeatherFragment extends Fragment {
                             try {
                                 double t = response.getJSONObject("current_weather").getDouble("temperature");
                                 tvTemp.setText(t + " ºC");
-                            } catch (Exception e) { tvTemp.setText("Error"); }
+                            } catch (Exception e) { tvTemp.setText(R.string.temperature_error); }
                         }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (isAdded() && tvTemp != null) tvTemp.setText("Err Red");
+                        if (isAdded() && tvTemp != null) tvTemp.setText(R.string.network_error_short);
                     }
                 }
         );

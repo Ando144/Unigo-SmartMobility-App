@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# API keys (fix S1): never commit real keys
+secrets.properties

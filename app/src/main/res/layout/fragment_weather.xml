@@ -29,29 +29,29 @@
                 android:padding="32dp">
 
                 <TextView
-                    android:id="@+id/tvUbicacionPrincipal"
+                    android:id="@+id/tvMainLocation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/detectando_ubicaci_n"
+                    android:text="@string/detecting_location"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
                     android:letterSpacing="0.02" />
 
                 <ImageView
-                    android:id="@+id/ivIconoClimaPrincipal"
+                    android:id="@+id/ivMainWeatherIcon"
                     android:layout_width="110dp"
                     android:layout_height="110dp"
                     android:layout_marginTop="16dp"
                     android:padding="8dp"
-                    android:src="@drawable/ic_clima_nubes"
+                    android:src="@drawable/ic_weather_clouds"
                     app:tint="@color/bilbao_red" />
 
                 <TextView
-                    android:id="@+id/tvDescripcionClima"
+                    android:id="@+id/tvWeatherDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/cargando"
+                    android:text="@string/loading"
                     android:textSize="15sp"
                     android:textAllCaps="true"
                     android:letterSpacing="0.1"
@@ -66,7 +66,7 @@
                     android:layout_marginBottom="12dp" />
 
                 <TextView
-                    android:id="@+id/tvTemperaturaPrincipal"
+                    android:id="@+id/tvMainTemperature"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="-- ºC"
@@ -90,7 +90,7 @@
             android:baselineAligned="false">
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/cvMapaAire"
+                android:id="@+id/cvAirMap"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -111,13 +111,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/calidad_aire"
+                        android:text="@string/air_quality"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
-                        android:id="@+id/tvIndiceAire"
+                        android:id="@+id/tvAirIndex"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="---"
@@ -129,7 +129,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/ver_mapa"
+                        android:text="@string/view_map"
                         android:textSize="14sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -138,7 +138,7 @@
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/cvMapaPolen"
+                android:id="@+id/cvPollenMap"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -159,13 +159,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/polen2"
+                        android:text="@string/pollen2"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
-                        android:id="@+id/tvIndicePolen"
+                        android:id="@+id/tvPollenIndex"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="---"
@@ -177,7 +177,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/ver_mapa2"
+                        android:text="@string/view_map2"
                         android:textSize="14sp"
                         android:textColor="?attr/colorPrimary"
                         android:textStyle="bold"
@@ -215,13 +215,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/ndice_uv_maximo"
+                        android:text="@string/max_uv_index"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
-                        android:id="@+id/tvValorUV"
+                        android:id="@+id/tvUvValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="--"
@@ -234,7 +234,7 @@
                         android:id="@+id/tvDescUV"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/cargando2"
+                        android:text="@string/loading2"
                         android:textSize="14sp"
                         android:textColor="?android:attr/textColorSecondary"
                         android:layout_marginTop="8dp"/>
@@ -260,13 +260,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/horas_de_luz"
+                        android:text="@string/daylight_hours"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
-                        android:id="@+id/tvAmanecer"
+                        android:id="@+id/tvSunrise"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="🌅 --:--"
@@ -276,7 +276,7 @@
                         android:layout_marginTop="8dp"/>
 
                     <TextView
-                        android:id="@+id/tvAnochecer"
+                        android:id="@+id/tvSunset"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="🌙 --:--"
@@ -291,7 +291,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/clima_en_tus_campus_favoritos"
+            android:text="@string/weather_at_favorite_campuses"
             android:textSize="16sp"
             android:textStyle="bold"
             android:paddingHorizontal="16dp"
@@ -300,7 +300,7 @@
             android:textColor="?attr/colorOnSurface" />
 
         <GridLayout
-            android:id="@+id/glFavoritosContainer"
+            android:id="@+id/glFavoritesContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:columnCount="3"
@@ -325,16 +325,16 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/pron_stico_euskalmet"
+                    android:text="@string/euskalmet_forecast"
                     android:textStyle="bold"
                     android:textSize="14sp"
                     android:textColor="@color/bilbao_red" />
                 <TextView
-                    android:id="@+id/tvPronosticoBilbao"
+                    android:id="@+id/tvBilbaoForecast"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="@string/cargando_informaci_n_oficial"
+                    android:text="@string/loading_official_info"
                     android:textSize="14sp"
                     android:lineHeight="20sp"
                     android:textColor="?attr/colorOnSurfaceVariant" />
@@ -344,7 +344,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/radar_de_precipitaciones_en_vivo"
+            android:text="@string/live_precipitation_radar"
             android:textSize="16sp"
             android:textStyle="bold"
             android:padding="16dp"
@@ -352,7 +352,7 @@
             android:textColor="?attr/colorOnSurface" />
 
         <WebView
-            android:id="@+id/wvRadarLluvia"
+            android:id="@+id/wvRainRadar"
             android:layout_width="match_parent"
             android:layout_height="400dp"
             android:layout_margin="16dp"

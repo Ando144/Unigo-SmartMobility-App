@@ -64,10 +64,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
     private SharedPreferences customPrefs;
     private SwitchPreferenceCompat darkModePref;
-    private ActivityResultLauncher<Intent> galeriaLauncher;
+    private ActivityResultLauncher<Intent> galleryLauncher;
 
-    // Launcher para solicitar permisos de notificaciones.
-    // Si el usuario acepta, disparamos la programación de la alarma; si rechaza, desmarcamos el switch automáticamente
+    // Launcher to request the notification permission.
+    // If the user accepts, the alarm is scheduled; if not, the switch is turned off automatically
     private final androidx.activity.result.ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), new androidx.activity.result.ActivityResultCallback<Boolean>() {
                 @Override
@@ -76,10 +76,10 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                         androidx.preference.SwitchPreferenceCompat switchNotif = findPreference("pref_notificaciones_clima");
                         if (switchNotif != null && switchNotif.isChecked()) {
                             android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
-                            String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
-                            int h = Integer.parseInt(horaActual.split(":")[0]);
-                            int m = Integer.parseInt(horaActual.split(":")[1]);
-                            programarAlarmaDiaria(requireContext(), h, m);
+                            String currentTime = prefs.getString("pref_hora_notificacion", "07:30");
+                            int h = Integer.parseInt(currentTime.split(":")[0]);
+                            int m = Integer.parseInt(currentTime.split(":")[1]);
+                            scheduleDailyAlarm(requireContext(), h, m);
                         }
                     } else {
                         androidx.preference.SwitchPreferenceCompat switchNotif = findPreference("pref_notificaciones_clima");
@@ -107,42 +107,42 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        // Inflamos la jerarquía desde el XML, pero toda la lógica la manejamos aquí.
+        // The hierarchy is inflated from XML, but all the logic is handled here.
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
         customPrefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         String userEmail = customPrefs.getString("user_email", "");
 
         // ===================================================================
-        // HORA DE NOTIFICACIÓN Y SWITCH DE NOTIFICACIONES
+        // NOTIFICATION TIME AND NOTIFICATIONS SWITCH
         // ===================================================================
-        final androidx.preference.Preference horaPref = findPreference("pref_hora_notificacion");
+        final androidx.preference.Preference timePref = findPreference("pref_hora_notificacion");
         final androidx.preference.SwitchPreferenceCompat switchNotif = findPreference("pref_notificaciones_clima");
 
-        if (horaPref != null && switchNotif != null) {
+        if (timePref != null && switchNotif != null) {
             final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
-            horaPref.setSummary(prefs.getString("pref_hora_notificacion", "07:30"));
+            timePref.setSummary(prefs.getString("pref_hora_notificacion", "07:30"));
 
-            boolean notifActivada = false;
+            boolean notificationsOn = false;
             if (!userEmail.isEmpty()) {
-                notifActivada = customPrefs.getBoolean("pref_notificaciones_" + userEmail, false);
+                notificationsOn = customPrefs.getBoolean("pref_notificaciones_" + userEmail, false);
             }
-            switchNotif.setChecked(notifActivada);
+            switchNotif.setChecked(notificationsOn);
 
-            horaPref.setOnPreferenceClickListener(preference -> {
-                String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
-                int h = Integer.parseInt(horaActual.split(":")[0]);
-                int m = Integer.parseInt(horaActual.split(":")[1]);
+            timePref.setOnPreferenceClickListener(preference -> {
+                String currentTime = prefs.getString("pref_hora_notificacion", "07:30");
+                int h = Integer.parseInt(currentTime.split(":")[0]);
+                int m = Integer.parseInt(currentTime.split(":")[1]);
 
                 android.app.TimePickerDialog timePicker = new android.app.TimePickerDialog(requireContext(),
                         (view, hourOfDay, minute) -> {
-                            String horaFormateada = String.format(java.util.Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
-                            prefs.edit().putString("pref_hora_notificacion", horaFormateada).apply();
-                            horaPref.setSummary(horaFormateada);
+                            String formattedTime = String.format(java.util.Locale.getDefault(), "%02d:%02d", hourOfDay, minute);
+                            prefs.edit().putString("pref_hora_notificacion", formattedTime).apply();
+                            timePref.setSummary(formattedTime);
 
-                            // Si cambiamos la hora y el switch está activo, ponemos la alarma vieja con la nueva hora.
+                            // If the time changes and the switch is on, the alarm is rescheduled with the new time.
                             if (switchNotif.isChecked()) {
-                                programarAlarmaDiaria(requireContext(), hourOfDay, minute);
+                                scheduleDailyAlarm(requireContext(), hourOfDay, minute);
                             }
                         }, h, m, true);
                 timePicker.show();
@@ -150,146 +150,146 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
             });
 
             switchNotif.setOnPreferenceChangeListener((preference, newValue) -> {
-                boolean activado = (Boolean) newValue;
+                boolean notificationsEnabled = (Boolean) newValue;
 
                 if (!userEmail.isEmpty()) {
-                    customPrefs.edit().putBoolean("pref_notificaciones_" + userEmail, activado).apply();
+                    customPrefs.edit().putBoolean("pref_notificaciones_" + userEmail, notificationsEnabled).apply();
                 }
 
-                if (activado) {
+                if (notificationsEnabled) {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                         if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                             requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
                             return true;
                         }
                     }
-                    String horaActual = prefs.getString("pref_hora_notificacion", "07:30");
-                    int h = Integer.parseInt(horaActual.split(":")[0]);
-                    int m = Integer.parseInt(horaActual.split(":")[1]);
-                    programarAlarmaDiaria(requireContext(), h, m);
+                    String currentTime = prefs.getString("pref_hora_notificacion", "07:30");
+                    int h = Integer.parseInt(currentTime.split(":")[0]);
+                    int m = Integer.parseInt(currentTime.split(":")[1]);
+                    scheduleDailyAlarm(requireContext(), h, m);
                 } else {
-                    cancelarAlarma(requireContext());
+                    cancelAlarm(requireContext());
                 }
                 return true;
             });
         }
 
         // ===================================================================
-        // TRANSPORTE FAVORITO
+        // FAVOURITE TRANSPORT
         // ===================================================================
-        final androidx.preference.Preference transportePref = findPreference("pref_transporte_favorito");
-        if (transportePref != null) {
+        final androidx.preference.Preference transportPref = findPreference("pref_transporte_favorito");
+        if (transportPref != null) {
             final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
-            final String[] nombresTransporte = getResources().getStringArray(R.array.nombres_transporte);
-            final String[] valoresTransporte = getResources().getStringArray(R.array.valores_transporte);
+            final String[] transportNames = getResources().getStringArray(R.array.transport_names);
+            final String[] transportValues = getResources().getStringArray(R.array.transport_values);
 
-            String actual;
+            String currentTransport;
             if (!userEmail.isEmpty()) {
-                actual = customPrefs.getString("transporte_favorito_" + userEmail, "publico");
+                currentTransport = customPrefs.getString("transporte_favorito_" + userEmail, "publico");
             } else {
-                actual = prefs.getString("pref_transporte_favorito", "publico");
+                currentTransport = prefs.getString("pref_transporte_favorito", "publico");
             }
-            for (int i = 0; i < valoresTransporte.length; i++) {
-                if (valoresTransporte[i].equals(actual)) transportePref.setSummary(nombresTransporte[i]);
+            for (int i = 0; i < transportValues.length; i++) {
+                if (transportValues[i].equals(currentTransport)) transportPref.setSummary(transportNames[i]);
             }
 
-            transportePref.setOnPreferenceClickListener(preference -> {
-                int seleccionado = 0;
-                String guardado;
+            transportPref.setOnPreferenceClickListener(preference -> {
+                int selectedIndex = 0;
+                String saved;
                 if (!userEmail.isEmpty()) {
-                    guardado = customPrefs.getString("transporte_favorito_" + userEmail, "publico");
+                    saved = customPrefs.getString("transporte_favorito_" + userEmail, "publico");
                 } else {
-                    guardado = prefs.getString("pref_transporte_favorito", "publico");
+                    saved = prefs.getString("pref_transporte_favorito", "publico");
                 }
-                for (int i = 0; i < valoresTransporte.length; i++) {
-                    if (valoresTransporte[i].equals(guardado)) seleccionado = i;
+                for (int i = 0; i < transportValues.length; i++) {
+                    if (transportValues[i].equals(saved)) selectedIndex = i;
                 }
 
                 com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
                         new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
-                builder.setTitle(R.string.transporte_favorito);
-                builder.setSingleChoiceItems(nombresTransporte, seleccionado, (dialog, which) -> {
-                    String valorElegido = valoresTransporte[which];
+                builder.setTitle(R.string.favorite_transport);
+                builder.setSingleChoiceItems(transportNames, selectedIndex, (dialog, which) -> {
+                    String chosenValue = transportValues[which];
 
                     if (!userEmail.isEmpty()) {
-                        customPrefs.edit().putString("transporte_favorito_" + userEmail, valorElegido).apply();
+                        customPrefs.edit().putString("transporte_favorito_" + userEmail, chosenValue).apply();
                     } else {
-                        prefs.edit().putString("pref_transporte_favorito", valorElegido).apply();
+                        prefs.edit().putString("pref_transporte_favorito", chosenValue).apply();
                     }
-                    transportePref.setSummary(nombresTransporte[which]);
+                    transportPref.setSummary(transportNames[which]);
 
                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> dialog.dismiss(), 150);
                 });
-                builder.setNegativeButton(R.string.cancelar3, null);
+                builder.setNegativeButton(R.string.cancel3, null);
                 builder.show();
                 return true;
             });
         }
 
         // ===================================================================
-        // ESTILO DE MAPA
+        // MAP STYLE
         // ===================================================================
-        final androidx.preference.Preference mapaPref = findPreference("pref_tipo_mapa");
-        if (mapaPref != null) {
+        final androidx.preference.Preference mapPref = findPreference("pref_tipo_mapa");
+        if (mapPref != null) {
             final android.content.SharedPreferences prefs = getPreferenceManager().getSharedPreferences();
-            final String[] nombresMapa = getResources().getStringArray(R.array.nombres_tipo_mapa);
-            final String[] valoresMapa = getResources().getStringArray(R.array.valores_tipo_mapa);
+            final String[] mapTypeNames = getResources().getStringArray(R.array.map_type_names);
+            final String[] mapTypeValues = getResources().getStringArray(R.array.map_type_values);
 
-            String actualMapa;
+            String currentMapType;
             if (!userEmail.isEmpty()) {
-                actualMapa = customPrefs.getString("tipo_mapa_" + userEmail, "1");
+                currentMapType = customPrefs.getString("tipo_mapa_" + userEmail, "1");
             } else {
-                actualMapa = prefs.getString("pref_tipo_mapa", "1");
+                currentMapType = prefs.getString("pref_tipo_mapa", "1");
             }
-            for (int i = 0; i < valoresMapa.length; i++) {
-                if (valoresMapa[i].equals(actualMapa)) mapaPref.setSummary(nombresMapa[i]);
+            for (int i = 0; i < mapTypeValues.length; i++) {
+                if (mapTypeValues[i].equals(currentMapType)) mapPref.setSummary(mapTypeNames[i]);
             }
 
-            mapaPref.setOnPreferenceClickListener(preference -> {
-                int seleccionado = 0;
-                String guardado;
+            mapPref.setOnPreferenceClickListener(preference -> {
+                int selectedIndex = 0;
+                String saved;
                 if (!userEmail.isEmpty()) {
-                    guardado = customPrefs.getString("tipo_mapa_" + userEmail, "1");
+                    saved = customPrefs.getString("tipo_mapa_" + userEmail, "1");
                 } else {
-                    guardado = prefs.getString("pref_tipo_mapa", "1");
+                    saved = prefs.getString("pref_tipo_mapa", "1");
                 }
-                for (int i = 0; i < valoresMapa.length; i++) {
-                    if (valoresMapa[i].equals(guardado)) seleccionado = i;
+                for (int i = 0; i < mapTypeValues.length; i++) {
+                    if (mapTypeValues[i].equals(saved)) selectedIndex = i;
                 }
 
                 com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
                         new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext());
-                builder.setTitle(R.string.estilo_de_mapa);
-                builder.setSingleChoiceItems(nombresMapa, seleccionado, (dialog, which) -> {
-                    String valorElegido = valoresMapa[which];
+                builder.setTitle(R.string.map_style);
+                builder.setSingleChoiceItems(mapTypeNames, selectedIndex, (dialog, which) -> {
+                    String chosenValue = mapTypeValues[which];
 
                     if (!userEmail.isEmpty()) {
-                        customPrefs.edit().putString("tipo_mapa_" + userEmail, valorElegido).apply();
+                        customPrefs.edit().putString("tipo_mapa_" + userEmail, chosenValue).apply();
                     } else {
-                        prefs.edit().putString("pref_tipo_mapa", valorElegido).apply();
+                        prefs.edit().putString("pref_tipo_mapa", chosenValue).apply();
                     }
-                    mapaPref.setSummary(nombresMapa[which]);
+                    mapPref.setSummary(mapTypeNames[which]);
 
                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> dialog.dismiss(), 150);
                 });
-                builder.setNegativeButton(R.string.cancelar4, null);
+                builder.setNegativeButton(R.string.cancel4, null);
                 builder.show();
                 return true;
             });
         }
 
         // ===================================================================
-        // COCHE ELÉCTRICO - Guardado por usuario
+        // ELECTRIC CAR - saved per user
         // ===================================================================
-        SwitchPreferenceCompat cocheElectricoPref = findPreference("pref_coche_electrico");
-        if (cocheElectricoPref != null) {
-            boolean cocheElecState = false;
+        SwitchPreferenceCompat electricCarPref = findPreference("pref_coche_electrico");
+        if (electricCarPref != null) {
+            boolean electricCarState = false;
             if (!userEmail.isEmpty()) {
-                cocheElecState = customPrefs.getBoolean("pref_coche_electrico_" + userEmail, false);
+                electricCarState = customPrefs.getBoolean("pref_coche_electrico_" + userEmail, false);
             }
-            cocheElectricoPref.setChecked(cocheElecState);
+            electricCarPref.setChecked(electricCarState);
 
-            cocheElectricoPref.setOnPreferenceChangeListener((preference, newValue) -> {
+            electricCarPref.setOnPreferenceChangeListener((preference, newValue) -> {
                 boolean checked = (boolean) newValue;
                 if (!userEmail.isEmpty()) {
                     customPrefs.edit().putBoolean("pref_coche_electrico_" + userEmail, checked).apply();
@@ -301,32 +301,32 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
 
         // ===================================================================
-        // OPEN DATA -- CREDITOS
+        // OPEN DATA -- CREDITS
         // ===================================================================
         androidx.preference.Preference openDataPref = findPreference("pref_open_data");
         if (openDataPref != null) {
             openDataPref.setOnPreferenceClickListener(preference -> {
                 new MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.fuentes_de_datos)
-                        .setMessage(R.string.esta_aplicaci_n_utiliza_datos_abiertos_proporcionados_por_euskalmet_open_meteo_open_data_euskadi_bizkaibus_euskotren_y_metro_bilbao_geobilbao_agradecemos_su_labor_en_la_apertura_de_datos_para_esta_aplicaci_n)
-                        .setPositiveButton(R.string.aceptar, null)
+                        .setTitle(R.string.data_sources)
+                        .setMessage(R.string.data_sources_acknowledgement)
+                        .setPositiveButton(R.string.accept, null)
                         .show();
                 return true;
             });
         }
 
         // ===================================================================
-        // INICIALIZACIÓN FINAL
+        // FINAL INITIALISATION
         // ===================================================================
         boolean isGuest = customPrefs.getBoolean("isGuest", true);
 
-        galeriaLauncher = registerForActivityResult(
+        galleryLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
                         android.net.Uri imageUri = result.getData().getData();
                         if (imageUri != null) {
-                            mostrarConfirmacionFoto(imageUri);
+                            showPhotoConfirmation(imageUri);
                         }
                     }
                 }
@@ -337,51 +337,18 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         setupGeneralConfig();
     }
 
-    // Utilizamos AlarmManager para delegar en el sistema operativo la ejecución de nuestra notificación en un momento exacto.
-    private void programarAlarmaDiaria(Context context, int hora, int minuto) {
-        java.util.Calendar calendario = java.util.Calendar.getInstance();
-        calendario.set(java.util.Calendar.HOUR_OF_DAY, hora);
-        calendario.set(java.util.Calendar.MINUTE, minuto);
-        calendario.set(java.util.Calendar.SECOND, 0);
-        calendario.set(java.util.Calendar.MILLISECOND, 0);
+    // AlarmManager is used so the operating system runs our notification at an exact time.
+    private void scheduleDailyAlarm(Context context, int alarmHour, int alarmMinute) {
+        // Fix F2: the scheduling code moved to WeatherAlarmScheduler, so the receiver
+        // can schedule the next day's notification too.
+        com.example.unigo_das.receivers.WeatherAlarmScheduler.scheduleDailyAlarm(context, alarmHour, alarmMinute);
 
-        // Si la hora elegida ya ha pasado en el día de hoy, le sumamos 1 día al calendario.
-        if (calendario.getTimeInMillis() <= System.currentTimeMillis()) {
-            calendario.add(java.util.Calendar.DAY_OF_YEAR, 1);
-        }
-
-        android.app.AlarmManager gestor = (android.app.AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        android.content.Intent intentBC = new android.content.Intent(context, com.example.unigo_das.receivers.NotificacionClimaReceiver.class);
-
-        int flags = android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            flags |= android.app.PendingIntent.FLAG_IMMUTABLE;
-        }
-        android.app.PendingIntent ibc = android.app.PendingIntent.getBroadcast(context, 1, intentBC, flags);
-
-        // 'setExactAndAllowWhileIdle' asegura que la alarma se dispare incluso si el móvil está en reposo.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            gestor.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, calendario.getTimeInMillis(), ibc);
-        } else {
-            gestor.setRepeating(android.app.AlarmManager.RTC_WAKEUP, calendario.getTimeInMillis(), android.app.AlarmManager.INTERVAL_DAY, ibc);
-        }
-
-        String horaAviso = String.format(java.util.Locale.getDefault(), "%02d:%02d", hora, minuto);
-        Toast.makeText(context, getString(R.string.aviso_programado_para_las) + horaAviso, Toast.LENGTH_SHORT).show();
+        String alertTime = String.format(java.util.Locale.getDefault(), "%02d:%02d", alarmHour, alarmMinute);
+        Toast.makeText(context, getString(R.string.alert_scheduled_for) + alertTime, Toast.LENGTH_SHORT).show();
     }
 
-    private void cancelarAlarma(Context context) {
-        android.app.AlarmManager gestor = (android.app.AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        android.content.Intent intentBC = new android.content.Intent(context, com.example.unigo_das.receivers.NotificacionClimaReceiver.class);
-
-        int flags = android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            flags |= android.app.PendingIntent.FLAG_IMMUTABLE;
-        }
-        android.app.PendingIntent ibc = android.app.PendingIntent.getBroadcast(context, 1, intentBC, flags);
-
-        // Al cancelarla, el sistema operativo desvincula ese PendingIntent de sus rutinas.
-        gestor.cancel(ibc);
+    private void cancelAlarm(Context context) {
+        com.example.unigo_das.receivers.WeatherAlarmScheduler.cancelAlarm(context);
     }
 
     @Override
@@ -414,13 +381,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                         dialog.setListener(new ProfileDialogFragment.ProfileAction() {
                             @Override
                             public void onRemovePhoto() {
-                                eliminarFotoPerfil();
+                                deleteProfilePhoto();
                             }
                         });
                         dialog.setImageSelectedListener(new ProfileDialogFragment.OnImageSelectedListener() {
                             @Override
                             public void onImageSelected(Intent intent) {
-                                galeriaLauncher.launch(intent);
+                                galleryLauncher.launch(intent);
                             }
                         });
                         dialog.show(getParentFragmentManager(), "ProfileDialog");
@@ -431,7 +398,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
     }
 
-    // Configura dinámicamente qué partes del menú se muestran según si es un Invitado o un Usuario con cuenta.
+    // Dynamically sets which parts of the menu are shown for a guest or for a user with an account.
     private void setupAccountSection(boolean isGuest) {
         Preference myAccount = findPreference("pref_my_account");
         Preference logout = findPreference("pref_logout");
@@ -502,48 +469,48 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     private void setupGeneralConfig() {
         final Preference languagePref = findPreference("pref_language");
         if (languagePref != null) {
-            actualizarSummaryIdioma(languagePref);
+            updateLanguageSummary(languagePref);
 
             languagePref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    final String[] idiomas = {"Castellano", "Euskara", "English", "Français", "Deutsch", "Italiano"};
-                    final String[] codigos = {"es", "eu", "en", "fr", "de", "it"};
+                    final String[] languageNames = {"Castellano", "Euskara", "English", "Français", "Deutsch", "Italiano"};
+                    final String[] codes = {"es", "eu", "en", "fr", "de", "it"};
 
                     LocaleListCompat currentLocales = AppCompatDelegate.getApplicationLocales();
-                    String langActual = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
-                    int seleccionado = 0;
-                    for (int i = 0; i < codigos.length; i++) {
-                        if (codigos[i].equals(langActual)) seleccionado = i;
+                    String activeLang = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
+                    int selectedIndex = 0;
+                    for (int i = 0; i < codes.length; i++) {
+                        if (codes[i].equals(activeLang)) selectedIndex = i;
                     }
 
                     new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(getString(R.string.seleccionar_idioma))
-                            .setSingleChoiceItems(idiomas, seleccionado, new DialogInterface.OnClickListener() {
+                            .setTitle(getString(R.string.choose_language))
+                            .setSingleChoiceItems(languageNames, selectedIndex, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(final DialogInterface dialog, int which) {
-                                    final String nuevoCodigo = codigos[which];
+                                    final String newCode = codes[which];
 
-                                    //Cerramos el diálogo antes de aplicar el cambio de idioma.
-                                    // AppCompatDelegate reinicia la Activity al cambiar el Locale para redibujar los textos.
-                                    // Si el diálogo sigue abierto durante ese reinicio, la app crashea lanzando
-                                    // una excepción 'WindowLeaked' al perder la referencia de la ventana.
+                                    // Close the dialog before applying the language change.
+                                    // AppCompatDelegate restarts the Activity when the Locale changes, to redraw the texts.
+                                    // If the dialog is still open during that restart, the app crashes with
+                                    // a 'WindowLeaked' exception because the window reference is lost.
                                     dialog.dismiss();
 
                                     String userEmail = customPrefs.getString("user_email", "");
                                     if (!userEmail.isEmpty()) {
-                                        customPrefs.edit().putString("language_" + userEmail, nuevoCodigo).apply();
+                                        customPrefs.edit().putString("language_" + userEmail, newCode).apply();
                                     }
 
                                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
                                         @Override
                                         public void run() {
-                                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(nuevoCodigo));
+                                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(newCode));
                                         }
                                     }, 150);
                                 }
                             })
-                            .setNegativeButton(getString(R.string.cancelar), null)
+                            .setNegativeButton(getString(R.string.cancel), null)
                             .show();
                     return true;
                 }
@@ -579,7 +546,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
     }
 
-    private void actualizarSummaryIdioma(androidx.preference.Preference pref) {
+    private void updateLanguageSummary(androidx.preference.Preference pref) {
         androidx.core.os.LocaleListCompat currentLocales = androidx.appcompat.app.AppCompatDelegate.getApplicationLocales();
         String lang = currentLocales.isEmpty() ? "es" : currentLocales.get(0).getLanguage();
         switch (lang) {
@@ -594,17 +561,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
     @Override
     public void onLanguageChanged() {
-        // El reinicio lo gestiona ahora AppCompatDelegate automáticamente.
+        // The restart is now handled automatically by AppCompatDelegate.
     }
 
-    private void mostrarConfirmacionFoto(final Uri imageUri) {
+    private void showPhotoConfirmation(final Uri imageUri) {
         try {
             InputStream inputStream = requireContext().getContentResolver().openInputStream(imageUri);
             final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
 
             if (bitmap != null) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                builder.setTitle(R.string.confirmar_foto_de_perfil);
+                builder.setTitle(R.string.confirm_profile_photo);
 
                 ImageView imageView = new ImageView(requireContext());
                 imageView.setImageBitmap(bitmap);
@@ -630,13 +597,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                 layout.addView(imageView);
 
                 builder.setView(layout);
-                builder.setPositiveButton(R.string.aceptar3, new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.accept3, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        guardarFotoPerfil(bitmap);
+                        uploadProfilePhoto(bitmap);
                     }
                 });
-                builder.setNegativeButton(R.string.cancelar6, null);
+                builder.setNegativeButton(R.string.cancel6, null);
                 builder.show();
             }
         } catch (Exception e) {
@@ -644,27 +611,33 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
         }
     }
 
-    // Proceso de subida de imagen "a pelo" utilizando HttpURLConnection nativo y encapsulación multipart/form-data.
-    // Volley suele dar problemas con archivos binarios pesados, así que montamos la cabecera HTTP a mano.
-    private void guardarFotoPerfil(final Bitmap bitmap) {
+    // Image upload done manually with the native HttpURLConnection and multipart/form-data encoding.
+    // Volley often has problems with large binary files, so the HTTP body is built by hand.
+    private void uploadProfilePhoto(final Bitmap bitmap) {
         final String userEmail = customPrefs.getString("user_email", "");
         if (!userEmail.isEmpty()) {
             final ProgressDialog progressDialog = new ProgressDialog(requireContext());
-            progressDialog.setMessage(getString(R.string.subiendo_foto));
+            progressDialog.setMessage(getString(R.string.uploading_photo));
             progressDialog.setCancelable(false);
             progressDialog.show();
 
-            // Las llamadas de red bloquean la interfaz. Desviamos el trabajo a un Thread en segundo plano.
+            // Fix F7: the context and the Activity are kept before starting the thread. Before,
+            // requireContext()/requireActivity() were called on the background thread and crashed
+            // the app (IllegalStateException) if the user left the screen during the upload.
+            final Context appContext = requireContext().getApplicationContext();
+            final Activity activity = requireActivity();
+
+            // Network calls block the UI, so the work runs on a background Thread.
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        File tempFile = new File(requireContext().getCacheDir(), "temp_profile.jpg");
+                        File tempFile = new File(appContext.getCacheDir(), "temp_profile.jpg");
                         FileOutputStream fos = new FileOutputStream(tempFile);
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos); // Comprimimos la imagen para no saturar el servidor
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos); // Compress the image so the server is not overloaded
                         fos.close();
 
-                        // El boundary actúa como el "separador" de las distintas partes del formulario (texto e imagen)
+                        // The boundary is the "separator" between the parts of the form (text and image)
                         String boundary = "*****" + System.currentTimeMillis() + "*****";
                         String url = "http://35.233.9.137/subir_foto.php";
 
@@ -675,17 +648,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
 
                         DataOutputStream dos = new DataOutputStream(connection.getOutputStream());
 
-                        // El email del usuario
+                        // The user's email
                         dos.writeBytes("--" + boundary + "\r\n");
                         dos.writeBytes("Content-Disposition: form-data; name=\"email\"\r\n\r\n");
                         dos.writeBytes(userEmail + "\r\n");
 
-                        // El archivo de la imagen
+                        // The image file
                         dos.writeBytes("--" + boundary + "\r\n");
                         dos.writeBytes("Content-Disposition: form-data; name=\"foto\";filename=\"profile.jpg\"\r\n");
                         dos.writeBytes("Content-Type: image/jpeg\r\n\r\n");
 
-                        // Volcamos los bytes de la imagen directamente al stream de salida
+                        // Write the image bytes directly to the output stream
                         FileInputStream fis = new FileInputStream(tempFile);
                         byte[] buffer = new byte[1024];
                         int bytesRead;
@@ -706,35 +679,39 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
                             response.append(line);
                         }
 
-                        final String respuestaJson = response.toString();
+                        final String jsonReply = response.toString();
 
-                        requireActivity().runOnUiThread(new Runnable() {
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 progressDialog.dismiss();
 
                                 try {
-                                    JSONObject json = new JSONObject(respuestaJson);
+                                    JSONObject json = new JSONObject(jsonReply);
                                     if (json.getBoolean("success")) {
-                                        String fotoUrl = json.getString("foto_url");
+                                        String photoUrl = json.getString("foto_url");
                                         customPrefs.edit()
-                                                .putString("profile_photo_url_" + userEmail, fotoUrl)
+                                                .putString("profile_photo_url_" + userEmail, photoUrl)
                                                 .apply();
+                                        // Fix F7: the UI is only updated if the screen is still open
+                                        if (!isAdded()) return;
                                         requireActivity().recreate();
-                                        Toast.makeText(requireContext(), R.string.foto_actualizada, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(requireContext(), R.string.photo_updated, Toast.LENGTH_SHORT).show();
                                     }
                                 } catch (Exception e) {
-                                    Toast.makeText(requireContext(), R.string.error_al_subir_foto, Toast.LENGTH_SHORT).show();
+                                    if (!isAdded()) return; // Fix F7
+                                    Toast.makeText(requireContext(), R.string.photo_upload_error, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
                     } catch (Exception e) {
                         e.printStackTrace();
-                        requireActivity().runOnUiThread(new Runnable() {
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 progressDialog.dismiss();
-                                Toast.makeText(requireContext(), R.string.error_de_conexi_n, Toast.LENGTH_SHORT).show();
+                                if (!isAdded()) return; // Fix F7: the screen was closed during the upload
+                                Toast.makeText(requireContext(), R.string.connection_error, Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -744,7 +721,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Langua
     }
 
 
-    private void eliminarFotoPerfil() {
+    private void deleteProfilePhoto() {
         String userEmail = customPrefs.getString("user_email", "");
         if (!userEmail.isEmpty()) {
             Data inputData = new Data.Builder()

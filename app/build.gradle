@@ -61,3 +61,11 @@ dependencies {
         exclude group: 'junit', module: 'junit'
     }
 }
+
+// Fix B1: the real API keys go in secrets.properties, which is not committed to Git.
+// secrets.defaults.properties holds placeholder values, so a fresh clone compiles
+// (before, BuildConfig.DIRECTIONS_API_KEY did not exist and the build failed).
+secrets {
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}

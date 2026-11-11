@@ -14,45 +14,45 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.unigo_das.R;
-import com.example.unigo_das.item.Centro;
+import com.example.unigo_das.item.Campus;
 
-public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroViewHolder> implements Filterable {
+public class CampusAdapter extends RecyclerView.Adapter<CampusAdapter.CampusViewHolder> implements Filterable {
 
-    private List<Centro> centroListFull;
-    private List<Centro> centroList;
+    private List<Campus> campusListFull;
+    private List<Campus> campusList;
     private OnStarClickListener starClickListener;
     private OnItemClickListener itemListener;
 
     public interface OnStarClickListener {
-        void onStarClick(Centro centro, int position);
+        void onStarClick(Campus campus, int position);
     }
 
     public interface OnItemClickListener {
-        void onItemClick(Centro centro);
+        void onItemClick(Campus campus);
     }
 
-    public CentroAdapter(List<Centro> centroList, OnStarClickListener starListener, OnItemClickListener itemListener) {
-        this.centroListFull = new ArrayList<>(centroList);
-        this.centroList = centroList;
+    public CampusAdapter(List<Campus> campusList, OnStarClickListener starListener, OnItemClickListener itemListener) {
+        this.campusListFull = new ArrayList<>(campusList);
+        this.campusList = campusList;
         this.starClickListener = starListener;
         this.itemListener = itemListener;
     }
 
     @NonNull
     @Override
-    public CentroViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_centro, parent, false);
-        return new CentroViewHolder(view);
+    public CampusViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_campus, parent, false);
+        return new CampusViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CentroViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CampusViewHolder holder, int position) {
         final int currentPosition = position;
-        final Centro centro = centroList.get(currentPosition);
+        final Campus campus = campusList.get(currentPosition);
 
-        holder.tvNombre.setText(centro.getNombre());
-        holder.tvUniUbi.setText(centro.getUbicacion());
-        String uni = centro.getUniversidad();
+        holder.tvCampusName.setText(campus.getName());
+        holder.tvUniLocation.setText(campus.getDistrict());
+        String uni = campus.getUniversity();
 
         holder.ivLogo.clearColorFilter();
 
@@ -67,7 +67,7 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             holder.ivLogo.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.bilbao_grey_dark));
         }
 
-        if (centro.isStarred()) {
+        if (campus.isStarred()) {
             holder.ivStar.setImageResource(android.R.drawable.btn_star_big_on);
             holder.ivStar.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.bilbao_red));
         } else {
@@ -78,10 +78,10 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
         holder.ivStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                centro.setStarred(!centro.isStarred());
+                campus.setStarred(!campus.isStarred());
                 notifyItemChanged(currentPosition);
                 if (starClickListener != null) {
-                    starClickListener.onStarClick(centro, currentPosition);
+                    starClickListener.onStarClick(campus, currentPosition);
                 }
             }
         });
@@ -90,28 +90,28 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
             @Override
             public void onClick(View v) {
                 if (itemListener != null) {
-                    itemListener.onItemClick(centro);
+                    itemListener.onItemClick(campus);
                 }
             }
         });
 
-        // --- NUEVA LÓGICA DEL MAPA DESPLEGABLE ---
+        // --- EXPANDABLE MAP LOGIC ---
 
-        // Inyectamos la imagen correspondiente al ID del centro
-        holder.ivMapaCentro.setImageResource(obtenerMapaPorCentro(centro.getId()));
+        // Set the photo that corresponds to the campus ID
+        holder.ivCampusPhoto.setImageResource(getPhotoForCampus(campus.getId()));
 
-        if (centro.isExpanded()) {
-            holder.layoutTransporte.setVisibility(View.VISIBLE);
+        if (campus.isExpanded()) {
+            holder.layoutTransport.setVisibility(View.VISIBLE);
             holder.ivExpand.setRotation(180f);
         } else {
-            holder.layoutTransporte.setVisibility(View.GONE);
+            holder.layoutTransport.setVisibility(View.GONE);
             holder.ivExpand.setRotation(0f);
         }
 
         holder.ivExpand.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                centro.setExpanded(!centro.isExpanded());
+                campus.setExpanded(!campus.isExpanded());
                 notifyItemChanged(currentPosition);
             }
         });
@@ -119,11 +119,11 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
 
     @Override
     public int getItemCount() {
-        return centroList.size();
+        return campusList.size();
     }
 
-    public void actualizarListaCompleta(List<Centro> nuevaLista) {
-        this.centroList = nuevaLista;
+    public void updateFullList(List<Campus> newList) {
+        this.campusList = newList;
         notifyDataSetChanged();
     }
 
@@ -132,15 +132,15 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                List<Centro> filteredList = new ArrayList<>();
+                List<Campus> filteredList = new ArrayList<>();
                 if (constraint == null || constraint.length() == 0) {
-                    filteredList.addAll(centroListFull);
+                    filteredList.addAll(campusListFull);
                 } else {
                     String filterPattern = constraint.toString().toLowerCase().trim();
-                    for (Centro item : centroListFull) {
-                        if (item.getNombre().toLowerCase().contains(filterPattern) ||
-                                item.getUniversidad().toLowerCase().contains(filterPattern) ||
-                                (item.getDescripcion() != null && item.getDescripcion().toLowerCase().contains(filterPattern))) {
+                    for (Campus item : campusListFull) {
+                        if (item.getName().toLowerCase().contains(filterPattern) ||
+                                item.getUniversity().toLowerCase().contains(filterPattern) ||
+                                (item.getDescription() != null && item.getDescription().toLowerCase().contains(filterPattern))) {
                             filteredList.add(item);
                         }
                     }
@@ -152,83 +152,83 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                centroList.clear();
-                centroList.addAll((List) results.values);
+                campusList.clear();
+                campusList.addAll((List) results.values);
                 notifyDataSetChanged();
             }
         };
     }
 
-    // --- DICCIONARIO DE IMÁGENES ---
-    private int obtenerMapaPorCentro(String idCentro) {
-        switch (idCentro) {
+    // --- IMAGE DICTIONARY ---
+    private int getPhotoForCampus(String campusCode) {
+        switch (campusCode) {
             // ==========================================
             // UPV/EHU
             // ==========================================
             case "EHU_345":
-                 return R.drawable.foto_sanma_viejo;
+                 return R.drawable.photo_sanmames_old;
             case "EHU_363":
-                 return R.drawable.foto_sanma_nuevo;
+                 return R.drawable.photo_sanmames_new;
             case "EHU_364":
-                 return R.drawable.foto_sanma_nuevo;
+                 return R.drawable.photo_sanmames_new;
             case "EHU_350":
-                 return R.drawable.foto_nautica;
+                 return R.drawable.photo_nautical;
             case "EHU_320":
-                 return R.drawable.foto_bellas_artes;
+                 return R.drawable.photo_fine_arts;
             case "EHU_310":
-                 return R.drawable.foto_ciencia_y_tecnologia;
+                 return R.drawable.photo_science_technology;
             case "EHU_323":
-                 return R.drawable.foto_sociales_comunicacion;
+                 return R.drawable.photo_social_communication;
             case "EHU_324":
-                 return R.drawable.foto_derecho;
+                 return R.drawable.photo_law;
             case "EHU_321":
-                 return R.drawable.foto_sarriko;
+                 return R.drawable.photo_sarriko;
             case "EHU_351":
-                 return R.drawable.foto_elcano;
+                 return R.drawable.photo_elcano;
             case "EHU_354":
-                 return R.drawable.foto_educacion;
+                 return R.drawable.photo_education;
             case "EHU_327":
-                 return R.drawable.foto_medicina_y_enfermeria;
+                 return R.drawable.photo_medicine_nursing;
             case "EHU_352":
-                return R.drawable.foto_medicina_y_enfermeria;
+                return R.drawable.photo_medicine_nursing;
             case "EHU_332":
-                 return R.drawable.foto_galdakao;
+                 return R.drawable.photo_galdakao;
             case "EHU_328":
-                 return R.drawable.foto_basurto;
+                 return R.drawable.photo_basurto;
             case "EHU_329":
-                 return R.drawable.foto_cruces;
+                 return R.drawable.photo_cruces;
             case "EHU_EXP":
-                 return R.drawable.foto_experiencia;
+                 return R.drawable.photo_experience;
 
                 // ==========================================
                 // MONDRAGON UNIBERTSITATEA
                 // ==========================================
             case "MU_BBF_EMP":
-                 return R.drawable.foto_mondragon_empresariales_leinn;
+                 return R.drawable.photo_mondragon_business_leinn;
             case "MU_BBF_LEINN":
-                return R.drawable.foto_mondragon_empresariales_leinn;
+                return R.drawable.photo_mondragon_business_leinn;
             case "MU_AS_POL":
-                 return R.drawable.foto_as_fabrik;
+                 return R.drawable.photo_as_fabrik;
             case "MU_AS_HUM":
-                return R.drawable.foto_as_fabrik;
+                return R.drawable.photo_as_fabrik;
 
                 // ==========================================
-                // UNIVERSIDAD DE DEUSTO
+                // UNIVERSITY OF DEUSTO
                 // ==========================================
             case "DEU_DBS":
-                 return R.drawable.foto_deusto;
+                 return R.drawable.photo_deusto;
             case "DEU_DER":
-                return R.drawable.foto_deusto;
+                return R.drawable.photo_deusto;
             case "DEU_CSH":
-                return R.drawable.foto_deusto;
+                return R.drawable.photo_deusto;
             case "DEU_ING":
-                return R.drawable.foto_deusto;
+                return R.drawable.photo_deusto;
             case "DEU_EDU":
-                return R.drawable.foto_deusto;
+                return R.drawable.photo_deusto;
             case "DEU_SAL":
-                return R.drawable.foto_deusto;
+                return R.drawable.photo_deusto;
             case "DEU_CSC":
-                return R.drawable.foto_deusto;
+                return R.drawable.photo_deusto;
 
             default:
 
@@ -236,21 +236,21 @@ public class CentroAdapter extends RecyclerView.Adapter<CentroAdapter.CentroView
         }
     }
 
-    static class CentroViewHolder extends RecyclerView.ViewHolder {
-        TextView tvNombre, tvUniUbi;
-        ImageView ivStar, ivLogo, ivExpand, ivMapaCentro;
-        View layoutTransporte;
+    static class CampusViewHolder extends RecyclerView.ViewHolder {
+        TextView tvCampusName, tvUniLocation;
+        ImageView ivStar, ivLogo, ivExpand, ivCampusPhoto;
+        View layoutTransport;
 
-        CentroViewHolder(View itemView) {
+        CampusViewHolder(View itemView) {
             super(itemView);
-            tvNombre = itemView.findViewById(R.id.tvNombreCentro);
-            tvUniUbi = itemView.findViewById(R.id.tvUniUbi);
+            tvCampusName = itemView.findViewById(R.id.tvCampusTitle);
+            tvUniLocation = itemView.findViewById(R.id.tvUniLocation);
             ivStar = itemView.findViewById(R.id.ivStar);
-            ivLogo = itemView.findViewById(R.id.ivLogoCentro);
+            ivLogo = itemView.findViewById(R.id.ivCampusLogo);
             ivExpand = itemView.findViewById(R.id.ivExpand);
-            layoutTransporte = itemView.findViewById(R.id.layoutTransporte);
+            layoutTransport = itemView.findViewById(R.id.layoutTransport);
 
-            ivMapaCentro = itemView.findViewById(R.id.ivMapaCentro);
+            ivCampusPhoto = itemView.findViewById(R.id.ivCampusPhoto);
         }
     }
 }

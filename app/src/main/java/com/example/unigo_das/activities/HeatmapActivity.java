@@ -22,18 +22,25 @@ import java.net.URL;
 
 public class HeatmapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private String tipoMapa;
+    // Fix F1: fixed values for the Intent extra. Before, the caller sent the
+    // translated button text ("AIR", "LUFT", ...), so in every language except
+    // Spanish the comparison with "AIRE" failed and the pollen map was shown.
+    public static final String EXTRA_MAP_TYPE = "TIPO_MAPA";
+    public static final String MAP_TYPE_AIR = "AIRE";
+    public static final String MAP_TYPE_POLLEN = "POLEN";
+
+    private String mapType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heatmap);
 
-        // Recibimos si el usuario quiere ver AIRE o POLEN
-        tipoMapa = getIntent().getStringExtra("TIPO_MAPA");
+        // We receive whether the user wants to see AIR or POLLEN
+        mapType = getIntent().getStringExtra(EXTRA_MAP_TYPE);
 
-        // Botón de volver atrás
-        findViewById(R.id.btnCerrarMapa).setOnClickListener(new View.OnClickListener() {            @Override
+        // Back button
+        findViewById(R.id.btnCloseMap).setOnClickListener(new View.OnClickListener() {            @Override
             public void onClick(View v) {
                 finish();
             }
@@ -47,23 +54,23 @@ public class HeatmapActivity extends AppCompatActivity implements OnMapReadyCall
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        // Centramos en Bilbao por defecto con un zoom de 10f para apreciar las nubes de calor
+        // Centre on Bilbao by default with zoom 10f, so the heat clouds can be seen
         LatLng bilbao = new LatLng(43.2630, -2.9350);
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bilbao, 10f));
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-        // Creamos el proveedor de la capa térmica
+        // Create the provider of the heatmap layer
         TileProvider tileProvider = new UrlTileProvider(256, 256) {
             @Override
             public URL getTileUrl(int x, int y, int zoom) {
                 String apiKey = BuildConfig.DIRECTIONS_API_KEY;
                 String url;
 
-                if ("AIRE".equals(tipoMapa)) {
-                    // API de Calidad del Aire de Google
+                if (MAP_TYPE_AIR.equals(mapType)) {
+                    // Google Air Quality API
                     url = "https://airquality.googleapis.com/v1/mapTypes/UAQI_INDIGO_PERSIAN/heatmapTiles/" + zoom + "/" + x + "/" + y + "?key=" + apiKey;
                 } else {
-                    // API de Polen de Google
+                    // Google Pollen API
                     url = "https://pollen.googleapis.com/v1/mapTypes/TREE_UPI/heatmapTiles/" + zoom + "/" + x + "/" + y + "?key=" + apiKey;
                 }
 
@@ -78,6 +85,6 @@ public class HeatmapActivity extends AppCompatActivity implements OnMapReadyCall
         googleMap.addTileOverlay(new TileOverlayOptions()
                 .tileProvider(tileProvider)
                 .fadeIn(false)
-                .transparency(0.2f)); // Un poco de transparencia mejora la legibilidad de las calles debajo
+                .transparency(0.2f)); // A little transparency keeps the streets below readable
     }
 }

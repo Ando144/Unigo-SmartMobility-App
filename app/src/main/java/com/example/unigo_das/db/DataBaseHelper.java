@@ -6,15 +6,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.Nullable;
-import com.example.unigo_das.item.Centro;
+import com.example.unigo_das.item.Campus;
 import java.util.ArrayList;
 import java.util.List;
-import com.example.unigo_das.item.Parada;
+import com.example.unigo_das.item.TransitStop;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Unigo.db";
-    private static final int DATABASE_VERSION = 3; // SUBIMOS A VERSIÓN 3
+    private static final int DATABASE_VERSION = 3; // Schema version 3
 
     public DataBaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -28,14 +28,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 "email VARCHAR(255) UNIQUE, " +
                 "password VARCHAR(255))");
 
-        sqLiteDatabase.execSQL("CREATE TABLE Centros (" +
-                "id_centro VARCHAR(255) PRIMARY KEY, " +
-                "nombre VARCHAR(255), " +
-                "universidad VARCHAR(255), " +
-                "descripcion TEXT, " +
-                "ubicacion VARCHAR(255), " +
-                "latitud REAL, " +
-                "longitud REAL)");
+        createCampusTable(sqLiteDatabase);
 
         sqLiteDatabase.execSQL("CREATE TABLE Favoritos (" +
                 "id_usuario INTEGER, " +
@@ -44,6 +37,41 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(id_usuario) REFERENCES Usuarios(id_usuario) ON DELETE CASCADE, " +
                 "FOREIGN KEY(id_centro) REFERENCES Centros(id_centro) ON DELETE CASCADE)");
 
+        createStopTable(sqLiteDatabase);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
+        if (oldVersion < 3) {
+            // The schemas before version 3 are unknown: same behaviour as before (rebuild everything).
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Favoritos");
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Paradas");
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Centros");
+            sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Usuarios");
+            onCreate(sqLiteDatabase);
+            return;
+        }
+        // Fix F8: from version 3 on, only the reference tables are rebuilt. The app fills them
+        // again at start-up (campuses on every start, stops when the table is empty), so the
+        // users' favourites are no longer deleted on every schema change.
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Paradas");
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Centros");
+        createCampusTable(sqLiteDatabase);
+        createStopTable(sqLiteDatabase);
+    }
+
+    private static void createCampusTable(SQLiteDatabase sqLiteDatabase) {
+        sqLiteDatabase.execSQL("CREATE TABLE Centros (" +
+                "id_centro VARCHAR(255) PRIMARY KEY, " +
+                "nombre VARCHAR(255), " +
+                "universidad VARCHAR(255), " +
+                "descripcion TEXT, " +
+                "ubicacion VARCHAR(255), " +
+                "latitud REAL, " +
+                "longitud REAL)");
+    }
+
+    private static void createStopTable(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL("CREATE TABLE Paradas (" +
                 "id_parada VARCHAR(255) PRIMARY KEY, " +
                 "nombre VARCHAR(255), " +
@@ -52,191 +80,209 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 "longitud REAL)");
     }
 
-    @Override
-    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Favoritos");
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Paradas");
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Centros");
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS Usuarios");
-        onCreate(sqLiteDatabase);
+    public boolean insertUser(String name, String email, String password) {
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues row = new ContentValues();
+        row.put("nombre", name);
+        row.put("email", email);
+        row.put("password", password);
+        long insertResult = database.insert("Usuarios", null, row);
+        database.close();
+        return insertResult != -1;
     }
 
-    public boolean insertarUsuario(String nombre, String email, String password) {
-        SQLiteDatabase bd = getWritableDatabase();
-        ContentValues nuevo = new ContentValues();
-        nuevo.put("nombre", nombre);
-        nuevo.put("email", email);
-        nuevo.put("password", password);
-        long resultado = bd.insert("Usuarios", null, nuevo);
-        bd.close();
-        return resultado != -1;
-    }
-
-    public int comprobarLogin(String email, String password) {
-        SQLiteDatabase bd = getReadableDatabase();
-        String[] argumentos = new String[] {email, password};
-        Cursor c = bd.rawQuery("SELECT id_usuario FROM Usuarios WHERE email=? AND password=?", argumentos);
-        int idUsuario = -1;
-        if (c.moveToFirst()) idUsuario = c.getInt(0);
+    public int checkLogin(String email, String password) {
+        SQLiteDatabase database = getReadableDatabase();
+        String[] queryArgs = new String[] {email, password};
+        Cursor c = database.rawQuery("SELECT id_usuario FROM Usuarios WHERE email=? AND password=?", queryArgs);
+        int foundUserId = -1;
+        if (c.moveToFirst()) foundUserId = c.getInt(0);
         c.close();
-        bd.close();
-        return idUsuario;
+        database.close();
+        return foundUserId;
     }
 
-    // Modificado para actualizar si ya existe (para cambio de idioma)
-    public boolean insertarCentro(String id_centro, String nombre, String universidad, String descripcion, String ubicacion, double latitud, double longitud) {
-        SQLiteDatabase bd = getWritableDatabase();
-        ContentValues nuevo = new ContentValues();
-        nuevo.put("id_centro", id_centro);
-        nuevo.put("nombre", nombre);
-        nuevo.put("universidad", universidad);
-        nuevo.put("descripcion", descripcion);
-        nuevo.put("ubicacion", ubicacion);
-        nuevo.put("latitud", latitud);
-        nuevo.put("longitud", longitud);
+    // Updated so that it also updates an existing row (needed when the language changes)
+    public boolean insertCampus(String campusId, String name, String university, String description, String districtName, double latitude, double longitude) {
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues row = new ContentValues();
+        row.put("id_centro", campusId);
+        row.put("nombre", name);
+        row.put("universidad", university);
+        row.put("descripcion", description);
+        row.put("ubicacion", districtName);
+        row.put("latitud", latitude);
+        row.put("longitud", longitude);
         
-        // IGNORE para no fallar si existe, y luego UPDATE para refrescar los campos de texto
-        long resultado = bd.insertWithOnConflict("Centros", null, nuevo, SQLiteDatabase.CONFLICT_IGNORE);
-        if (resultado == -1) {
-            bd.update("Centros", nuevo, "id_centro=?", new String[]{id_centro});
+        // IGNORE so it does not fail if the row exists, then UPDATE to refresh the text fields
+        long insertResult = database.insertWithOnConflict("Centros", null, row, SQLiteDatabase.CONFLICT_IGNORE);
+        if (insertResult == -1) {
+            database.update("Centros", row, "id_centro=?", new String[]{campusId});
         }
-        bd.close();
+        database.close();
         return true;
     }
 
-    public boolean centrosEstaVacia() {
-        SQLiteDatabase bd = getReadableDatabase();
-        Cursor cursor = bd.rawQuery("SELECT COUNT(*) FROM Centros", null);
+    // Fix F9: inserts (or updates) all the campuses in one transaction, with the same
+    // insert-or-update logic as insertCampus(), opening the database only once.
+    public void insertCampusesBulk(List<Campus> campuses) {
+        SQLiteDatabase database = getWritableDatabase();
+        database.beginTransaction();
+        try {
+            for (Campus campus : campuses) {
+                ContentValues row = new ContentValues();
+                row.put("id_centro", campus.getId());
+                row.put("nombre", campus.getName());
+                row.put("universidad", campus.getUniversity());
+                row.put("descripcion", campus.getDescription());
+                row.put("ubicacion", campus.getDistrict());
+                row.put("latitud", campus.getLatitude());
+                row.put("longitud", campus.getLongitude());
+                long insertResult = database.insertWithOnConflict("Centros", null, row, SQLiteDatabase.CONFLICT_IGNORE);
+                if (insertResult == -1) {
+                    database.update("Centros", row, "id_centro=?", new String[]{campus.getId()});
+                }
+            }
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();
+            database.close();
+        }
+    }
+
+    public boolean isCampusTableEmpty() {
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT COUNT(*) FROM Centros", null);
         cursor.moveToFirst();
         int count = cursor.getInt(0);
         cursor.close();
-        bd.close();
+        database.close();
         return count == 0;
     }
 
-    public Centro obtenerCentroPorId(String id_centro) {
-        SQLiteDatabase bd = getReadableDatabase();
-        Cursor cursor = bd.rawQuery("SELECT * FROM Centros WHERE id_centro = ?", new String[]{id_centro});
-        Centro centro = null;
+    public Campus getCampusById(String campusId) {
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT * FROM Centros WHERE id_centro = ?", new String[]{campusId});
+        Campus campus = null;
         if (cursor.moveToFirst()) {
             String id = cursor.getString(cursor.getColumnIndexOrThrow("id_centro"));
-            String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
+            String name = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
             String uni = cursor.getString(cursor.getColumnIndexOrThrow("universidad"));
             String desc = cursor.getString(cursor.getColumnIndexOrThrow("descripcion"));
-            String ubi = cursor.getString(cursor.getColumnIndexOrThrow("ubicacion"));
+            String district = cursor.getString(cursor.getColumnIndexOrThrow("ubicacion"));
             double lat = cursor.getDouble(cursor.getColumnIndexOrThrow("latitud"));
             double lon = cursor.getDouble(cursor.getColumnIndexOrThrow("longitud"));
-            centro = new Centro(id, nombre, uni, desc, ubi, lat, lon);
+            campus = new Campus(id, name, uni, desc, district, lat, lon);
         }
         cursor.close();
-        bd.close();
-        return centro;
+        database.close();
+        return campus;
     }
 
-    public List<Centro> obtenerTodosLosCentros() {
-        List<Centro> listaCentros = new ArrayList<>();
-        SQLiteDatabase bd = getReadableDatabase();
-        Cursor cursor = bd.rawQuery("SELECT * FROM Centros ORDER BY nombre ASC", null);
+    public List<Campus> getAllCampuses() {
+        List<Campus> campusItems = new ArrayList<>();
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT * FROM Centros ORDER BY nombre ASC", null);
         if (cursor.moveToFirst()) {
             do {
                 String id = cursor.getString(cursor.getColumnIndexOrThrow("id_centro"));
-                String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
                 String uni = cursor.getString(cursor.getColumnIndexOrThrow("universidad"));
                 String desc = cursor.getString(cursor.getColumnIndexOrThrow("descripcion"));
-                String ubi = cursor.getString(cursor.getColumnIndexOrThrow("ubicacion"));
+                String district = cursor.getString(cursor.getColumnIndexOrThrow("ubicacion"));
                 double lat = cursor.getDouble(cursor.getColumnIndexOrThrow("latitud"));
                 double lon = cursor.getDouble(cursor.getColumnIndexOrThrow("longitud"));
-                listaCentros.add(new Centro(id, nombre, uni, desc, ubi, lat, lon));
+                campusItems.add(new Campus(id, name, uni, desc, district, lat, lon));
             } while (cursor.moveToNext());
         }
         cursor.close();
-        bd.close();
-        return listaCentros;
+        database.close();
+        return campusItems;
     }
 
-    public boolean anadirFavorito(int id_usuario, String id_centro) {
-        SQLiteDatabase bd = getWritableDatabase();
-        ContentValues nuevo = new ContentValues();
-        nuevo.put("id_usuario", id_usuario);
-        nuevo.put("id_centro", id_centro);
-        long resultado = bd.insertWithOnConflict("Favoritos", null, nuevo, SQLiteDatabase.CONFLICT_IGNORE);
-        bd.close();
-        return resultado != -1;
+    public boolean addFavorite(int userId, String campusId) {
+        SQLiteDatabase database = getWritableDatabase();
+        ContentValues row = new ContentValues();
+        row.put("id_usuario", userId);
+        row.put("id_centro", campusId);
+        long insertResult = database.insertWithOnConflict("Favoritos", null, row, SQLiteDatabase.CONFLICT_IGNORE);
+        database.close();
+        return insertResult != -1;
     }
 
-    public void borrarFavorito(int id_usuario, String id_centro) {
-        SQLiteDatabase bd = getWritableDatabase();
-        String[] argumentos = new String[]{String.valueOf(id_usuario), id_centro};
-        bd.delete("Favoritos", "id_usuario=? AND id_centro=?", argumentos);
-        bd.close();
+    public void removeFavorite(int userId, String campusId) {
+        SQLiteDatabase database = getWritableDatabase();
+        String[] queryArgs = new String[]{String.valueOf(userId), campusId};
+        database.delete("Favoritos", "id_usuario=? AND id_centro=?", queryArgs);
+        database.close();
     }
 
-    public List<String> obtenerIdsFavoritosUsuario(int id_usuario) {
-        List<String> listaFavoritos = new ArrayList<>();
-        SQLiteDatabase bd = getReadableDatabase();
-        String[] argumentos = new String[]{String.valueOf(id_usuario)};
-        Cursor cursor = bd.rawQuery("SELECT id_centro FROM Favoritos WHERE id_usuario=?", argumentos);
+    public List<String> getUserFavoriteIds(int userId) {
+        List<String> favoriteIds = new ArrayList<>();
+        SQLiteDatabase database = getReadableDatabase();
+        String[] queryArgs = new String[]{String.valueOf(userId)};
+        Cursor cursor = database.rawQuery("SELECT id_centro FROM Favoritos WHERE id_usuario=?", queryArgs);
         if (cursor.moveToFirst()) {
             do {
-                listaFavoritos.add(cursor.getString(0));
+                favoriteIds.add(cursor.getString(0));
             } while (cursor.moveToNext());
         }
         cursor.close();
-        bd.close();
-        return listaFavoritos;
+        database.close();
+        return favoriteIds;
     }
 
-    public boolean paradasEstaVacia() {
-        SQLiteDatabase bd = getReadableDatabase();
-        Cursor cursor = bd.rawQuery("SELECT COUNT(*) FROM Paradas", null);
+    public boolean isStopTableEmpty() {
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT COUNT(*) FROM Paradas", null);
         cursor.moveToFirst();
         int count = cursor.getInt(0);
         cursor.close();
-        bd.close();
+        database.close();
         return count == 0;
     }
 
-    public void insertarParadasMasivas(List<Parada> listaParadas) {
-        SQLiteDatabase bd = getWritableDatabase();
-        bd.beginTransaction();
+    public void insertStopsBulk(List<TransitStop> stopList) {
+        SQLiteDatabase database = getWritableDatabase();
+        database.beginTransaction();
         try {
-            for (Parada p : listaParadas) {
-                ContentValues nuevo = new ContentValues();
-                nuevo.put("id_parada", p.getId());
-                nuevo.put("nombre", p.getNombre());
-                nuevo.put("tipo_transporte", p.getTipo());
-                nuevo.put("latitud", p.getLatitud());
-                nuevo.put("longitud", p.getLongitud());
+            for (TransitStop p : stopList) {
+                ContentValues row = new ContentValues();
+                row.put("id_parada", p.getId());
+                row.put("nombre", p.getName());
+                row.put("tipo_transporte", p.getType());
+                row.put("latitud", p.getLatitude());
+                row.put("longitud", p.getLongitude());
 
-                bd.insertWithOnConflict("Paradas", null, nuevo, SQLiteDatabase.CONFLICT_IGNORE);
+                database.insertWithOnConflict("Paradas", null, row, SQLiteDatabase.CONFLICT_IGNORE);
             }
-            bd.setTransactionSuccessful();
+            database.setTransactionSuccessful();
         } finally {
-            bd.endTransaction();
-            bd.close();
+            database.endTransaction();
+            database.close();
         }
     }
 
-    public List<Parada> obtenerParadasPorTipo(String tipo) {
-        List<Parada> lista = new ArrayList<>();
+    public List<TransitStop> getStopsByType(String type) {
+        List<TransitStop> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        // Hacemos la consulta filtrando por la columna tipo_transporte
-        Cursor cursor = db.rawQuery("SELECT * FROM Paradas WHERE tipo_transporte = ?", new String[]{tipo});
+        // Query filtered by the tipo_transporte column
+        Cursor cursor = db.rawQuery("SELECT * FROM Paradas WHERE tipo_transporte = ?", new String[]{type});
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 String id = cursor.getString(cursor.getColumnIndexOrThrow("id_parada"));
-                String nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("nombre"));
                 String t = cursor.getString(cursor.getColumnIndexOrThrow("tipo_transporte"));
                 double lat = cursor.getDouble(cursor.getColumnIndexOrThrow("latitud"));
                 double lon = cursor.getDouble(cursor.getColumnIndexOrThrow("longitud"));
 
-                lista.add(new Parada(id, nombre, t, lat, lon));
+                list.add(new TransitStop(id, name, t, lat, lon));
             } while (cursor.moveToNext());
             cursor.close();
         }
         db.close();
-        return lista;
+        return list;
     }
 }

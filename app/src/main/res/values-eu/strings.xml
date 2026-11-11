@@ -39,7 +39,7 @@
     <string name="error_generic">Errore bat gertatu da</string>
     <string name="server_error">Zerbitzariaren errorea</string>
 
-    <string name="seccion_clima_de_euskadi">Atala: Euskadiko Eguraldia</string>
+    <string name="basque_weather_section">Atala: Euskadiko Eguraldia</string>
     <string name="weather_title">Eguraldia</string>
 
     <string name="centres_title">Ikastetxeak</string>
@@ -57,85 +57,85 @@
     <string name="cycle_path_joined">Bidegorri konektatua</string>
 
 
-    <string name="centro_ehu_ingenieria_bilbao">Bilboko Ingeniaritza Eskola, Eraikin nagusia</string>
-    <string name="centro_ehu_ingenieria_bilbao1">Bilboko Ingeniaritza Eskola, I. Eraikina</string>
-    <string name="centro_ehu_ingenieria_bilbao2">Bilboko Ingeniaritza Eskola, II. Eraikina</string>
-    <string name="centro_ehu_ingenieria_bilbao3">Bilboko Ingeniaritza Eskola, Nautika</string>
+    <string name="campus_ehu_engineering_bilbao">Bilboko Ingeniaritza Eskola, Eraikin nagusia</string>
+    <string name="campus_ehu_engineering_bilbao1">Bilboko Ingeniaritza Eskola, I. Eraikina</string>
+    <string name="campus_ehu_engineering_bilbao2">Bilboko Ingeniaritza Eskola, II. Eraikina</string>
+    <string name="campus_ehu_engineering_bilbao3">Bilboko Ingeniaritza Eskola, Nautika</string>
 
-    <string name="centro_ehu_bellas_artes">Arte Ederren Fakultatea</string>
-    <string name="centro_ehu_ciencia_tecnologia">Zientzia eta Teknologia Fakultatea</string>
-    <string name="centro_ehu_ciencias_sociales_comunicacion">Gizarte eta Komunikazio Zientzien Fakultatea</string>
-    <string name="centro_ehu_derecho">Zuzenbide Fakultatea. Bizkaiko atala</string>
-    <string name="centro_ehu_economia_empresa">Ekonomia eta Enpresa Fakultatea</string>
-    <string name="centro_ehu_economia_empresa_elcano">Ekonomia eta Enpresa Fakultatea. Elkano atala</string>
-    <string name="centro_ehu_educacion_bilbao">Bilboko Hezkuntza Fakultatea</string>
-    <string name="centro_ehu_medicina_enfermeria">Medikuntza eta Erizaintza Fakultatea</string>
-    <string name="centro_ehu_unidad_docente_medicina">Med. eta Erizaintza Fak. Irakaskuntza Unitatea</string>
-    <string name="centro_ehu_aulas_experiencia">Esperientzia Gelak</string>
+    <string name="campus_ehu_fine_arts">Arte Ederren Fakultatea</string>
+    <string name="campus_ehu_science_technology">Zientzia eta Teknologia Fakultatea</string>
+    <string name="campus_ehu_social_communication_sciences">Gizarte eta Komunikazio Zientzien Fakultatea</string>
+    <string name="campus_ehu_law">Zuzenbide Fakultatea. Bizkaiko atala</string>
+    <string name="campus_ehu_economics_business">Ekonomia eta Enpresa Fakultatea</string>
+    <string name="campus_ehu_economics_business_elcano">Ekonomia eta Enpresa Fakultatea. Elkano atala</string>
+    <string name="campus_ehu_education_bilbao">Bilboko Hezkuntza Fakultatea</string>
+    <string name="campus_ehu_medicine_nursing">Medikuntza eta Erizaintza Fakultatea</string>
+    <string name="campus_ehu_medical_teaching_unit">Med. eta Erizaintza Fak. Irakaskuntza Unitatea</string>
+    <string name="campus_ehu_experience_classrooms">Esperientzia Gelak</string>
 
-    <string name="centro_mu_bbf_empresariales">Bilbao Berrikuntza Faktoria (BBF): Enpresagintza</string>
-    <string name="centro_mu_bbf_leinn">Bilbao Berrikuntza Faktoria (BBF): LEINN</string>
-    <string name="centro_mu_as_politecnica">As Fabrik: Goi Eskola Politeknikoa</string>
-    <string name="centro_mu_as_humanidades">As Fabrik: Humanitate eta Hezkuntza Zientzien Fak.</string>
+    <string name="campus_mu_bbf_business">Bilbao Berrikuntza Faktoria (BBF): Enpresagintza</string>
+    <string name="campus_mu_bbf_leinn">Bilbao Berrikuntza Faktoria (BBF): LEINN</string>
+    <string name="campus_mu_as_polytechnic">As Fabrik: Goi Eskola Politeknikoa</string>
+    <string name="campus_mu_as_humanities">As Fabrik: Humanitate eta Hezkuntza Zientzien Fak.</string>
 
-    <string name="centro_deusto_business">Deustu Business School</string>
-    <string name="centro_deusto_derecho">Zuzenbide Fakultatea</string>
-    <string name="centro_deusto_sociales_humanas">Gizarte eta Giza Zientzien Fakultatea</string>
-    <string name="centro_deusto_ingenieria">Ingeniaritza Fakultatea</string>
-    <string name="centro_deusto_educacion_deporte">Hezkuntza eta Kirol Fakultatea</string>
-    <string name="centro_deusto_salud">Osasun Zientzien Fakultatea</string>
-    <string name="centro_deusto_sociales_comunicacion">Gizarte eta Komunikazio Zientzien Fakultatea</string>
+    <string name="campus_deusto_business">Deustu Business School</string>
+    <string name="campus_deusto_law">Zuzenbide Fakultatea</string>
+    <string name="campus_deusto_social_human_sciences">Gizarte eta Giza Zientzien Fakultatea</string>
+    <string name="campus_deusto_engineering">Ingeniaritza Fakultatea</string>
+    <string name="campus_deusto_education_sport">Hezkuntza eta Kirol Fakultatea</string>
+    <string name="campus_deusto_health">Osasun Zientzien Fakultatea</string>
+    <string name="campus_deusto_social_communication">Gizarte eta Komunikazio Zientzien Fakultatea</string>
 
     <string name="map_title">Mapa</string>
-    <string name="precio_variable">"Prezio aldakorra"</string>
-    <string name="billete_ocasional">Aldizkako txartela</string>
-    <string name="coste_estimado">Kostu estimatua</string>
-    <string name="coste_estimado_aviso">Prezioa nabarmen merkeagoa izango da Barik txartela edo abonuak erabiliz.</string>
+    <string name="variable_price">"Prezio aldakorra"</string>
+    <string name="single_ticket">Aldizkako txartela</string>
+    <string name="estimated_cost">Kostu estimatua</string>
+    <string name="estimated_cost_notice">Prezioa nabarmen merkeagoa izango da Barik txartela edo abonuak erabiliz.</string>
 
-    <string name="destino_final">Azken helmuga</string>
+    <string name="final_destination">Azken helmuga</string>
 
-    <string name="caminar">Oinez</string>
+    <string name="walk">Oinez</string>
 
-    <string name="bici">Bizikleta</string>
+    <string name="bike">Bizikleta</string>
 
-    <string name="direccion">Norabidea</string>
-    <string name="desde">Nondik</string>
-    <string name="hasta">Nora</string>
-    <string name="paradas">geraleku</string>
+    <string name="direction">Norabidea</string>
+    <string name="from">Nondik</string>
+    <string name="to">Nora</string>
+    <string name="stops">geraleku</string>
 
-    <string name="coche_electrico_contaminacion">Garraio publikoa erabiltzeak trafikoa arintzen laguntzen du, nahiz eta zure auto elektrikoa jada aukera garbia izan.</string>
+    <string name="electric_car_emissions">Garraio publikoa erabiltzeak trafikoa arintzen laguntzen du, nahiz eta zure auto elektrikoa jada aukera garbia izan.</string>
 
-    <string name="has_evitado">Saihestu duzu</string>
-    <string name="co2_respecto_combustion">g CO2 errekuntza-auto baten aldean.</string>
+    <string name="you_avoided">Saihestu duzu</string>
+    <string name="co2_vs_combustion_car">g CO2 errekuntza-auto baten aldean.</string>
 
-    <string name="ruta_no_valida_titulo">Ibilbide esklusiborik ez</string>
-    <string name="ruta_no_valida_mensaje">Ez dago ibilbide bideragarririk hautatutako garraioak soilik erabiliz.\n\nSaiatu garraiobide gehiago gaitzen.</string>
-    <string name="cancelar">Utzi</string>
-    <string name="cambiar_filtros">Iragazkiak aldatu</string>
+    <string name="invalid_route_title">Ibilbide esklusiborik ez</string>
+    <string name="invalid_route_message">Ez dago ibilbide bideragarririk hautatutako garraioak soilik erabiliz.\n\nSaiatu garraiobide gehiago gaitzen.</string>
+    <string name="cancel">Utzi</string>
+    <string name="change_filters">Iragazkiak aldatu</string>
 
-    <string name="filtros_ruta_titulo">Ibilbidearen iragazkiak</string>
-    <string name="salida_dias_max">Irteera (Geh. 14 egun)</string>
-    <string name="hoy">Gaur</string>
-    <string name="ahora">Orain</string>
-    <string name="medios_preferidos">Garraiobide gogokoenak</string>
-    <string name="autobus">Autobusa</string>
-    <string name="tren">Trena</string>
-    <string name="mi_coche_es_electrico">Nire autoa elektrikoa da</string>
-    <string name="aplicar">Ezarri</string>
-    <string name="restablecer">Berrezarri</string>
+    <string name="route_filters_title">Ibilbidearen iragazkiak</string>
+    <string name="departure_max_days">Irteera (Geh. 14 egun)</string>
+    <string name="today">Gaur</string>
+    <string name="now">Orain</string>
+    <string name="preferred_modes">Garraiobide gogokoenak</string>
+    <string name="bus_option">Autobusa</string>
+    <string name="train">Trena</string>
+    <string name="my_car_is_electric">Nire autoa elektrikoa da</string>
+    <string name="apply">Ezarri</string>
+    <string name="reset">Berrezarri</string>
 
-    <string name="mostrar_paradas_titulo">Garraio Sarea</string>
-    <string name="ocultar_paradas">Geralekuak ezkutatu</string>
-    <string name="tranvia">Tranbia</string>
-    <string name="cerrar">Itxi</string>
+    <string name="show_stops_title">Garraio Sarea</string>
+    <string name="hide_stops">Geralekuak ezkutatu</string>
+    <string name="tram_option">Tranbia</string>
+    <string name="close">Itxi</string>
 
 
-    <string name="xml_buscar_centro_facultad">Ikastetxea edo fakultatea bilatu...</string>
-    <string name="xml_detalles_del_trayecto">Ibilbidearen xehetasunak</string>
-    <string name="xml_a_pie">Oinez</string>
-    <string name="xml_bici">Bizikleta</string>
-    <string name="xml_publico">Publikoa</string>
-    <string name="xml_donde_quieres_ir">Nora joan nahi duzu?</string>
+    <string name="xml_search_campus_faculty">Ikastetxea edo fakultatea bilatu...</string>
+    <string name="xml_trip_details">Ibilbidearen xehetasunak</string>
+    <string name="xml_on_foot">Oinez</string>
+    <string name="xml_bike">Bizikleta</string>
+    <string name="xml_public">Publikoa</string>
+    <string name="xml_where_to_go">Nora joan nahi duzu?</string>
 
     <string name="login_title">UNIGO</string>
     <string name="login_subtitle">Zure campusa, zure ibilbidea.</string>
@@ -170,137 +170,150 @@
     <string name="no_data_short">E/D</string>
     <string name="no_data_long">Daturik ez</string>
     <string name="error_api">Errorea</string>
-    <string name="aire">AIREA</string>
-    <string name="polen">POLEN</string>
-    <string name="tu_ubicaci_n">Zure kokapena</string>
-    <string name="tu_ubicaci_n2">Zure kokapena</string>
-    <string name="desconocido">Ezezaguna</string>
-    <string name="cielo_despejado">Ostarteak</string>
-    <string name="mayormente_despejado">Gehienean oskarbi</string>
-    <string name="parcialmente_nublado">Hodei gutxi</string>
-    <string name="totalmente_nublado">Oso hodeitsu</string>
-    <string name="niebla_densa">Lanbro trinkoa</string>
-    <string name="llovizna">Zirimiria</string>
-    <string name="llovizna_helada">Zirimiri izoztua</string>
-    <string name="lluvia_ligera">Euri txikia</string>
-    <string name="lluvia_moderada">Euri ertaina</string>
-    <string name="lluvia_fuerte">Euri zaparrada</string>
-    <string name="lluvia_helada">Euri izoztua</string>
-    <string name="nieve_ligera">Elur txikia</string>
-    <string name="nieve_moderada">Elur ertaina</string>
-    <string name="nevada_fuerte">Elurtea</string>
-    <string name="granizo_suave">Txingor txikia</string>
-    <string name="chubascos_ligeros">Zaparrada txikiak</string>
-    <string name="chubascos_moderados">Zaparrada ertainak</string>
-    <string name="chubascos_violentos">Zaparrada gogorrak</string>
-    <string name="chubascos_de_nieve">Elur-zaparradak</string>
-    <string name="tormenta_el_ctrica">Ekaitza</string>
-    <string name="tormenta_con_granizo">Ekaitza txingorrarekin</string>
-    <string name="a_n_no_has_guardado_ning_n_campus_en_favoritos">Oraindik ez duzu campusik gogokoenetan gorde.</string>
-    <string name="bajo">Baxua</string>
-    <string name="moderado">Ertaina</string>
-    <string name="alto">Altua</string>
-    <string name="muy_alto">Oso altua</string>
-    <string name="extremo">Muturrekoa</string>
-    <string name="detectando_ubicaci_n">Kokapena detektatzen...</string>
-    <string name="cargando">Kargatzen...</string>
-    <string name="calidad_aire">AIREAREN KALITATEA</string>
-    <string name="ver_mapa">Mapa ikusi</string>
-    <string name="polen2">POLEN MAILA</string>
-    <string name="ver_mapa2">Mapa ikusi</string>
-    <string name="ndice_uv_maximo">UV INDIZE MAXIMOA</string>
-    <string name="cargando2">Kargatzen...</string>
-    <string name="horas_de_luz">EGUN-ARGIA</string>
-    <string name="clima_en_tus_campus_favoritos">Eguraldia zure gogoko campusetan</string>
-    <string name="pron_stico_euskalmet">Euskalmet Iragarpena</string>
-    <string name="cargando_informaci_n_oficial">Informazio ofiziala kargatzen...</string>
-    <string name="radar_de_precipitaciones_en_vivo">Prezipitazioen zuzeneko radarra</string>
-    <string name="ruta_al_campus">Campuserako ibilbidea</string>
-    <string name="quieres_abrir_el_mapa_para_ver_c_mo_llegar_a">"Mapa ireki nahi duzu honako honetara nola iritsi ikusteko? "</string>
-    <string name="s_trazar_ruta">Bai, ibilbidea marraztu</string>
-    <string name="cancelar2">Utzi</string>
-    <string name="clima_en_bilbao">Eguraldia Bilbon (</string>
-    <string name="hace_fr_o_abr_gate_bien">"Hotz egiten du, ondo abrigatu! "</string>
-    <string name="d_a_caluroso">"Egun beroa. "</string>
-    <string name="cielo_despejado2">"Oskarbi. "</string>
-    <string name="ojo_hay_niebla_precauci_n_si_vas_en_coche_o_bici">"Kontuz! Lanbroa dago, ibili kontuz autoan edo bizikletan bazabiltza. "</string>
-    <string name="atenci_n_riesgo_de_nevadas">"Adi! Elur-arriskua. "</string>
-    <string name="alerta_por_tormentas_el_ctricas">"Ekaitz-alerta. "</string>
-    <string name="lluvia_fuerte_hoy">Euri zaparradak gaur (</string>
-    <string name="mm_imprescindible_paraguas">"mm). Aterkia ezinbestekoa da. "</string>
-    <string name="se_esperan_algunos_chubascos">Zaparrada batzuk espero dira (</string>
-    <string name="no_se_esperan_lluvias">"Ez da euririk espero. "</string>
-    <string name="precauci_n_rachas_de_viento_de">"Kontuz: Haize-boladak "</string>
-    <string name="protecci_n_solar_necesaria_uv">"Eguzki-babesa beharrezkoa (UV: "</string>
-    <string name="unigo_clima_del_campus">UniGo: Campusaren Eguraldia</string>
-    <string name="abre_la_app_para_consultar_la_previsi_n_detallada_antes_de_salir">Ireki aplikazioa iragarpen zehatza ikusteko atera aurretik.</string>
-    <string name="unigo_clima_del_campus2">UniGo: Campusaren Eguraldia</string>
-    <string name="con_ctate_a_internet_para_ver_el_pron_stico_de_hoy">Konektatu internetera gaurko iragarpena ikusteko.</string>
-    <string name="alertas_de_clima">Eguraldi Alertak</string>
-    <string name="avisos_diarios_sobre_el_entorno">Eguneroko ingurumen abisuak</string>
-    <string name="transporte_favorito">Garraio gogokoena</string>
-    <string name="cancelar3">Utzi</string>
-    <string name="estilo_de_mapa">Maparen estiloa</string>
-    <string name="cancelar4">Utzi</string>
-    <string name="fuentes_de_datos">Datu-iturriak</string>
-    <string name="esta_aplicaci_n_utiliza_datos_abiertos_proporcionados_por_euskalmet_open_meteo_open_data_euskadi_bizkaibus_euskotren_y_metro_bilbao_geobilbao_agradecemos_su_labor_en_la_apertura_de_datos_para_esta_aplicaci_n">Aplikazio honek datu irekiak erabiltzen ditu, honakoek emanak:\n\n• Euskalmet\n• Open Meteo\n• Open Data Euskadi\n• Bizkaibus\n• Euskotren eta Metro Bilbao\n• GeoBilbao\n\nEskertzen diegu beren lana datuak irekitzearren aplikazio honentzat.</string>
-    <string name="aceptar">Onartu</string>
-    <string name="aviso_programado_para_las">"Abisua programatuta ordu honetarako: "</string>
-    <string name="seleccionar_idioma">Hizkuntza aukeratu</string>
-    <string name="cancelar5">Utzi</string>
-    <string name="confirmar_foto_de_perfil">Berretsi profileko argazkia</string>
-    <string name="aceptar3">Onartu</string>
-    <string name="cancelar6">Utzi</string>
-    <string name="subiendo_foto">Argazkia igotzen...</string>
-    <string name="foto_actualizada">Argazkia eguneratuta</string>
-    <string name="error_al_subir_foto">Errorea argazkia igotzean</string>
-    <string name="error_de_conexi_n">Konexio-errorea</string>
-    <string name="eliminar_foto">Argazkia ezabatu</string>
-    <string name="est_s_seguro_de_que_quieres_eliminar_tu_foto_de_perfil">Ziur zaude zure profileko argazkia ezabatu nahi duzula?</string>
-    <string name="eliminar">Ezabatu</string>
-    <string name="cancelar7">Utzi</string>
-    <string name="rutas_y_transporte">Ibilbideak eta Garraioa</string>
-    <string name="transporte_favorito2">Garraio gogokoena</string>
-    <string name="medio_de_transporte_por_defecto">Garraiobide lehenetsia</string>
-    <string name="veh_culo_el_ctrico">Ibilgailu elektrikoa</string>
-    <string name="priorizar_rutas_con_puntos_de_recarga"> </string>
-    <string name="alertas_y_clima">Alertak eta Eguraldia</string>
-    <string name="notificaciones_de_salud_y_clima">Osasun eta eguraldi jakinarazpenak</string>
-    <string name="recibir_avisos_diarios_sobre_polen_lluvia_y_uv">Jaso polenari, euriari eta UV-ari buruzko eguneroko abisuak</string>
-    <string name="hora_del_aviso_diario">Eguneroko abisuaren ordua</string>
-    <string name="visualizaci_n_del_mapa">Maparen bistaratzea</string>
-    <string name="estilo_de_mapa2">Maparen estiloa</string>
+    <string name="air">AIREA</string>
+    <string name="pollen">POLEN</string>
+    <string name="your_location">Zure kokapena</string>
+    <string name="your_location2">Zure kokapena</string>
+    <string name="unknown">Ezezaguna</string>
+    <string name="clear_sky">Ostarteak</string>
+    <string name="mostly_clear">Gehienean oskarbi</string>
+    <string name="partly_cloudy">Hodei gutxi</string>
+    <string name="overcast">Oso hodeitsu</string>
+    <string name="dense_fog">Lanbro trinkoa</string>
+    <string name="drizzle">Zirimiria</string>
+    <string name="freezing_drizzle">Zirimiri izoztua</string>
+    <string name="light_rain">Euri txikia</string>
+    <string name="moderate_rain">Euri ertaina</string>
+    <string name="heavy_rain">Euri zaparrada</string>
+    <string name="freezing_rain">Euri izoztua</string>
+    <string name="light_snow">Elur txikia</string>
+    <string name="moderate_snow">Elur ertaina</string>
+    <string name="heavy_snow">Elurtea</string>
+    <string name="light_hail">Txingor txikia</string>
+    <string name="light_showers">Zaparrada txikiak</string>
+    <string name="moderate_showers">Zaparrada ertainak</string>
+    <string name="violent_showers">Zaparrada gogorrak</string>
+    <string name="snow_showers">Elur-zaparradak</string>
+    <string name="thunderstorm">Ekaitza</string>
+    <string name="thunderstorm_with_hail">Ekaitza txingorrarekin</string>
+    <string name="no_favorite_campuses_yet">Oraindik ez duzu campusik gogokoenetan gorde.</string>
+    <string name="uv_low">Baxua</string>
+    <string name="uv_moderate">Ertaina</string>
+    <string name="uv_high">Altua</string>
+    <string name="uv_very_high">Oso altua</string>
+    <string name="uv_extreme">Muturrekoa</string>
+    <string name="detecting_location">Kokapena detektatzen...</string>
+    <string name="loading">Kargatzen...</string>
+    <string name="air_quality">AIREAREN KALITATEA</string>
+    <string name="view_map">Mapa ikusi</string>
+    <string name="pollen2">POLEN MAILA</string>
+    <string name="view_map2">Mapa ikusi</string>
+    <string name="max_uv_index">UV INDIZE MAXIMOA</string>
+    <string name="loading2">Kargatzen...</string>
+    <string name="daylight_hours">EGUN-ARGIA</string>
+    <string name="weather_at_favorite_campuses">Eguraldia zure gogoko campusetan</string>
+    <string name="euskalmet_forecast">Euskalmet Iragarpena</string>
+    <string name="loading_official_info">Informazio ofiziala kargatzen...</string>
+    <string name="live_precipitation_radar">Prezipitazioen zuzeneko radarra</string>
+    <string name="route_to_campus">Campuserako ibilbidea</string>
+    <string name="open_map_to_route_question">"Mapa ireki nahi duzu honako honetara nola iritsi ikusteko? "</string>
+    <string name="yes_draw_route">Bai, ibilbidea marraztu</string>
+    <string name="cancel2">Utzi</string>
+    <string name="weather_in_bilbao">Eguraldia Bilbon (</string>
+    <string name="cold_wrap_up">"Hotz egiten du, ondo abrigatu! "</string>
+    <string name="hot_day">"Egun beroa. "</string>
+    <string name="clear_sky2">"Oskarbi. "</string>
+    <string name="fog_warning">"Kontuz! Lanbroa dago, ibili kontuz autoan edo bizikletan bazabiltza. "</string>
+    <string name="snow_risk_warning">"Adi! Elur-arriskua. "</string>
+    <string name="thunderstorm_alert">"Ekaitz-alerta. "</string>
+    <string name="heavy_rain_today">Euri zaparradak gaur (</string>
+    <string name="mm_umbrella_needed">"mm). Aterkia ezinbestekoa da. "</string>
+    <string name="some_showers_expected">Zaparrada batzuk espero dira (</string>
+    <string name="no_rain_expected">"Ez da euririk espero. "</string>
+    <string name="wind_gusts_warning">"Kontuz: Haize-boladak "</string>
+    <string name="sun_protection_needed_uv">"Eguzki-babesa beharrezkoa (UV: "</string>
+    <string name="unigo_campus_weather">UniGo: Campusaren Eguraldia</string>
+    <string name="open_app_for_detailed_forecast">Ireki aplikazioa iragarpen zehatza ikusteko atera aurretik.</string>
+    <string name="unigo_campus_weather2">UniGo: Campusaren Eguraldia</string>
+    <string name="connect_to_see_forecast">Konektatu internetera gaurko iragarpena ikusteko.</string>
+    <string name="weather_alerts">Eguraldi Alertak</string>
+    <string name="daily_environment_alerts">Eguneroko ingurumen abisuak</string>
+    <string name="favorite_transport">Garraio gogokoena</string>
+    <string name="cancel3">Utzi</string>
+    <string name="map_style">Maparen estiloa</string>
+    <string name="cancel4">Utzi</string>
+    <string name="data_sources">Datu-iturriak</string>
+    <string name="data_sources_acknowledgement">Aplikazio honek datu irekiak erabiltzen ditu, honakoek emanak:\n\n• Euskalmet\n• Open Meteo\n• Open Data Euskadi\n• Bizkaibus\n• Euskotren eta Metro Bilbao\n• GeoBilbao\n\nEskertzen diegu beren lana datuak irekitzearren aplikazio honentzat.</string>
+    <string name="accept">Onartu</string>
+    <string name="alert_scheduled_for">"Abisua programatuta ordu honetarako: "</string>
+    <string name="choose_language">Hizkuntza aukeratu</string>
+    <string name="cancel5">Utzi</string>
+    <string name="confirm_profile_photo">Berretsi profileko argazkia</string>
+    <string name="accept3">Onartu</string>
+    <string name="cancel6">Utzi</string>
+    <string name="uploading_photo">Argazkia igotzen...</string>
+    <string name="photo_updated">Argazkia eguneratuta</string>
+    <string name="photo_upload_error">Errorea argazkia igotzean</string>
+    <string name="connection_error">Konexio-errorea</string>
+    <string name="delete_photo">Argazkia ezabatu</string>
+    <string name="confirm_delete_photo_message">Ziur zaude zure profileko argazkia ezabatu nahi duzula?</string>
+    <string name="delete">Ezabatu</string>
+    <string name="cancel7">Utzi</string>
+    <string name="routes_and_transport">Ibilbideak eta Garraioa</string>
+    <string name="favorite_transport2">Garraio gogokoena</string>
+    <string name="default_transport_mode">Garraiobide lehenetsia</string>
+    <string name="electric_vehicle">Ibilgailu elektrikoa</string>
+    <string name="prioritize_charging_routes"> </string>
+    <string name="alerts_and_weather">Alertak eta Eguraldia</string>
+    <string name="health_weather_notifications">Osasun eta eguraldi jakinarazpenak</string>
+    <string name="daily_pollen_rain_uv_alerts">Jaso polenari, euriari eta UV-ari buruzko eguneroko abisuak</string>
+    <string name="daily_alert_time">Eguneroko abisuaren ordua</string>
+    <string name="map_display">Maparen bistaratzea</string>
+    <string name="map_style2">Maparen estiloa</string>
     <string name="normal">Normala</string>
-    <string name="informaci_n">Informazioa</string>
-    <string name="fuentes_de_datos_open_data">Datu-iturriak (Open Data)</string>
-    <string name="agradecimientos_a_las_entidades_colaboradoras">Erakunde laguntzaileei eskerrak</string>
-    <string name="equipo_de_desarrollo">Garapen Taldea</string>
-    <string name="creado_por_jon_ander_duque_asier_faraig_y_andoni_ortiz_de_zarate">Jon Ander Duque, Asier Faraig eta Andoni Ortiz de Zaratek sortua</string>
-    <string name="versi_n_de_la_aplicaci_n">Aplikazioaren bertsioa</string>
+    <string name="information">Informazioa</string>
+    <string name="open_data_sources">Datu-iturriak (Open Data)</string>
+    <string name="thanks_to_partner_organizations">Erakunde laguntzaileei eskerrak</string>
+    <string name="development_team">Garapen Taldea</string>
+    <string name="created_by_authors">Jon Ander Duque, Asier Faraig eta Andoni Ortiz de Zaratek sortua</string>
+    <string name="app_version">Aplikazioaren bertsioa</string>
 
-    <string name="fallo_cr_tico_respuesta_vac_a_del_servidor_php_crash">Akats kritikoa: Zerbitzariaren erantzun hutsa (PHP Crash)</string>
-    <string name="error_al_procesar_respuesta_del_servidor">Errorea zerbitzariaren erantzuna prozesatzean</string>
-    <string name="error_en_la_conexi_n">Konexio-errorea</string>
-    <string name="error_de_red_o_credenciales_incorrectas">Sare-errorea edo kredentzial okerrak</string>
-    <string name="error_de_conexi_n_con_el_servidor">Zerbitzariarekiko konexio-errorea</string>
+    <string name="empty_server_response_error">Akats kritikoa: Zerbitzariaren erantzun hutsa (PHP Crash)</string>
+    <string name="server_response_parse_error">Errorea zerbitzariaren erantzuna prozesatzean</string>
+    <string name="connection_failed">Konexio-errorea</string>
+    <string name="network_or_credentials_error">Sare-errorea edo kredentzial okerrak</string>
+    <string name="server_connection_error">Zerbitzariarekiko konexio-errorea</string>
 
-    <string-array name="nombres_transporte">
+    <string-array name="transport_names">
         <item>Garraio Publikoa</item>
         <item>Bizikleta</item>
         <item>Oinez</item>
     </string-array>
-    <string-array name="valores_transporte">
+    <string-array name="transport_values">
         <item>publico</item>
         <item>bici</item>
         <item>pie</item>
     </string-array>
 
-    <string-array name="nombres_tipo_mapa">
+    <string-array name="map_type_names">
         <item>Normala</item>
         <item>Satelitea</item>
         <item>Erliebea</item>
         <item>Hibridoa</item>
     </string-array>
-    <string-array name="valores_tipo_mapa">
+    <string-array name="map_type_values">
         <item>1</item> <item>2</item> <item>3</item> <item>4</item> </string-array>
+
+    <!-- Added with the English translation: texts that were hardcoded in Java (fix F5) and the "Low" air quality level (fix F6) -->
+    <string name="login_fill_fields">Mesedez, bete eremuak</string>
+    <string name="register_fill_fields">Mesedez, bete eremu guztiak</string>
+    <string name="user_registered">Erabiltzailea erregistratuta!</string>
+    <string name="generic_failure">Akatsa</string>
+    <string name="server_error_with_response">ZERBITZARIAREN ERROREA: %1$s</string>
+    <string name="euskalmet_connection_error">Errorea Euskalmetekin konektatzean.</string>
+    <string name="data_parse_error">Errorea datuak aztertzean.</string>
+    <string name="translating_forecast">Iragarpena itzultzen...</string>
+    <string name="network_error_short">Sare-err.</string>
+    <string name="temperature_error">Errorea</string>
+    <string name="air_low">Baxua</string>
 </resources>

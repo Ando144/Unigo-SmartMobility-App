@@ -17,7 +17,7 @@
         app:cardBackgroundColor="?attr/colorSurface">
 
         <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchViewCentros"
+            android:id="@+id/searchViewCampuses"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:iconifiedByDefault="false"
@@ -40,7 +40,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnFiltroTodas"
+                android:id="@+id/btnFilterAll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/all"
@@ -51,7 +51,7 @@
                 app:cornerRadius="16dp" />
 
             <Button
-                android:id="@+id/btnFiltroEHU"
+                android:id="@+id/btnFilterEhu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="EHU"
@@ -62,7 +62,7 @@
                 app:cornerRadius="16dp" />
 
             <Button
-                android:id="@+id/btnFiltroDeusto"
+                android:id="@+id/btnFilterDeusto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Deusto"
@@ -73,7 +73,7 @@
                 app:cornerRadius="16dp" />
 
             <Button
-                android:id="@+id/btnFiltroMondragon"
+                android:id="@+id/btnFilterMondragon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Mondragon"
@@ -85,10 +85,10 @@
     </HorizontalScrollView>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCentros"
+        android:id="@+id/rvCampuses"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="80dp" /> <!-- Margen para que el BottomNav no tape el último -->
+        android:paddingBottom="80dp" /> <!-- Margin so the BottomNav does not cover the last item -->
 
 </LinearLayout>

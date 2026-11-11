@@ -42,8 +42,8 @@ public class ChangePasswordDialogFragment extends DialogFragment {
 
         builder.setView(view)
                 .setTitle(R.string.change_password)
-                .setPositiveButton(R.string.aplicar, null)
-                .setNegativeButton(R.string.cancelar7, null);
+                .setPositiveButton(R.string.apply, null)
+                .setNegativeButton(R.string.cancel7, null);
 
         AlertDialog dialog = builder.create();
 
@@ -67,10 +67,10 @@ public class ChangePasswordDialogFragment extends DialogFragment {
                 }
 
                 if (isValid) {
-                    // Deshabilitar botones para evitar doble click
+                    // Disable the buttons to avoid a double click
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
                     dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
-                    cambiarContrasena(oldPass, newPass, dialog);
+                    requestPasswordChange(oldPass, newPass, dialog);
                 }
             });
         });
@@ -78,7 +78,7 @@ public class ChangePasswordDialogFragment extends DialogFragment {
         return dialog;
     }
 
-    private void cambiarContrasena(String oldPass, String newPass, AlertDialog dialog) {
+    private void requestPasswordChange(String oldPass, String newPass, AlertDialog dialog) {
         SharedPreferences prefs = requireContext().getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         String email = prefs.getString("user_email", "");
 
@@ -93,21 +93,24 @@ public class ChangePasswordDialogFragment extends DialogFragment {
                 .setInputData(inputData)
                 .build();
 
-        WorkManager.getInstance(requireContext()).enqueue(workRequest);
+        // Fix F7: the application context is kept, because the observer can run after the dialog
+        // was closed, and requireContext() then throws an IllegalStateException.
+        final Context appContext = requireContext().getApplicationContext();
+        WorkManager.getInstance(appContext).enqueue(workRequest);
 
-        // Usamos 'getWorkInfoByIdLiveData' con observeForever para que funcione aunque el diálogo se cierre
-        WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(workRequest.getId())
+        // 'getWorkInfoByIdLiveData' with observeForever is used so it works even if the dialog is closed
+        WorkManager.getInstance(appContext).getWorkInfoByIdLiveData(workRequest.getId())
                 .observeForever(new Observer<WorkInfo>() {
                     @Override
                     public void onChanged(WorkInfo workInfo) {
                         if (workInfo != null && workInfo.getState().isFinished()) {
-                            WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(workRequest.getId())
+                            WorkManager.getInstance(appContext).getWorkInfoByIdLiveData(workRequest.getId())
                                     .removeObserver(this);
 
                             String response = workInfo.getOutputData().getString("response");
 
                             if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
-                                procesarRespuestaCambio(response, dialog);
+                                handlePasswordChangeResponse(response, dialog);
                             } else {
                                 if (getContext() != null) {
                                     Toast.makeText(getContext(), R.string.network_error, Toast.LENGTH_LONG).show();
@@ -122,7 +125,7 @@ public class ChangePasswordDialogFragment extends DialogFragment {
                 });
     }
 
-    private void procesarRespuestaCambio(String jsonResponse, AlertDialog dialog) {
+    private void handlePasswordChangeResponse(String jsonResponse, AlertDialog dialog) {
         if (jsonResponse == null || getContext() == null) {
             if (dialog.isShowing()) {
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);

@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Fix F2: needed to schedule the daily weather notification again after a restart -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".UnigoApplication"
@@ -20,7 +22,7 @@
         android:theme="@style/Theme.Unigodas"
         android:usesCleartextTraffic="true">
 
-        <!-- Servicio para persistencia de idioma en versiones anteriores a Android 13 -->
+        <!-- Service that persists the app language on versions before Android 13 -->
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"
@@ -33,7 +35,15 @@
                 android:value="true" />
         </service>
 
-        <receiver android:name=".receivers.NotificacionClimaReceiver" />
+        <receiver android:name=".receivers.WeatherNotificationReceiver" />
+        <!-- Fix F2: reschedules the daily weather notification after the phone restarts -->
+        <receiver
+            android:name=".receivers.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
@@ -56,7 +66,7 @@
 
         <activity
             android:name=".activities.HeatmapActivity"
-            android:theme="@style/TemaVentanaFlotante"
+            android:theme="@style/FloatingWindowTheme"
             android:exported="false" />
     </application>
 

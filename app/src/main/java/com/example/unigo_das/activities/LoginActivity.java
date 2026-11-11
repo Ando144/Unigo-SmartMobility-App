@@ -54,37 +54,37 @@ public class LoginActivity extends AppCompatActivity {
         btnLangEs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("es", btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
+                changeLoginLanguage("es", btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
             }
         });
         btnLangEu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("eu", btnLangEu, btnLangEs, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
+                changeLoginLanguage("eu", btnLangEu, btnLangEs, btnLangEn, btnLangFr, btnLangDe, btnLangIt);
             }
         });
         btnLangEn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("en", btnLangEn, btnLangEs, btnLangEu, btnLangFr, btnLangDe, btnLangIt);
+                changeLoginLanguage("en", btnLangEn, btnLangEs, btnLangEu, btnLangFr, btnLangDe, btnLangIt);
             }
         });
         btnLangFr.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("fr", btnLangFr, btnLangEs, btnLangEu, btnLangEn, btnLangDe, btnLangIt);
+                changeLoginLanguage("fr", btnLangFr, btnLangEs, btnLangEu, btnLangEn, btnLangDe, btnLangIt);
             }
         });
         btnLangDe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("de", btnLangDe, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangIt);
+                changeLoginLanguage("de", btnLangDe, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangIt);
             }
         });
         btnLangIt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cambiarIdiomaLogin("it", btnLangIt, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe);
+                changeLoginLanguage("it", btnLangIt, btnLangEs, btnLangEu, btnLangEn, btnLangFr, btnLangDe);
             }
         });
 
@@ -95,9 +95,9 @@ public class LoginActivity extends AppCompatActivity {
                 String pass = etPassword.getText().toString().trim();
 
                 if (!email.isEmpty() && !pass.isEmpty()) {
-                    ejecutarLogin(email, pass);
+                    performLogin(email, pass);
                 } else {
-                    Toast.makeText(LoginActivity.this, "Por favor, llena los campos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, R.string.login_fill_fields, Toast.LENGTH_SHORT).show(); // Fix F5: text moved to strings.xml so it is translated to the 6 languages
                 }
             }
         });
@@ -113,14 +113,14 @@ public class LoginActivity extends AppCompatActivity {
         btnGuest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                marcarEstadoUsuario(true);
-                irAMainActivity();
+                saveUserState(true);
+                goToMainActivity();
             }
         });
     }
 
 
-    private void ejecutarLogin(String email, String password) {
+    private void performLogin(String email, String password) {
         Data inputData = new Data.Builder()
                 .putString("script", "login.php")
                 .putString("email", email)
@@ -140,34 +140,34 @@ public class LoginActivity extends AppCompatActivity {
                         if (workInfo != null && workInfo.getState().isFinished()) {
                             if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
                                 String response = workInfo.getOutputData().getString("response");
-                                procesarRespuestaLogin(response);
+                                handleLoginResponse(response);
                             } else {
                                 String errorResponse = workInfo.getOutputData().getString("response");
-                                procesarError(errorResponse);
+                                handleError(errorResponse);
                             }
                         }
                     }
                 });
     }
 
-    //Parsea la respuesta y vuelca toda la info del usuario en SharedPreferences
-    // para mantener la sesión abierta. También recupera los ajustes estéticos de esa persona en concreto.
-    private void procesarRespuestaLogin(String jsonResponse) {
+    // Parses the response and stores all the user information in SharedPreferences
+    // to keep the session open. It also restores the visual settings of that specific user.
+    private void handleLoginResponse(String jsonResponse) {
         try {
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject) parser.parse(jsonResponse);
 
             if (json.containsKey("success") && (Boolean) json.get("success")) {
-                String nombre = (String) json.get("nombre");
+                String name = (String) json.get("nombre");
                 String email = etEmail.getText().toString().trim();
-                String fotoUrl = json.containsKey("foto") ? (String) json.get("foto") : null;
+                String photoUrl = json.containsKey("foto") ? (String) json.get("foto") : null;
 
                 SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
 
-                // Quitamos el modo invitado e inyectamos los datos clave de la sesión
+                // Leave guest mode and store the key session data
                 editor.putString("user_email", email);
-                editor.putString("user_name", nombre);
+                editor.putString("user_name", name);
                 editor.putBoolean("isGuest", false);
 
                 editor.remove("user_id");
@@ -175,35 +175,35 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putInt("user_id", ((Long) json.get("id")).intValue());
                 }
 
-                // Sincronizamos la URL de su foto de perfil en el servidor con el almacenamiento local
-                if (fotoUrl != null && !fotoUrl.isEmpty()) {
-                    editor.putString("profile_photo_url_" + email, fotoUrl);
+                // Sync the URL of the user's profile photo on the server with local storage
+                if (photoUrl != null && !photoUrl.isEmpty()) {
+                    editor.putString("profile_photo_url_" + email, photoUrl);
                 } else {
                     editor.remove("profile_photo_url_" + email);
                 }
 
-                // Rescatamos el idioma en el que el usuario dejó la app la última vez
+                // Restore the language in which the user last left the app
                 String savedLang = prefs.getString("language_" + email, "es");
                 LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(savedLang);
                 AppCompatDelegate.setApplicationLocales(appLocales);
 
                 editor.apply();
 
-                // Recuperamos y aplicamos su modo oscuro preferido antes de saltar a la pantalla principal
-                aplicarTemaUsuario(email);
-                irAMainActivity();
+                // Restore and apply the user's preferred dark mode before going to the main screen
+                applyUserTheme(email);
+                goToMainActivity();
             } else {
                 String error = (String) json.get("error");
                 Toast.makeText(this, "Error: " + error, Toast.LENGTH_SHORT).show();
             }
         } catch (ParseException e) {
-            Toast.makeText(this, R.string.error_al_procesar_respuesta_del_servidor, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.server_response_parse_error, Toast.LENGTH_SHORT).show();
         }
     }
 
-    // Cruza las preferencias de cuenta de este email con las preferencias globales del dispositivo
-    // para garantizar que si Rita la pollera entra con su cuenta, la app se ponga negra o blanca según lo dejó él.
-    private void aplicarTemaUsuario(String email) {
+    // Combines the account preferences of this email with the global preferences of the device
+    // so that each user gets the dark or light theme they last chose.
+    private void applyUserTheme(String email) {
         SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         SharedPreferences defaultPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -217,46 +217,46 @@ public class LoginActivity extends AppCompatActivity {
         );
     }
 
-    private void procesarError(String errorResponse) {
+    private void handleError(String errorResponse) {
         if (errorResponse != null) {
             try {
                 JSONParser parser = new JSONParser();
                 JSONObject json = (JSONObject) parser.parse(errorResponse);
                 String error = (String) json.get("error");
-                Toast.makeText(this, error != null ? error : getString(R.string.error_en_la_conexi_n), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, error != null ? error : getString(R.string.connection_failed), Toast.LENGTH_SHORT).show();
             } catch (ParseException e) {
-                Toast.makeText(this, R.string.error_de_red_o_credenciales_incorrectas, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.network_or_credentials_error, Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(this, R.string.error_de_conexi_n_con_el_servidor, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.server_connection_error, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void irAMainActivity() {
+    private void goToMainActivity() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
-        // Matamos la Activity de login para que al pulsar 'Atrás' el usuario no vuelva a ver el formulario
+        // Finish the login Activity so that pressing 'Back' does not show the form again
         finish();
     }
 
-    private void marcarEstadoUsuario(boolean esInvitado) {
+    private void saveUserState(boolean isGuestUser) {
         SharedPreferences prefs = getSharedPreferences("UnigoPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean("isGuest", esInvitado);
+        editor.putBoolean("isGuest", isGuestUser);
         editor.apply();
     }
 
-    // Lógica para repintar la vista al momento seleccionando un nuevo Locale
-    private void cambiarIdiomaLogin(String langCode, TextView activo, TextView... inactivos) {
+    // Logic to redraw the view immediately when a new Locale is selected
+    private void changeLoginLanguage(String langCode, TextView activeButton, TextView... inactiveButtons) {
         LocaleListCompat appLocales = LocaleListCompat.forLanguageTags(langCode);
         AppCompatDelegate.setApplicationLocales(appLocales);
-        marcarIdiomaActivo(activo, inactivos);
+        highlightActiveLanguage(activeButton, inactiveButtons);
     }
 
-    private void marcarIdiomaActivo(TextView activo, TextView... inactivos) {
-        activo.setBackgroundColor(ContextCompat.getColor(this, R.color.bilbao_red));
-        activo.setTextColor(ContextCompat.getColor(this, R.color.white));
-        for (TextView tv : inactivos) {
+    private void highlightActiveLanguage(TextView activeButton, TextView... inactiveButtons) {
+        activeButton.setBackgroundColor(ContextCompat.getColor(this, R.color.bilbao_red));
+        activeButton.setTextColor(ContextCompat.getColor(this, R.color.white));
+        for (TextView tv : inactiveButtons) {
             tv.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
             tv.setTextColor(ContextCompat.getColor(this, R.color.white));
         }

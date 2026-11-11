@@ -1,32 +1,32 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme (Modo Oscuro). -->
+    <!-- Base application theme (dark mode). -->
     <style name="Base.Theme.Unigodas" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Color principal: Rojo Bilbao -->
+        <!-- Primary colour: Bilbao red -->
         <item name="colorPrimary">@color/bilbao_red</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorPrimaryContainer">@color/bilbao_red_dark</item>
         <item name="colorOnPrimaryContainer">@color/white</item>
 
-        <!-- Color secundario -->
+        <!-- Secondary colour -->
         <item name="colorSecondary">@color/bilbao_grey_light</item>
         <item name="colorOnSecondary">@color/bilbao_grey_dark</item>
 
-        <!-- Fondos y superficies (Modo Oscuro) -->
+        <!-- Backgrounds and surfaces (dark mode) -->
         <item name="android:colorBackground">@color/bg_dark</item>
         <item name="colorSurface">@color/surface_dark</item>
         <item name="colorOnSurface">@color/text_light</item>
         <item name="colorSurfaceVariant">@color/bilbao_grey_dark</item>
         <item name="colorOnSurfaceVariant">@color/text_secondary_light</item>
 
-        <!-- Otros elementos -->
+        <!-- Other elements -->
         <item name="android:textColorPrimary">@color/text_light</item>
         <item name="android:textColorSecondary">@color/text_secondary_light</item>
 
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
-    <!-- Diálogo flotante en modo oscuro -->
-    <style name="TemaVentanaFlotante" parent="Theme.MaterialComponents.DayNight.Dialog">
+    <!-- Floating dialog in dark mode -->
+    <style name="FloatingWindowTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>

@@ -1,5 +1,7 @@
 # UNIGO — Smart Urban Mobility for University Students (Android, Java)
 
+![Java](https://img.shields.io/badge/Java-11-E76F00?logo=openjdk&logoColor=white) ![Android](https://img.shields.io/badge/Android-7.0%2B-3DDC84?logo=android&logoColor=white) ![Google Maps](https://img.shields.io/badge/Google%20Maps-SDK-4285F4?logo=googlemaps&logoColor=white) ![Material](https://img.shields.io/badge/Material-Components-757575?logo=materialdesign&logoColor=white) ![SQLite](https://img.shields.io/badge/SQLite-local%20DB-003B57?logo=sqlite&logoColor=white) ![Languages](https://img.shields.io/badge/Languages-6-8A2BE2) [![License](https://img.shields.io/badge/License-MIT-0A66C2)](LICENSE)
+
 A native Android app that helps university students in Bilbao and Bizkaia get to their campus. It plans walking, cycling and public-transport routes to 28 campuses, estimates the CO₂ saved compared with a car, shows the stops of 7 transport networks and the bike lanes, and adds weather, air-quality and pollen information. Available in 6 languages.
 
 ---
@@ -155,6 +157,7 @@ tempRouteCo2 += stepCo2;
 ├── secrets.defaults.properties    # Placeholder API keys (copy to secrets.properties)
 ├── repomix-output.xml             # Repository dump (kept from the original project)
 ├── CHANGELOG.md
+├── LICENSE                        # MIT License
 └── README.md
 ```
 
@@ -179,3 +182,9 @@ tempRouteCo2 += stepCo2;
 Team project by **Jon Ander Duque**, **Asier Faraig** and **Andoni Ortiz de Zarate**, developed in the 2025–26 academic year for the **DAS** course of the Bachelor's Degree in Management and Information Systems Engineering at the **Bilbao School of Engineering (UPV/EHU)**.
 
 The authors credit these open-data sources inside the app: Euskalmet, Open-Meteo, Open Data Euskadi, Bizkaibus, Euskotren and Metro Bilbao, and GeoBilbao.
+
+---
+
+## License
+
+This project is released under the [MIT License](LICENSE). The open-data sources listed above keep their own terms of use.

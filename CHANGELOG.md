@@ -24,6 +24,10 @@ All notable changes made after the original course submission.
 
   The Android project could not be compiled in the environment used for the translation; see "Pending" below.
 
+### Added
+
+- `LICENSE` file (MIT License, © the three authors) and a License section in the README.
+
 ### Fixed
 
 | ID | Problem | Effect | Fix |

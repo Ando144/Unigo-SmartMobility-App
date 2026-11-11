@@ -1,6 +1,6 @@
 # UNIGO — Design document
 
-This document describes how the app is built. Everything in it was taken from the source code of this repository. No written project report was available, so this is not a translation of one.
+This document describes how the app is built. Everything in it was taken from the source code of this repository. The original course report is not included in this repository, so this document is not a translation of it.
 
 Class and resource names are the English names used since version 1.1.0. [Appendix A](#appendix-a--name-equivalence-table) maps them to the original Spanish names.
 

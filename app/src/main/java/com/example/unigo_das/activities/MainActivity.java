@@ -14,9 +14,9 @@
  *                 WorkManager, ML Kit Translate, SQLite. Back end: PHP + MySQL
  *                 server (not part of this repository).
  *  Authors      : Jon Ander Duque, Asier Faraig, Andoni Ortiz de Zarate
- *  Course       : DAS course project - Bachelor's Degree in Management and
- *                 Information Systems Engineering, Bilbao School of
- *                 Engineering (UPV/EHU).
+ *  Course       : DAS course project, academic year 2025-26 - Bachelor's
+ *                 Degree in Management and Information Systems Engineering,
+ *                 Bilbao School of Engineering (UPV/EHU).
  * =============================================================================
  */
 package com.example.unigo_das.activities;

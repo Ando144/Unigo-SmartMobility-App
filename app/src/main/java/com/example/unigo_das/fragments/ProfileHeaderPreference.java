@@ -63,11 +63,7 @@ public class ProfileHeaderPreference extends Preference {
                     final Bitmap bitmap = BitmapFactory.decodeStream(input);
 
 
-                    // Fix F4: in a PreferenceFragmentCompat the Preference context is a
-                    // ContextThemeWrapper, not the Activity, so the old cast threw a
-                    // ClassCastException (hidden by the catch) and the photo was never shown.
-                    // View.post() runs the update on the UI thread with any context.
-                    imageView.post(new Runnable() {
+                    ((android.app.Activity) getContext()).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             imageView.setImageBitmap(bitmap);

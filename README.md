@@ -106,7 +106,7 @@ tempRouteCo2 += stepCo2;
    - `MAPS_API_KEY`: Maps SDK for Android.
    - `DIRECTIONS_API_KEY`: Directions API, Air Quality API and Pollen API.
 
-   `secrets.properties` is ignored by Git. Without real keys the project still compiles, but maps, routes, air quality and pollen will not load.
+   `secrets.properties` is ignored by Git. Keys in `local.properties` are not read. Without real keys the project still compiles, but maps, routes, air quality and pollen will not load.
 3. Let Gradle sync, then run the `app` configuration.
 
 **Notes:**
@@ -176,6 +176,6 @@ tempRouteCo2 += stepCo2;
 
 ## Authors and academic context
 
-Team project by **Jon Ander Duque**, **Asier Faraig** and **Andoni Ortiz de Zarate**, developed for the **DAS** course of the Bachelor's Degree in Management and Information Systems Engineering at the **Bilbao School of Engineering (UPV/EHU)**.
+Team project by **Jon Ander Duque**, **Asier Faraig** and **Andoni Ortiz de Zarate**, developed in the 2025–26 academic year for the **DAS** course of the Bachelor's Degree in Management and Information Systems Engineering at the **Bilbao School of Engineering (UPV/EHU)**.
 
 The authors credit these open-data sources inside the app: Euskalmet, Open-Meteo, Open Data Euskadi, Bizkaibus, Euskotren and Metro Bilbao, and GeoBilbao.
